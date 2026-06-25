@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { isNative } from "@/platform/runtime";
 
 const schema = z.object({
   email: z.string().trim().email("Please enter a valid email address"),
@@ -62,6 +63,14 @@ function LoginPage() {
   };
 
   const handleGoogle = async () => {
+    if (isNative()) {
+      // Lovable's web_message OAuth flow doesn't work inside Capacitor's
+      // WebView. Native Google Sign-In ships in a later phase via
+      // @codetrix-studio/capacitor-google-auth or the RevenueCat-aligned
+      // provider. Email/password remains fully available.
+      setError("root", { message: "Google sign-in isn't available in the mobile app yet — please use email and password." });
+      return;
+    }
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (result.error) {
       setError("root", { message: result.error.message ?? "Google sign-in failed" });
@@ -93,13 +102,17 @@ function LoginPage() {
           <AlertDescription>{errors.root.message}</AlertDescription>
         </Alert>
       )}
-      <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={isSubmitting}>
-        Continue with Google
-      </Button>
-      <div className="relative my-5 text-center text-xs uppercase tracking-wider text-muted-foreground">
-        <span className="bg-background px-3 relative z-10">or</span>
-        <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
-      </div>
+      {!isNative() && (
+        <>
+          <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={isSubmitting}>
+            Continue with Google
+          </Button>
+          <div className="relative my-5 text-center text-xs uppercase tracking-wider text-muted-foreground">
+            <span className="bg-background px-3 relative z-10">or</span>
+            <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
+          </div>
+        </>
+      )}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
