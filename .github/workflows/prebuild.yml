@@ -1,0 +1,154 @@
+name: Prebuild
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      coverage_threshold:
+        description: "Override coverage threshold (all metrics) for this run. Leave blank to use branch default."
+        required: false
+        default: ""
+      coverage_threshold_statements:
+        description: "Override statements threshold (optional)"
+        required: false
+        default: ""
+      coverage_threshold_branches:
+        description: "Override branches threshold (optional)"
+        required: false
+        default: ""
+      coverage_threshold_functions:
+        description: "Override functions threshold (optional)"
+        required: false
+        default: ""
+      coverage_threshold_lines:
+        description: "Override lines threshold (optional)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  prebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Resolve coverage thresholds
+        id: thresholds
+        run: |
+          # Precedence: workflow_dispatch input > per-branch default > 80
+          case "${GITHUB_REF_NAME}" in
+            main) BRANCH_DEFAULT=80 ;;
+            develop) BRANCH_DEFAULT=75 ;;
+            *) BRANCH_DEFAULT=70 ;;
+          esac
+          INPUT="${{ github.event.inputs.coverage_threshold }}"
+          THRESHOLD="${INPUT:-$BRANCH_DEFAULT}"
+          echo "COVERAGE_THRESHOLD=$THRESHOLD" >> "$GITHUB_ENV"
+          echo "COVERAGE_THRESHOLD_STATEMENTS=${{ github.event.inputs.coverage_threshold_statements }}" >> "$GITHUB_ENV"
+          echo "COVERAGE_THRESHOLD_BRANCHES=${{ github.event.inputs.coverage_threshold_branches }}" >> "$GITHUB_ENV"
+          echo "COVERAGE_THRESHOLD_FUNCTIONS=${{ github.event.inputs.coverage_threshold_functions }}" >> "$GITHUB_ENV"
+          echo "COVERAGE_THRESHOLD_LINES=${{ github.event.inputs.coverage_threshold_lines }}" >> "$GITHUB_ENV"
+          echo "Using base coverage threshold: $THRESHOLD (branch: ${GITHUB_REF_NAME})"
+
+      - name: Run prebuild (typecheck, lint, tests with coverage)
+        run: bun run prebuild
+
+      - name: Coverage summary
+        if: always()
+        run: node scripts/coverage-summary.mjs
+
+      - name: Upload coverage HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-report
+          path: coverage/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Post coverage summary to PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          COVERAGE_THRESHOLD: ${{ env.COVERAGE_THRESHOLD }}
+          COVERAGE_THRESHOLD_STATEMENTS: ${{ env.COVERAGE_THRESHOLD_STATEMENTS }}
+          COVERAGE_THRESHOLD_BRANCHES: ${{ env.COVERAGE_THRESHOLD_BRANCHES }}
+          COVERAGE_THRESHOLD_FUNCTIONS: ${{ env.COVERAGE_THRESHOLD_FUNCTIONS }}
+          COVERAGE_THRESHOLD_LINES: ${{ env.COVERAGE_THRESHOLD_LINES }}
+          BRANCH_NAME: ${{ github.ref_name }}
+          IS_OVERRIDE: ${{ github.event.inputs.coverage_threshold != '' }}
+          OVERRIDE_VALUE: ${{ github.event.inputs.coverage_threshold }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'coverage/coverage-final.json';
+            const base = Number(process.env.COVERAGE_THRESHOLD || 80);
+            const pick = (v, f) => {
+              const n = Number(v);
+              return Number.isFinite(n) ? n : f;
+            };
+            const thresholds = {
+              statements: pick(process.env.COVERAGE_THRESHOLD_STATEMENTS, base),
+              branches: pick(process.env.COVERAGE_THRESHOLD_BRANCHES, base),
+              functions: pick(process.env.COVERAGE_THRESHOLD_FUNCTIONS, base),
+              lines: pick(process.env.COVERAGE_THRESHOLD_LINES, base),
+            };
+
+            let body = '## Coverage Summary\n\n';
+            const isOverride = process.env.IS_OVERRIDE === 'true';
+            body += `_Branch: \`${process.env.BRANCH_NAME}\` · Base threshold: ${base}%`;
+            if (isOverride) body += ` (manual override: ${process.env.OVERRIDE_VALUE}%)`;
+            body += '_\n\n';
+            body += '| Metric | Coverage | Threshold | Status |\n';
+            body += '|--------|----------|-----------|--------|\n';
+
+            if (!fs.existsSync(path)) {
+              body += '| — | No report | — | ⚠️ |\n';
+            } else {
+              const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+              const total = data.total || {};
+              for (const key of ['statements', 'branches', 'functions', 'lines']) {
+                const pct = total[key]?.pct ?? 'N/A';
+                const threshold = thresholds[key];
+                const status = (typeof pct === 'number' && pct >= threshold) ? '✅' : '❌';
+                body += `| ${key} | ${pct}% | ${threshold}% | ${status} |\n`;
+              }
+            }
+
+            const marker = '<!-- coverage-summary-bot -->';
+            body += '\n' + marker;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
