@@ -80,37 +80,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Lovable App" },
-      {
-        name: "description",
-        content:
-          "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality.",
-      },
+      { name: "description", content: "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality." },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Lovable App" },
-      {
-        property: "og:description",
-        content:
-          "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality.",
-      },
+      { property: "og:description", content: "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Lovable App" },
-      {
-        name: "twitter:description",
-        content:
-          "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality.",
-      },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4f96efc9-6d27-46ae-8f68-4c68f9e6a444/id-preview-a5995a9d--d89211fc-539e-4a16-b4b6-9ae9d6517c95.lovable.app-1782399914960.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4f96efc9-6d27-46ae-8f68-4c68f9e6a444/id-preview-a5995a9d--d89211fc-539e-4a16-b4b6-9ae9d6517c95.lovable.app-1782399914960.png",
-      },
+      { name: "twitter:description", content: "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4f96efc9-6d27-46ae-8f68-4c68f9e6a444/id-preview-a5995a9d--d89211fc-539e-4a16-b4b6-9ae9d6517c95.lovable.app-1782399914960.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4f96efc9-6d27-46ae-8f68-4c68f9e6a444/id-preview-a5995a9d--d89211fc-539e-4a16-b4b6-9ae9d6517c95.lovable.app-1782399914960.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
