@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { createClient, type Session } from "@supabase/supabase-js";
+import { AlertsScreen } from "./mobile/alerts";
 import "./styles.css";
 
 declare global {
@@ -296,6 +297,7 @@ function App() {
   return (
     <MobileHome
       email={session.user.email ?? "unknown"}
+      userId={session.user.id}
       onSignOut={() => {
         sb.auth.signOut().then(() => setSession(null));
       }}
