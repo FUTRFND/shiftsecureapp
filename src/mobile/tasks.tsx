@@ -378,8 +378,9 @@ function TaskCard({
     <article
       style={{
         background: palette.surface,
-        border: `1px solid ${palette.border}`,
-        borderLeft: `6px solid ${tone}`,
+        border: `1px solid ${palette.hairline}`,
+        borderLeft: `4px solid ${tone}`,
+        borderRadius: 12,
         padding: 14,
       }}
     >
