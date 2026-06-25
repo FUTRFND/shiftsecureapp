@@ -187,7 +187,7 @@ export function VoiceScreen({
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [draftsErr, setDraftsErr] = useState<string | null>(null);
 
-  const recognitionRef = useRef<ReturnType<WebSpeechCtor> | null>(null);
+  const recognitionRef = useRef<InstanceType<WebSpeechCtor> | null>(null);
   const finalRef = useRef("");
 
   // Hard guarantee: never leave a session running across unmount.
