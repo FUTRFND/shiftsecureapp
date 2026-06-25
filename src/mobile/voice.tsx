@@ -4,66 +4,36 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const palette = {
-  bg: "#f7f7f2",
-  ink: "#121212",
-  muted: "#454545",
-  border: "#121212",
-  surface: "#ffffff",
-  critical: "#b00020",
-  accent: "#1b4d8f",
-  ok: "#0a7a3b",
-};
+import {
+  EmptyState,
+  LoadingBlock,
+  Spinner,
+  buttonBase,
+  cardStyle as baseCardStyle,
+  inputStyle as baseInputStyle,
+  pageStyle,
+  palette as basePalette,
+  primaryButton,
+  space,
+  textareaStyle as baseTextareaStyle,
+  useConfirm,
+  useKeyboardScrollIntoView,
+} from "./ui";
 
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  boxSizing: "border-box",
-  padding: "20px 16px 80px",
-  background: palette.bg,
-  color: palette.ink,
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-};
+const palette = { ...basePalette, accent: "#1b4d8f" };
 
-const buttonBase: React.CSSProperties = {
-  minHeight: 44,
-  border: `1px solid ${palette.border}`,
-  background: palette.surface,
-  color: palette.ink,
-  fontSize: 15,
-  fontWeight: 600,
-  padding: "0 14px",
-  cursor: "pointer",
-  touchAction: "manipulation",
-  WebkitTapHighlightColor: "transparent",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  minHeight: 44,
-  padding: "10px 12px",
-  fontSize: 15,
-  border: `1px solid ${palette.border}`,
-  borderRadius: 0,
-  background: palette.surface,
-  color: palette.ink,
-};
-
+const inputStyle = baseInputStyle;
 const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  minHeight: 120,
+  ...baseTextareaStyle,
   fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
   fontSize: 14,
   lineHeight: 1.4,
-  resize: "vertical",
+};
+const cardStyle: React.CSSProperties = {
+  ...baseCardStyle,
+  marginBottom: space.lg,
 };
 
-const cardStyle: React.CSSProperties = {
-  border: `1px solid ${palette.border}`,
-  background: palette.surface,
-  padding: 16,
-  marginBottom: 16,
-};
 
 type Sbar = {
   patient: string;
@@ -186,8 +156,11 @@ export function VoiceScreen({
   const [draftsOpen, setDraftsOpen] = useState(false);
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [draftsErr, setDraftsErr] = useState<string | null>(null);
+  useKeyboardScrollIntoView();
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   const recognitionRef = useRef<InstanceType<WebSpeechCtor> | null>(null);
+
   const finalRef = useRef("");
 
   // Hard guarantee: never leave a session running across unmount.
@@ -484,7 +457,14 @@ export function VoiceScreen({
   );
 
   const deleteDraft = useCallback(
-    async (id: string) => {
+    async (id: string, title: string) => {
+      const ok = await confirm({
+        title: `Delete "${title || "this draft"}"?`,
+        body: "This handoff draft will be removed from your account.",
+        confirmLabel: "Delete",
+        destructive: true,
+      });
+      if (!ok) return;
       console.log("[voice] delete draft", id);
       try {
         const { error } = await sb.from("handoff_drafts").delete().eq("id", id);
@@ -499,8 +479,9 @@ export function VoiceScreen({
         setDraftsErr(err instanceof Error ? err.message : "Couldn't delete draft.");
       }
     },
-    [draftId, sb],
+    [confirm, draftId, sb],
   );
+
 
   return (
     <main style={pageStyle}>
@@ -530,11 +511,11 @@ export function VoiceScreen({
         <div style={cardStyle}>
           <h2 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700 }}>Saved drafts</h2>
           {loadingDrafts ? (
-            <p style={{ fontSize: 13, color: palette.muted }}>Loading…</p>
+            <LoadingBlock label="Loading drafts…" />
           ) : draftsErr ? (
             <p style={{ fontSize: 13, color: palette.critical }}>{draftsErr}</p>
           ) : drafts.length === 0 ? (
-            <p style={{ fontSize: 13, color: palette.muted }}>No drafts yet.</p>
+            <EmptyState icon="✎" title="No drafts yet" body="Generate and save a summary to keep it here." />
           ) : (
             <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
               {drafts.map((d) => (
@@ -567,7 +548,7 @@ export function VoiceScreen({
                   </button>
                   <button
                     type="button"
-                    onClick={() => deleteDraft(d.id)}
+                    onClick={() => deleteDraft(d.id, d.title)}
                     style={{ ...buttonBase, minHeight: 36, padding: "0 10px", color: palette.critical }}
                   >
                     Delete
@@ -655,13 +636,20 @@ export function VoiceScreen({
         <button
           type="button"
           onClick={generate}
+          disabled={generating || recording}
+          className="mobile-tap"
           style={{
             ...buttonBase,
             background: palette.accent,
+            borderColor: palette.accent,
             color: palette.surface,
-            opacity: generating || recording ? 0.6 : 1,
+            opacity: generating || recording ? 0.7 : 1,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
           }}
         >
+          {generating && <Spinner size={14} color={palette.surface} />}
           {generating ? "Generating…" : hasSummary ? "Regenerate summary" : "Generate summary"}
         </button>
         {generateErr && (
@@ -755,13 +743,20 @@ export function VoiceScreen({
             <button
               type="button"
               onClick={saveDraft}
+              disabled={savingDraft}
+              className="mobile-tap"
               style={{
                 ...buttonBase,
                 background: palette.ok,
+                borderColor: palette.ok,
                 color: palette.surface,
-                opacity: savingDraft ? 0.6 : 1,
+                opacity: savingDraft ? 0.7 : 1,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
               }}
             >
+              {savingDraft && <Spinner size={14} color={palette.surface} />}
               {savingDraft ? "Saving…" : draftId ? "Update draft" : "Save draft"}
             </button>
             {saveErr && (
@@ -770,6 +765,7 @@ export function VoiceScreen({
           </div>
         </div>
       )}
+      {confirmDialog}
     </main>
   );
 }

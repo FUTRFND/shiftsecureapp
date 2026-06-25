@@ -7,18 +7,23 @@ import {
   type TaskRow,
   type TaskStatus,
 } from "../lib/tasks";
-
-const palette = {
-  bg: "#f7f7f2",
-  ink: "#121212",
-  muted: "#454545",
-  border: "#121212",
-  surface: "#ffffff",
-  critical: "#b00020",
-  warning: "#b15c00",
-  info: "#1b4d8f",
-  ok: "#0a7a3b",
-};
+import {
+  EmptyState,
+  LoadingBlock,
+  Spinner,
+  buttonBase,
+  inputStyle,
+  labelStyle,
+  pageStyle,
+  palette,
+  primaryButton,
+  selectStyle,
+  space,
+  textareaStyle,
+  useConfirm,
+  useKeyboardScrollIntoView,
+  usePullToRefresh,
+} from "./ui";
 
 const PRIORITY_LABEL: Record<TaskPriority, string> = {
   low: "Low",
@@ -43,72 +48,7 @@ const STATUS_LABEL: Record<TaskStatus, string> = {
 
 const STATUS_ORDER: TaskStatus[] = ["todo", "in_progress", "done", "cancelled"];
 
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  boxSizing: "border-box",
-  padding: "20px 16px 80px",
-  background: palette.bg,
-  color: palette.ink,
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-};
 
-const buttonBase: React.CSSProperties = {
-  minHeight: 44,
-  border: `1px solid ${palette.border}`,
-  background: palette.surface,
-  color: palette.ink,
-  fontSize: 15,
-  fontWeight: 600,
-  padding: "0 14px",
-  borderRadius: 0,
-  font: "inherit",
-  cursor: "pointer",
-  touchAction: "manipulation",
-  WebkitAppearance: "none",
-  WebkitTapHighlightColor: "rgba(0,0,0,0.1)",
-};
-
-const primaryButton: React.CSSProperties = {
-  ...buttonBase,
-  background: palette.ink,
-  color: palette.surface,
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  minHeight: 44,
-  padding: "10px 12px",
-  fontSize: 16,
-  border: `1px solid ${palette.border}`,
-  borderRadius: 0,
-  background: palette.surface,
-  color: palette.ink,
-  marginBottom: 10,
-  font: "inherit",
-};
-
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  minHeight: 70,
-  resize: "vertical",
-};
-
-const selectStyle: React.CSSProperties = {
-  ...inputStyle,
-  WebkitAppearance: "none",
-  appearance: "none",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: 12,
-  fontWeight: 700,
-  textTransform: "uppercase",
-  letterSpacing: 0.5,
-  color: palette.muted,
-  marginBottom: 4,
-};
 
 type TaskInput = {
   title: string;
@@ -138,6 +78,8 @@ export function TasksScreen({
   const [editing, setEditing] = useState<
     { mode: "create" } | { mode: "edit"; row: TaskRow } | null
   >(null);
+  useKeyboardScrollIntoView();
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   const profilesById = useMemo(() => {
     const m = new Map<string, ProfileLite>();
@@ -166,9 +108,14 @@ export function TasksScreen({
     setLoading(false);
   }, [sb]);
 
+  const { refreshing, indicator } = usePullToRefresh(load, {
+    enabled: !editing,
+  });
+
   useEffect(() => {
     load();
   }, [load]);
+
 
   useEffect(() => {
     const channel = sb
@@ -223,13 +170,20 @@ export function TasksScreen({
   }
 
   async function remove(row: TaskRow) {
-    if (!confirm(`Delete "${row.title}"?`)) return;
+    const ok = await confirm({
+      title: `Delete "${row.title}"?`,
+      body: "This task will be removed for everyone on the shift.",
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (!ok) return;
     const { error: e } = await sb.from("tasks").delete().eq("id", row.id);
     if (e) {
       console.error("[tasks] delete failed", e);
       setError(e.message);
     }
   }
+
 
   async function handleSave(input: TaskInput, editingRow: TaskRow | null) {
     if (editingRow) {
@@ -276,15 +230,16 @@ export function TasksScreen({
 
   return (
     <main style={pageStyle}>
+      {indicator}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 12,
+          marginBottom: space.md,
         }}
       >
-        <button type="button" onClick={onBack} style={buttonBase}>
+        <button type="button" onClick={onBack} style={buttonBase} className="mobile-tap">
           ← Back
         </button>
         <span
@@ -301,7 +256,7 @@ export function TasksScreen({
       <h1 style={{ margin: "0 0 4px", fontSize: 26, fontWeight: 700 }}>
         Shift Tasks
       </h1>
-      <p style={{ margin: "0 0 16px", fontSize: 13, color: palette.muted }}>
+      <p style={{ margin: `0 0 ${space.lg}px`, fontSize: 13, color: palette.muted }}>
         Assign action items. Updates sync live across the shift.
       </p>
 
@@ -313,7 +268,8 @@ export function TasksScreen({
             color: palette.critical,
             padding: "8px 10px",
             fontSize: 13,
-            marginBottom: 12,
+            borderRadius: 10,
+            marginBottom: space.md,
           }}
         >
           {error}
@@ -325,7 +281,7 @@ export function TasksScreen({
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: 6,
-          marginBottom: 14,
+          marginBottom: space.md,
         }}
       >
         {(["todo", "in_progress", "done", "all"] as const).map((f) => (
@@ -333,6 +289,7 @@ export function TasksScreen({
             key={f}
             type="button"
             onClick={() => setFilter(f)}
+            className="mobile-tap"
             style={{
               ...buttonBase,
               minHeight: 36,
@@ -353,25 +310,24 @@ export function TasksScreen({
           console.log("[tasks] new tapped");
           setEditing({ mode: "create" });
         }}
-        style={{ ...primaryButton, width: "100%", marginBottom: 14 }}
+        className="mobile-tap"
+        style={{ ...primaryButton, width: "100%", marginBottom: space.md }}
       >
         + New task
       </button>
 
-      {loading ? (
-        <p style={{ fontSize: 14, color: palette.muted }}>Loading tasks…</p>
+      {loading && !refreshing ? (
+        <LoadingBlock label="Loading tasks…" />
       ) : visible.length === 0 ? (
-        <div
-          style={{
-            border: `1px dashed ${palette.border}`,
-            padding: 24,
-            textAlign: "center",
-            color: palette.muted,
-            fontSize: 14,
-          }}
-        >
-          No {filter === "all" ? "" : STATUS_LABEL[filter].toLowerCase()} tasks.
-        </div>
+        <EmptyState
+          icon="✓"
+          title={
+            filter === "all"
+              ? "No tasks yet"
+              : `No ${STATUS_LABEL[filter].toLowerCase()} tasks`
+          }
+          body="Tap + New task to assign action items to your team."
+        />
       ) : (
         <div style={{ display: "grid", gap: 10 }}>
           {visible.map((t) => (
@@ -389,9 +345,11 @@ export function TasksScreen({
           ))}
         </div>
       )}
+      {confirmDialog}
     </main>
   );
 }
+
 
 function TaskCard({
   row,
@@ -420,8 +378,9 @@ function TaskCard({
     <article
       style={{
         background: palette.surface,
-        border: `1px solid ${palette.border}`,
-        borderLeft: `6px solid ${tone}`,
+        border: `1px solid ${palette.hairline}`,
+        borderLeft: `4px solid ${tone}`,
+        borderRadius: 12,
         padding: 14,
       }}
     >
@@ -606,6 +565,9 @@ function TaskEditor({
   const [dueLocal, setDueLocal] = useState(isoToLocalInput(initial.due_at));
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  useKeyboardScrollIntoView();
+
+
 
   const canSave = title.trim().length > 0 && ownerId.length > 0;
 
@@ -655,7 +617,7 @@ function TaskEditor({
           marginBottom: 12,
         }}
       >
-        <button type="button" onClick={onCancel} style={buttonBase}>
+        <button type="button" onClick={onCancel} style={buttonBase} className="mobile-tap">
           ← Cancel
         </button>
         <button
@@ -664,8 +626,16 @@ function TaskEditor({
             console.log("[tasks] save tapped", { canSave, saving });
             handleSubmit();
           }}
-          style={{ ...primaryButton, opacity: saving ? 0.6 : 1 }}
+          className="mobile-tap"
+          style={{
+            ...primaryButton,
+            opacity: saving ? 0.7 : 1,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+          }}
         >
+          {saving && <Spinner size={14} color={palette.surface} />}
           {saving ? "Saving…" : "Save"}
         </button>
       </div>
