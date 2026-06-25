@@ -773,13 +773,7 @@ export function VoiceScreen({
         </div>
       </Card>
 
-      <SectionHeader
-        title={
-          <span style={{ display: "inline-flex", alignItems: "center" }}>
-            <StepBadge n={2} /> Summarize
-          </span>
-        as unknown as string}
-      />
+      <SectionHeader title="2 · Summarize" />
       <Card>
         <p
           style={{
@@ -826,13 +820,7 @@ export function VoiceScreen({
 
       {hasSummary && (
         <>
-          <SectionHeader
-            title={
-              <span style={{ display: "inline-flex", alignItems: "center" }}>
-                <StepBadge n={3} /> Review SBAR
-              </span>
-            as unknown as string}
-          />
+          <SectionHeader title="3 · Review SBAR" />
           <Card>
             <label style={labelStyle}>Patient</label>
             <input
