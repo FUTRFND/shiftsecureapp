@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Shift Secure" }] }),
   component: Dashboard,
 });
 
@@ -45,7 +45,7 @@ function Dashboard() {
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
               <Activity className="h-4 w-4" strokeWidth={2.5} />
             </div>
-            ShiftSecure
+            Shift Secure
           </Link>
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline text-sm text-muted-foreground">{user?.email}</span>

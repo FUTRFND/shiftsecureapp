@@ -19,7 +19,7 @@ export function Nav() {
           <div className="relative grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
             <Activity className="h-4 w-4" strokeWidth={2.5} />
           </div>
-          ShiftSecure
+          Shift Secure
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
           <a href="#features" className="hover:text-foreground transition-colors">

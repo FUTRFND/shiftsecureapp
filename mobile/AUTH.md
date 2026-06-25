@@ -118,7 +118,7 @@ reset on native.
 2. **Universal Links domain verification.** Requires owning `handoffhero.app`
    and hosting `apple-app-site-association` + `assetlinks.json`. Until then
    email links must rely on the custom scheme, which works but shows the
-   user a "Open in Handoff Hero?" prompt.
+   user a "Open in Shift Secure?" prompt.
 3. **`build:mobile` SPA correctness.** The Phase 2 scaffold is good enough
    for plumbing; full SSR→SPA route audit lands in Phase 4 when AI moves to
    an Edge Function and protected routes no longer depend on server-rendered

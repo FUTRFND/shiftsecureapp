@@ -37,7 +37,7 @@ import { TemplateEditorDialog } from "@/components/templates/TemplateEditorDialo
 import { PRESETS, type TemplateInput, type TemplateRow } from "@/lib/templates";
 
 export const Route = createFileRoute("/_authenticated/templates")({
-  head: () => ({ meta: [{ title: "Handoff Templates — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Handoff Templates — Shift Secure" }] }),
   component: TemplatesPage,
 });
 
@@ -139,7 +139,7 @@ function TemplatesPage() {
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
               <Activity className="h-4 w-4" strokeWidth={2.5} />
             </div>
-            ShiftSecure
+            Shift Secure
           </Link>
         </div>
       </header>

@@ -42,7 +42,7 @@ if (!existsSync(indexHtml)) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <title>Handoff Hero</title>
+    <title>Shift Secure</title>
   </head>
   <body>
     <div id="app"></div>

@@ -23,7 +23,7 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign in — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Sign in — Shift Secure" }] }),
   component: LoginPage,
 });
 
@@ -103,7 +103,7 @@ function LoginPage() {
   }
 
   return (
-    <AuthShell title="Welcome back" subtitle="Sign in to continue to ShiftSecure">
+    <AuthShell title="Welcome back" subtitle="Sign in to continue to Shift Secure">
       {errors.root && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
@@ -164,7 +164,7 @@ function LoginPage() {
         </Button>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        New to ShiftSecure?{" "}
+        New to Shift Secure?{" "}
         <Link to="/signup" className="text-primary font-medium hover:underline">
           Create an account
         </Link>
@@ -189,7 +189,7 @@ export function AuthShell({
           <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
             <Activity className="h-4 w-4" strokeWidth={2.5} />
           </div>
-          ShiftSecure
+          Shift Secure
         </Link>
       </header>
       <main className="flex-1 grid place-items-center px-6 pb-12">

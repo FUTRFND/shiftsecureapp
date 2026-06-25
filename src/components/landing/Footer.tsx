@@ -8,10 +8,10 @@ export function Footer() {
           <div className="grid h-7 w-7 place-items-center rounded-md bg-gradient-primary text-primary-foreground">
             <Activity className="h-3.5 w-3.5" strokeWidth={2.5} />
           </div>
-          ShiftSecure
+          Shift Secure
         </div>
         <p className="text-sm text-muted-foreground">
-          © 2026 ShiftSecure. Built for the people who keep us alive.
+          © 2026 Shift Secure. Built for the people who keep us alive.
         </p>
       </div>
     </footer>

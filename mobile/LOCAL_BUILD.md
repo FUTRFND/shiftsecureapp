@@ -1,4 +1,4 @@
-# Local Build Guide — Handoff Hero (iOS + Android)
+# Local Build Guide — Shift Secure (iOS + Android)
 
 This is the **one-stop guide** for taking the repo from a fresh clone to a
 running app on a physical device or simulator. Companion docs:

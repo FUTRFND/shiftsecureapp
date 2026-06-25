@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/alerts")({
-  head: () => ({ meta: [{ title: "Critical Alerts — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Critical Alerts — Shift Secure" }] }),
   component: AlertsPage,
 });
 

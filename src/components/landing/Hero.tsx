@@ -41,7 +41,7 @@ export function Hero() {
           <div className="relative rounded-2xl overflow-hidden border border-border shadow-elegant">
             <img
               src={heroImg}
-              alt="ShiftSecure handoff dashboard"
+              alt="Shift Secure handoff dashboard"
               width={1536}
               height={1024}
               className="w-full h-auto"

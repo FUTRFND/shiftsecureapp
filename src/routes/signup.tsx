@@ -49,7 +49,7 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export const Route = createFileRoute("/signup")({
-  head: () => ({ meta: [{ title: "Create account — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Create account — Shift Secure" }] }),
   component: SignupPage,
 });
 

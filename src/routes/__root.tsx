@@ -79,27 +79,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
+      { title: "Shift Secure" },
       {
         name: "description",
         content:
-          "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality.",
+          "Structured handoffs, real-time task ownership, and critical alerts for emergency medicine teams.",
       },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
+      { property: "og:title", content: "Shift Secure" },
       {
         property: "og:description",
         content:
-          "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality.",
+          "Structured handoffs, real-time task ownership, and critical alerts for emergency medicine teams.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
+      { name: "twitter:title", content: "Shift Secure" },
       {
         name: "twitter:description",
         content:
-          "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality.",
+          "Structured handoffs, real-time task ownership, and critical alerts for emergency medicine teams.",
       },
       {
         property: "og:image",

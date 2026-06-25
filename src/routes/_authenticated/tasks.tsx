@@ -37,7 +37,7 @@ import {
 } from "@/lib/tasks";
 
 export const Route = createFileRoute("/_authenticated/tasks")({
-  head: () => ({ meta: [{ title: "Tasks — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Tasks — Shift Secure" }] }),
   component: TasksPage,
 });
 
@@ -152,7 +152,7 @@ function TasksPage() {
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
               <Activity className="h-4 w-4" strokeWidth={2.5} />
             </div>
-            ShiftSecure
+            Shift Secure
           </Link>
         </div>
       </header>

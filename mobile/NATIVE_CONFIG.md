@@ -23,10 +23,10 @@ Everything you must edit by hand after `npx cap add ios` and
 
 ```xml
 <key>NSMicrophoneUsageDescription</key>
-<string>Handoff Hero records your voice so you can dictate patient handoffs hands-free.</string>
+<string>Shift Secure records your voice so you can dictate patient handoffs hands-free.</string>
 
 <key>NSSpeechRecognitionUsageDescription</key>
-<string>Handoff Hero converts your dictation to text on-device so you can review and edit it before sharing.</string>
+<string>Shift Secure converts your dictation to text on-device so you can review and edit it before sharing.</string>
 
 <key>CFBundleURLTypes</key>
 <array>

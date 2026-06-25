@@ -30,7 +30,7 @@ Open `ios/App/App/Info.plist` and add:
 
 ```xml
 <key>NSMicrophoneUsageDescription</key>
-<string>Handoff Hero needs the microphone to record your dictated handoffs.</string>
+<string>Shift Secure needs the microphone to record your dictated handoffs.</string>
 <key>NSSpeechRecognitionUsageDescription</key>
 <string>Speech recognition turns your dictation into the transcript that becomes an SBAR handoff.</string>
 <key>UIBackgroundModes</key><array/>

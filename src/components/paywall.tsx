@@ -47,7 +47,7 @@ export function Paywall({
   onOpenChange,
   capability,
   featureTitle = "Unlock Pro",
-  featureDescription = "Get full access to every Handoff Hero feature.",
+  featureDescription = "Get full access to every Shift Secure feature.",
   benefits = [
     "AI-powered SBAR summaries",
     "Unlimited templates and history",
@@ -152,7 +152,7 @@ export function Paywall({
 
         {webOnly ? (
           <div className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
-            Subscriptions are managed in the Handoff Hero iOS and Android apps. Install the app to
+            Subscriptions are managed in the Shift Secure iOS and Android apps. Install the app to
             subscribe, then sign in here to unlock Pro features.
           </div>
         ) : loadingOfferings ? (

@@ -20,7 +20,7 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Reset password — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Reset password — Shift Secure" }] }),
   component: ForgotPasswordPage,
 });
 

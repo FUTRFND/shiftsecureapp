@@ -93,7 +93,7 @@ function VoiceErrorBoundary({ error, reset }: { error: Error; reset: () => void 
 }
 
 export const Route = createFileRoute("/_authenticated/voice")({
-  head: () => ({ meta: [{ title: "Voice summary — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Voice summary — Shift Secure" }] }),
   component: VoicePage,
   errorComponent: VoiceErrorBoundary,
 });
