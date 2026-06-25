@@ -636,13 +636,20 @@ export function VoiceScreen({
         <button
           type="button"
           onClick={generate}
+          disabled={generating || recording}
+          className="mobile-tap"
           style={{
             ...buttonBase,
             background: palette.accent,
+            borderColor: palette.accent,
             color: palette.surface,
-            opacity: generating || recording ? 0.6 : 1,
+            opacity: generating || recording ? 0.7 : 1,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
           }}
         >
+          {generating && <Spinner size={14} color={palette.surface} />}
           {generating ? "Generating…" : hasSummary ? "Regenerate summary" : "Generate summary"}
         </button>
         {generateErr && (
