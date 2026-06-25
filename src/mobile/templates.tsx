@@ -239,7 +239,8 @@ function TemplateCard({
     <article
       style={{
         background: palette.surface,
-        border: `1px solid ${palette.border}`,
+        border: `1px solid ${palette.hairline}`,
+        borderRadius: 12,
         padding: 14,
       }}
     >
@@ -294,11 +295,17 @@ function TemplateCard({
         </span>
       </div>
       <div style={{ display: "flex", gap: 8 }}>
-        <button type="button" style={{ ...buttonBase, flex: 1 }} onClick={onEdit}>
+        <button
+          type="button"
+          className="mobile-tap"
+          style={{ ...buttonBase, flex: 1 }}
+          onClick={onEdit}
+        >
           Edit
         </button>
         <button
           type="button"
+          className="mobile-tap"
           style={{ ...buttonBase, color: palette.critical }}
           onClick={onDelete}
         >
