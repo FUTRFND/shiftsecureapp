@@ -284,6 +284,13 @@ function VoicePage() {
       toast.error("You're offline. AI summary needs a connection.");
       return;
     }
+    // Capability check: hidden gate. The server re-verifies independently
+    // via RevenueCat — this is just UX so free users see the paywall instead
+    // of a 402 error toast.
+    if (!canUseAI) {
+      setPaywallOpen(true);
+      return;
+    }
     // De-dupe overlapping requests: only the latest call writes to state.
     const requestId = ++generationIdRef.current;
     setGenerating(true);
