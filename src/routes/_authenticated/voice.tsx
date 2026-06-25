@@ -275,15 +275,24 @@ function VoicePage() {
       toast.error("Dictate at least a sentence or two first.");
       return;
     }
+    if (!network.connected) {
+      toast.error("You're offline. AI summary needs a connection.");
+      return;
+    }
+    // De-dupe overlapping requests: only the latest call writes to state.
+    const requestId = ++generationIdRef.current;
     setGenerating(true);
     try {
       const { summary } = await aiService.summarizeHandoff({
         transcript,
         context: context || undefined,
       });
+      if (requestId !== generationIdRef.current) return; // superseded
       setSbar(parseSummary(summary));
       setHasSummary(true);
+      void platformHaptics.notificationSuccess();
     } catch (err) {
+      if (requestId !== generationIdRef.current) return;
       const msg =
         err instanceof AIError
           ? err.message
@@ -291,14 +300,21 @@ function VoicePage() {
             ? err.message
             : "Couldn't generate summary";
       toast.error(msg);
+      void platformHaptics.notificationError();
     } finally {
-      setGenerating(false);
+      if (requestId === generationIdRef.current) setGenerating(false);
     }
   }
 
   async function copy(text: string) {
-    await navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard");
+    try {
+      await platformClipboard.write(text);
+      toast.success("Copied to clipboard");
+      void platformHaptics.impact("light");
+    } catch (err) {
+      const msg = err instanceof ClipboardError ? err.message : "Couldn't copy to the clipboard.";
+      toast.error(msg);
+    }
   }
 
   function reset() {
