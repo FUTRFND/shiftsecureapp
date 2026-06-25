@@ -8,6 +8,7 @@ import { startDeepLinkListener } from "@/platform/deep-links";
 import { registerAuthDeepLinkHandler } from "@/lib/auth-deep-link";
 import { SIGN_IN_ROUTE } from "@/config/auth";
 import { subscriptionService } from "@/services/subscription";
+import { isNative } from "@/platform/runtime";
 
 interface AuthContextValue {
   user: User | null;
@@ -44,18 +45,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (cancelled) return;
 
-      // 2. Register the deep-link handler (works on web too — covers Universal
-      //    Links opened in-app). This is independent from the listener below.
-      unsubDeepLink = registerAuthDeepLinkHandler({
-        navigate: router.navigate as never,
-        onError: (message) => toast.error(message),
-      });
+      if (!isNative()) {
+        // 2. Register the deep-link handler for browser callback flows.
+        unsubDeepLink = registerAuthDeepLinkHandler({
+          navigate: router.navigate as never,
+          onError: (message) => toast.error(message),
+        });
 
-      // 3. Start the native Capacitor URL listener. No-op on web.
-      try {
-        stopNativeListener = await startDeepLinkListener();
-      } catch (err) {
-        console.warn("[auth] startDeepLinkListener failed", err);
+        // 3. Start URL listener on web only during native-shell freeze isolation.
+        try {
+          stopNativeListener = await startDeepLinkListener();
+        } catch (err) {
+          console.warn("[auth] startDeepLinkListener failed", err);
+        }
       }
       if (cancelled) return;
 

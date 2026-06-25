@@ -7,9 +7,8 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * - `appId` is the reverse-DNS bundle identifier used by both stores.
  * - `server.androidScheme: "https"` makes the in-app origin `https://localhost`
  *   which Supabase Auth + Lovable AI Gateway accept as a same-origin caller.
- * - `SplashScreen.launchAutoHide: false` — the splash is hidden by the
- *   native-shell only after the React tree signals `appReady`, preventing
- *   the white flash that auto-hide causes.
+ * - `SplashScreen.launchAutoHide: true` — temporary native-shell isolation so
+ *   app startup does not depend on JS-driven splash hide/show calls.
  * - `Keyboard.resize: "body"` lets CSS env(safe-area-inset-bottom) and
  *   --keyboard-height work together cleanly on both platforms.
  */
@@ -33,7 +32,7 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchAutoHide: false,
+      launchAutoHide: true,
       backgroundColor: "#0b1220",
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP",

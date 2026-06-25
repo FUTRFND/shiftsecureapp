@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Bell, FileText, ListChecks, Mic, LogOut } from "lucide-react";
+import { Bell, FileText, ListChecks, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/lib/auth";
 
 type Section = "alerts" | "templates" | "tasks" | "voice";
 
@@ -44,28 +43,15 @@ const SECTIONS: Array<{
 ];
 
 export function MobileHome() {
-  const { signOut } = useAuth();
   const [active, setActive] = useState<Section | null>(null);
 
   const activeSection = SECTIONS.find((s) => s.id === active) ?? null;
 
   return (
     <div className="min-h-dvh bg-background flex flex-col">
-      <header className="px-5 pt-4 pb-3 border-b border-border flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Shift Secure</h1>
-          <p className="text-xs text-muted-foreground">Mobile preview</p>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            void signOut();
-          }}
-          aria-label="Sign out"
-        >
-          <LogOut className="h-4 w-4" />
-        </Button>
+      <header className="px-5 pt-4 pb-3 border-b border-border">
+        <h1 className="text-xl font-semibold tracking-tight">Shift Secure</h1>
+        <p className="text-xs text-muted-foreground">Mobile preview</p>
       </header>
 
       <main className="flex-1 px-5 py-5 space-y-4 safe-bottom">

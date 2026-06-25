@@ -14,8 +14,6 @@
  *
  *   Malformed URLs are caught and logged, never thrown.
  */
-import { isNative } from "./runtime";
-
 export type DeepLinkHandler = (url: URL, rawUrl: string) => boolean | Promise<boolean>;
 
 const handlers = new Set<DeepLinkHandler>();
@@ -69,21 +67,5 @@ export async function dispatchDeepLink(rawUrl: string): Promise<boolean> {
  * Returns an async unsubscribe function.
  */
 export async function startDeepLinkListener(): Promise<() => Promise<void>> {
-  if (!isNative()) return async () => {};
-  const { App } = await import("@capacitor/app");
-  const sub = await App.addListener("appUrlOpen", (event) => {
-    void dispatchDeepLink(event.url);
-  });
-
-  // On cold start the URL that launched the app is delivered separately.
-  try {
-    const launch = await App.getLaunchUrl();
-    if (launch?.url) void dispatchDeepLink(launch.url);
-  } catch {
-    /* getLaunchUrl is best-effort */
-  }
-
-  return async () => {
-    await sub.remove();
-  };
+  return async () => {};
 }
