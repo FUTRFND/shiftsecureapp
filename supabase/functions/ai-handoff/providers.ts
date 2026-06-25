@@ -94,7 +94,8 @@ class LovableAIProvider implements AIProvider {
     } catch {
       throw new ProviderError("Provider returned invalid JSON", "malformed_response", false);
     }
-    const content = (payload as any)?.choices?.[0]?.message?.content;
+    const content = (payload as { choices?: Array<{ message?: { content?: unknown } }> })
+      ?.choices?.[0]?.message?.content;
     if (typeof content !== "string" || !content.trim()) {
       throw new ProviderError("Provider returned empty content", "malformed_response", false);
     }
