@@ -43,6 +43,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "/src": resolve(projectRoot, "src"),
+        "@": resolve(projectRoot, "src"),
       },
     },
     plugins: [react()],
