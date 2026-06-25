@@ -404,7 +404,7 @@ function VoicePage() {
         void platformHaptics.notificationSuccess();
       }
       setDraftTitle(title);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(err?.message ?? "Couldn't save draft");
     } finally {
       setSavingDraft(false);
@@ -460,7 +460,7 @@ function VoicePage() {
       }
       setSkipped(skippedRows);
       setDrafts(valid);
-    } catch (err: any) {
+    } catch (err) {
       const msg = err?.message ?? "Couldn't load drafts";
       setDraftsError(msg);
       toast.error(msg);
@@ -475,7 +475,7 @@ function VoicePage() {
       if (error) throw error;
       setSkipped((s) => s.filter((x) => x.id !== id));
       toast.success("Corrupted draft deleted");
-    } catch (err: any) {
+    } catch (err) {
       toast.error(err?.message ?? "Couldn't delete draft");
     }
   }
@@ -512,7 +512,7 @@ function VoicePage() {
       setHasSummary(true);
       setDraftsOpen(false);
       toast.success("Draft loaded");
-    } catch (err: any) {
+    } catch (err) {
       toast.error(err?.message ?? "Couldn't open draft");
     }
   }
@@ -527,7 +527,7 @@ function VoicePage() {
         setDraftTitle("");
       }
       toast.success("Draft deleted");
-    } catch (err: any) {
+    } catch (err) {
       toast.error(err?.message ?? "Couldn't delete draft");
     }
   }
