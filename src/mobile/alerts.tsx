@@ -141,7 +141,17 @@ export function AlertsScreen({
     [alerts],
   );
 
+  useKeyboardScrollIntoView();
+  const { confirm, dialog: confirmDialog } = useConfirm();
+  const { refreshing, indicator } = usePullToRefresh(load);
+
   async function acknowledge(row: AlertRow) {
+    const ok = await confirm({
+      title: "Acknowledge alert?",
+      body: "Your name will be recorded as the acknowledger.",
+      confirmLabel: "Acknowledge",
+    });
+    if (!ok) return;
     const { error: e } = await sb
       .from("patient_alerts")
       .update({
@@ -154,6 +164,12 @@ export function AlertsScreen({
   }
 
   async function resolve(row: AlertRow) {
+    const ok = await confirm({
+      title: "Resolve alert?",
+      body: "Mark this alert as resolved for the whole shift.",
+      confirmLabel: "Resolve",
+    });
+    if (!ok) return;
     const { error: e } = await sb
       .from("patient_alerts")
       .update({
@@ -165,7 +181,13 @@ export function AlertsScreen({
   }
 
   async function remove(row: AlertRow) {
-    if (!confirm("Delete this alert?")) return;
+    const ok = await confirm({
+      title: "Delete this alert?",
+      body: "This cannot be undone.",
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (!ok) return;
     const { error: e } = await sb
       .from("patient_alerts")
       .delete()
@@ -175,15 +197,16 @@ export function AlertsScreen({
 
   return (
     <main style={pageStyle}>
+      {indicator}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 12,
+          marginBottom: space.md,
         }}
       >
-        <button type="button" onClick={onBack} style={buttonBase}>
+        <button type="button" onClick={onBack} style={buttonBase} className="mobile-tap">
           ← Back
         </button>
         <span
@@ -200,7 +223,7 @@ export function AlertsScreen({
       <h1 style={{ margin: "0 0 4px", fontSize: 26, fontWeight: 700 }}>
         Critical Alerts
       </h1>
-      <p style={{ margin: "0 0 16px", fontSize: 13, color: palette.muted }}>
+      <p style={{ margin: `0 0 ${space.lg}px`, fontSize: 13, color: palette.muted }}>
         Broadcast high-priority patient concerns to the whole shift.
       </p>
 
@@ -213,7 +236,8 @@ export function AlertsScreen({
             padding: "10px 12px",
             fontSize: 14,
             fontWeight: 600,
-            marginBottom: 12,
+            borderRadius: 10,
+            marginBottom: space.md,
           }}
         >
           {activeCritical} active critical{" "}
@@ -229,7 +253,8 @@ export function AlertsScreen({
             color: palette.critical,
             padding: "8px 10px",
             fontSize: 13,
-            marginBottom: 12,
+            borderRadius: 10,
+            marginBottom: space.md,
           }}
         >
           {error}
@@ -241,7 +266,7 @@ export function AlertsScreen({
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: 6,
-          marginBottom: 14,
+          marginBottom: space.md,
         }}
       >
         {(["active", "acknowledged", "resolved", "all"] as const).map((f) => (
@@ -249,6 +274,7 @@ export function AlertsScreen({
             key={f}
             type="button"
             onClick={() => setFilter(f)}
+            className="mobile-tap"
             style={{
               ...buttonBase,
               minHeight: 36,
@@ -266,7 +292,8 @@ export function AlertsScreen({
       <button
         type="button"
         onClick={() => setComposerOpen((v) => !v)}
-        style={{ ...primaryButton, width: "100%", marginBottom: 14 }}
+        className="mobile-tap"
+        style={{ ...primaryButton, width: "100%", marginBottom: space.md }}
       >
         {composerOpen ? "Cancel new alert" : "+ New alert"}
       </button>
@@ -280,21 +307,14 @@ export function AlertsScreen({
         />
       )}
 
-      {loading ? (
-        <p style={{ fontSize: 14, color: palette.muted }}>Loading alerts…</p>
+      {loading && !refreshing ? (
+        <LoadingBlock label="Loading alerts…" />
       ) : visible.length === 0 ? (
-        <div
-          style={{
-            border: `1px dashed ${palette.border}`,
-            padding: 24,
-            textAlign: "center",
-            color: palette.muted,
-            fontSize: 14,
-          }}
-        >
-          No {filter === "all" ? "" : STATUS_LABEL[filter].toLowerCase()}{" "}
-          alerts.
-        </div>
+        <EmptyState
+          icon="◎"
+          title={`No ${filter === "all" ? "" : STATUS_LABEL[filter].toLowerCase() + " "}alerts`}
+          body="Pull down to refresh, or broadcast a new alert above."
+        />
       ) : (
         <div style={{ display: "grid", gap: 10 }}>
           {visible.map((a) => (
@@ -315,9 +335,11 @@ export function AlertsScreen({
           ))}
         </div>
       )}
+      {confirmDialog}
     </main>
   );
 }
+
 
 function AlertCard({
   row,
