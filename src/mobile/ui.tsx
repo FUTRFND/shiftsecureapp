@@ -91,7 +91,7 @@ export const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   boxSizing: "border-box",
   padding: `calc(env(safe-area-inset-top, 0px) + ${space.lg}px) ${space.lg}px 96px`,
-  background: palette.bg,
+  background: gradient.page,
   color: palette.ink,
   fontFamily: SYS_FONT,
   WebkitFontSmoothing: "antialiased",
@@ -99,7 +99,7 @@ export const pageStyle: React.CSSProperties = {
 };
 
 
-// iOS-style controls: 44pt min height, 10pt radius, system font, 16pt input
+// iOS-style controls: 44pt min height, 12pt radius, system font, 16pt input
 // text so iOS does not zoom on focus.
 
 export const buttonBase: React.CSSProperties = {
@@ -117,14 +117,17 @@ export const buttonBase: React.CSSProperties = {
   touchAction: "manipulation",
   WebkitAppearance: "none",
   WebkitTapHighlightColor: "transparent",
-  transition: "opacity 120ms ease, transform 120ms ease, background 120ms ease",
+  transition: "opacity 120ms ease, transform 120ms ease, background 120ms ease, box-shadow 160ms ease",
 };
 
+// Brand-gradient primary CTA (Sign in, Save, Publish).
 export const primaryButton: React.CSSProperties = {
   ...buttonBase,
-  background: palette.ink,
-  borderColor: palette.ink,
-  color: palette.surface,
+  background: gradient.primary,
+  borderColor: "transparent",
+  color: "#ffffff",
+  boxShadow: shadow.primary,
+  fontWeight: 700,
 };
 
 export const accentButton: React.CSSProperties = {
@@ -143,7 +146,7 @@ export const dangerButton: React.CSSProperties = {
 
 export const ghostButton: React.CSSProperties = {
   ...buttonBase,
-  background: "transparent",
+  background: palette.surface,
   border: `1px solid ${palette.hairline}`,
   color: palette.ink,
 };
@@ -151,9 +154,9 @@ export const ghostButton: React.CSSProperties = {
 export const inputStyle: React.CSSProperties = {
   width: "100%",
   boxSizing: "border-box",
-  minHeight: 44,
-  padding: "10px 14px",
-  fontSize: 16, // ≥16px = no iOS zoom on focus
+  minHeight: 48,
+  padding: "12px 14px",
+  fontSize: 16,
   border: `1px solid ${palette.hairline}`,
   borderRadius: radii.md,
   background: palette.surface,
@@ -163,6 +166,7 @@ export const inputStyle: React.CSSProperties = {
   marginBottom: space.sm,
   scrollMarginBottom: 120,
   outline: "none",
+  transition: "border-color 140ms ease, box-shadow 140ms ease",
 };
 
 export const textareaStyle: React.CSSProperties = {
@@ -178,7 +182,7 @@ export const selectStyle: React.CSSProperties = {
   WebkitAppearance: "none",
   appearance: "none",
   backgroundImage:
-    "linear-gradient(45deg, transparent 50%, #1c1c1e 50%), linear-gradient(135deg, #1c1c1e 50%, transparent 50%)",
+    "linear-gradient(45deg, transparent 50%, #1c2024 50%), linear-gradient(135deg, #1c2024 50%, transparent 50%)",
   backgroundPosition:
     "calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px)",
   backgroundSize: "6px 6px, 6px 6px",
@@ -199,7 +203,7 @@ export const labelStyle: React.CSSProperties = {
 export const cardStyle: React.CSSProperties = {
   background: palette.surface,
   border: `1px solid ${palette.hairline}`,
-  borderRadius: radii.lg,
+  borderRadius: radii.xl,
   padding: space.lg,
   boxShadow: shadow.card,
 };
@@ -221,16 +225,26 @@ function ensureGlobalStyles() {
   from { opacity: 0; transform: translateY(-4px) }
   to   { opacity: 1; transform: translateY(0) }
 }
-.mobile-screen-fade { animation: mobile-fade-in 200ms ease-out both; }
-.mobile-tap:active:not(:disabled) { opacity: 0.7; transform: scale(0.98); }
+@keyframes mobile-shimmer {
+  0%   { background-position: -400px 0 }
+  100% { background-position: 400px 0 }
+}
+.mobile-screen-fade { animation: mobile-fade-in 220ms ease-out both; }
+.mobile-tap:active:not(:disabled) { opacity: 0.85; transform: scale(0.985); }
 .mobile-tap:disabled { opacity: 0.45; cursor: default; }
 button:disabled { cursor: default; }
 input:focus, textarea:focus, select:focus {
-  border-color: #0a84ff !important;
-  box-shadow: 0 0 0 3px rgba(10,132,255,0.18);
+  border-color: ${palette.accent} !important;
+  box-shadow: 0 0 0 4px ${palette.accentSoft};
 }
 * { -webkit-tap-highlight-color: transparent; }
 html, body { background: ${palette.bg}; overscroll-behavior-y: contain; }
+.mobile-skeleton {
+  background: linear-gradient(90deg, ${palette.surfaceAlt} 0%, #ffffff 50%, ${palette.surfaceAlt} 100%);
+  background-size: 800px 100%;
+  animation: mobile-shimmer 1.4s linear infinite;
+  border-radius: 8px;
+}
 `;
   const el = document.createElement("style");
   el.setAttribute("data-mobile-ui", "true");
