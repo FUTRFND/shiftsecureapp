@@ -7,28 +7,32 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * - `appId` is the reverse-DNS bundle identifier used by both stores.
  * - `server.androidScheme: "https"` makes the in-app origin `https://localhost`
  *   which Supabase Auth + Lovable AI Gateway accept as a same-origin caller.
- * - `SplashScreen.launchAutoHide: true` — temporary native-shell isolation so
- *   app startup does not depend on JS-driven splash hide/show calls.
- * - `Keyboard.resize: "body"` lets CSS env(safe-area-inset-bottom) and
- *   --keyboard-height work together cleanly on both platforms.
+ * - `includePlugins: []` makes this diagnostic shell exclude every native
+ *   plugin during `npx cap sync`, isolating WKWebView/project configuration.
  */
 const config: CapacitorConfig = {
   appId: "com.badexy.shiftsecure",
   appName: "Shift Secure",
   webDir: "dist/spa",
   bundledWebRuntime: false,
+  includePlugins: [],
+  loggingBehavior: "debug",
+  backgroundColor: "#f7f7f2",
+  initialFocus: true,
   server: {
+    iosScheme: "capacitor",
     androidScheme: "https",
   },
   ios: {
-    // `never` lets the WebView extend under the status bar so our CSS
-    // safe-area paddings own the inset — required for Dynamic Island devices.
-    contentInset: "never",
+    contentInset: "automatic",
+    includePlugins: [],
     limitsNavigationsToAppBoundDomains: false,
     scrollEnabled: true,
+    webContentsDebuggingEnabled: true,
   },
   android: {
     allowMixedContent: false,
+    includePlugins: [],
   },
   plugins: {
     SplashScreen: {

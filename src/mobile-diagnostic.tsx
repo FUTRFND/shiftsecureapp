@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createRoot } from "react-dom/client";
 
 const screens = ["Alerts", "Templates", "Tasks", "Voice"] as const;
+const buildStamp = "SHIFT_SECURE_DIAGNOSTIC_2026_06_25_REACT_ONLY";
 
 type Screen = (typeof screens)[number];
 
@@ -39,6 +40,17 @@ function MobileDiagnostic() {
         }}
       >
         React local state only
+      </p>
+      <p
+        data-diagnostic-build={buildStamp}
+        style={{
+          margin: "0 0 24px",
+          fontSize: "12px",
+          lineHeight: 1.4,
+          color: "#666666",
+        }}
+      >
+        {buildStamp}
       </p>
 
       <div
