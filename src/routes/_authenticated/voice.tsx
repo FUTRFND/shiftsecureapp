@@ -35,6 +35,12 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { aiService, AIError } from "@/services/ai";
+import { platformSpeech, SpeechError } from "@/platform/speech";
+import { platformClipboard, ClipboardError } from "@/platform/clipboard";
+import { platformHaptics } from "@/platform/haptics";
+import { platformPermissions } from "@/platform/permissions";
+import { useNetworkStatus } from "@/hooks/use-network-status";
+import { OfflineBanner } from "@/components/offline-banner";
 
 function VoiceErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -81,26 +87,6 @@ export const Route = createFileRoute("/_authenticated/voice")({
   component: VoicePage,
   errorComponent: VoiceErrorBoundary,
 });
-
-// Minimal types for Web Speech API
-type SR = {
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: ((e: any) => void) | null;
-  onerror: ((e: any) => void) | null;
-  onend: (() => void) | null;
-};
-
-function getSpeechRecognition(): (new () => SR) | null {
-  if (typeof window === "undefined") return null;
-  return (
-    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition || null
-  );
-}
 
 
 type Sbar = {
