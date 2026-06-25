@@ -102,11 +102,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality.",
       },
-      { name: "description", content: "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality." },
-      { property: "og:description", content: "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality." },
-      { name: "twitter:description", content: "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/276e823b-d35f-4573-a9e0-5ae29f85d6d9/id-preview-426111f4--d89211fc-539e-4a16-b4b6-9ae9d6517c95.lovable.app-1782410675137.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/276e823b-d35f-4573-a9e0-5ae29f85d6d9/id-preview-426111f4--d89211fc-539e-4a16-b4b6-9ae9d6517c95.lovable.app-1782410675137.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
