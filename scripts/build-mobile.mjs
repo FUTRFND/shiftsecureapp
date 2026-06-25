@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const root = resolve(process.cwd());
 const distSpa = join(root, "dist", "spa");
-const indexMobileHtml = join(root, "dist", "spa", "index.mobile.html");
-const indexHtml = join(root, "dist", "spa", "index.html");
+const indexHtml = join(distSpa, "index.html");
 const iosPublic = join(root, "ios", "App", "App", "public");
 
 console.log("[build:mobile] building standalone React diagnostic screen");
@@ -14,7 +13,18 @@ execSync("vite build --config scripts/vite.mobile-diagnostic.config.mjs", {
   stdio: "inherit",
 });
 
-renameSync(indexMobileHtml, indexHtml);
+if (!existsSync(indexHtml)) {
+  throw new Error(
+    `[build:mobile] expected ${indexHtml} after vite build but it is missing.`,
+  );
+}
+
+// Hard fail if a stale index.mobile.html somehow appears in the output.
+const strayMobile = join(distSpa, "index.mobile.html");
+if (existsSync(strayMobile)) {
+  rmSync(strayMobile);
+  console.warn("[build:mobile] removed stray dist/spa/index.mobile.html");
+}
 
 rmSync(iosPublic, { recursive: true, force: true });
 mkdirSync(iosPublic, { recursive: true });
