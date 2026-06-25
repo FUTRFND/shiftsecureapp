@@ -6,8 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { ProfileLite, TaskPriority, TaskRow, TaskStatus } from "@/lib/tasks";
 
 type Props = {
@@ -29,7 +42,14 @@ const empty = (currentUserId: string) => ({
   due_at: "",
 });
 
-export function TaskDialog({ open, onOpenChange, currentUserId, profiles, editing, onSaved }: Props) {
+export function TaskDialog({
+  open,
+  onOpenChange,
+  currentUserId,
+  profiles,
+  editing,
+  onSaved,
+}: Props) {
   const [form, setForm] = useState(() => empty(currentUserId));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,8 +144,13 @@ export function TaskDialog({ open, onOpenChange, currentUserId, profiles, editin
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label>Status</Label>
-              <Select value={form.status} onValueChange={(v) => setForm((f) => ({ ...f, status: v as TaskStatus }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.status}
+                onValueChange={(v) => setForm((f) => ({ ...f, status: v as TaskStatus }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todo">To do</SelectItem>
                   <SelectItem value="in_progress">In progress</SelectItem>
@@ -136,8 +161,13 @@ export function TaskDialog({ open, onOpenChange, currentUserId, profiles, editin
             </div>
             <div className="space-y-2">
               <Label>Priority</Label>
-              <Select value={form.priority} onValueChange={(v) => setForm((f) => ({ ...f, priority: v as TaskPriority }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.priority}
+                onValueChange={(v) => setForm((f) => ({ ...f, priority: v as TaskPriority }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="normal">Normal</SelectItem>
@@ -148,8 +178,13 @@ export function TaskDialog({ open, onOpenChange, currentUserId, profiles, editin
             </div>
             <div className="space-y-2">
               <Label>Assignee</Label>
-              <Select value={form.owner_id} onValueChange={(v) => setForm((f) => ({ ...f, owner_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Assign to..." /></SelectTrigger>
+              <Select
+                value={form.owner_id}
+                onValueChange={(v) => setForm((f) => ({ ...f, owner_id: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Assign to..." />
+                </SelectTrigger>
                 <SelectContent>
                   {profiles.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
@@ -176,7 +211,9 @@ export function TaskDialog({ open, onOpenChange, currentUserId, profiles, editin
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
+            Cancel
+          </Button>
           <Button variant="hero" onClick={handleSubmit} disabled={saving}>
             {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             {editing ? "Save changes" : "Create task"}

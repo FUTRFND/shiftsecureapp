@@ -8,7 +8,10 @@ import { useEffect, useState } from "react";
 import { platformNetwork, type NetworkStatus } from "@/platform/network";
 
 export function useNetworkStatus(): NetworkStatus {
-  const [status, setStatus] = useState<NetworkStatus>({ connected: true, connectionType: "unknown" });
+  const [status, setStatus] = useState<NetworkStatus>({
+    connected: true,
+    connectionType: "unknown",
+  });
 
   useEffect(() => {
     let active = true;
@@ -17,12 +20,14 @@ export function useNetworkStatus(): NetworkStatus {
     void platformNetwork.getStatus().then((s) => {
       if (active) setStatus(s);
     });
-    void platformNetwork.addListener((s) => {
-      if (active) setStatus(s);
-    }).then((u) => {
-      if (!active) u();
-      else unsub = u;
-    });
+    void platformNetwork
+      .addListener((s) => {
+        if (active) setStatus(s);
+      })
+      .then((u) => {
+        if (!active) u();
+        else unsub = u;
+      });
 
     return () => {
       active = false;

@@ -84,12 +84,12 @@ gh workflow run prebuild.yml --ref feature/legacy-migration \
 
 **Resulting effective thresholds:**
 
-| Metric      | Effective threshold | Source                                    |
-| ----------- | ------------------- | ----------------------------------------- |
-| Statements  | 85%                 | inherits from strict base                 |
-| Branches    | 70%                 | relaxed override (`coverage_threshold_branches`) |
-| Functions   | 75%                 | relaxed override (`coverage_threshold_functions`) |
-| Lines       | 85%                 | inherits from strict base                 |
+| Metric     | Effective threshold | Source                                            |
+| ---------- | ------------------- | ------------------------------------------------- |
+| Statements | 85%                 | inherits from strict base                         |
+| Branches   | 70%                 | relaxed override (`coverage_threshold_branches`)  |
+| Functions  | 75%                 | relaxed override (`coverage_threshold_functions`) |
+| Lines      | 85%                 | inherits from strict base                         |
 
 This is useful when most of the codebase must meet a high bar, but specific metrics (e.g., branches in legacy code with complex conditionals, or functions in auto-generated wrappers) are temporarily harder to cover.
 

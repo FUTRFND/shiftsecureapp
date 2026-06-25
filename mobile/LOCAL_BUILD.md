@@ -1,4 +1,4 @@
-# Local Build Guide — Handoff Hero (iOS + Android)
+# Local Build Guide — Shift Secure (iOS + Android)
 
 This is the **one-stop guide** for taking the repo from a fresh clone to a
 running app on a physical device or simulator. Companion docs:
@@ -35,19 +35,19 @@ cp .env.example .env.local        # fill in every value (see checklist below)
 
 ### Environment variable checklist (`.env.local`)
 
-| Var | Where to get it | Required for |
-| --- | --- | --- |
-| `VITE_SUPABASE_URL` | Supabase project settings | web + native |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase project settings | web + native |
-| `VITE_SUPABASE_PROJECT_ID` | Supabase project settings | web + native |
-| `SUPABASE_URL` | same as above | server fns (dev) |
-| `SUPABASE_PUBLISHABLE_KEY` | same | server fns (dev) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase project settings | server fns (dev) |
-| `LOVABLE_API_KEY` | Lovable AI gateway | dev only — prod lives in Edge Function secrets |
-| `VITE_REVENUECAT_IOS_KEY` | RevenueCat → Project settings → API keys → Apple | iOS build |
-| `VITE_REVENUECAT_ANDROID_KEY` | RevenueCat → Project settings → API keys → Google | Android build |
-| `VITE_APP_URL_SCHEME` | leave as `handoffhero` unless you renamed it | deep links |
-| `VITE_APP_UNIVERSAL_LINK_HOST` | your owned domain (e.g. `handoffhero.app`) | universal/app links |
+| Var                             | Where to get it                                   | Required for                                   |
+| ------------------------------- | ------------------------------------------------- | ---------------------------------------------- |
+| `VITE_SUPABASE_URL`             | Supabase project settings                         | web + native                                   |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase project settings                         | web + native                                   |
+| `VITE_SUPABASE_PROJECT_ID`      | Supabase project settings                         | web + native                                   |
+| `SUPABASE_URL`                  | same as above                                     | server fns (dev)                               |
+| `SUPABASE_PUBLISHABLE_KEY`      | same                                              | server fns (dev)                               |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Supabase project settings                         | server fns (dev)                               |
+| `LOVABLE_API_KEY`               | Lovable AI gateway                                | dev only — prod lives in Edge Function secrets |
+| `VITE_REVENUECAT_IOS_KEY`       | RevenueCat → Project settings → API keys → Apple  | iOS build                                      |
+| `VITE_REVENUECAT_ANDROID_KEY`   | RevenueCat → Project settings → API keys → Google | Android build                                  |
+| `VITE_APP_URL_SCHEME`           | leave as `handoffhero` unless you renamed it      | deep links                                     |
+| `VITE_APP_UNIVERSAL_LINK_HOST`  | your owned domain (e.g. `handoffhero.app`)        | universal/app links                            |
 
 Note: **never** put `SUPABASE_SERVICE_ROLE_KEY`, `LOVABLE_API_KEY`, or the
 RevenueCat **secret** API key into the mobile bundle. The mobile app only
@@ -128,18 +128,18 @@ so requests without a valid Supabase session are rejected.
 
 ## 6. Command quick reference
 
-| Goal | Command |
-| --- | --- |
-| Install deps | `bun install` |
-| Typecheck | `bun run typecheck` |
-| Web dev server | `bun run dev` |
-| Web production build | `bun run build` |
-| Static SPA for Capacitor | `bun run build:mobile` |
-| Sync web → native | `npx cap sync` (or `bun run cap:sync`) |
-| Open iOS project | `npx cap open ios` |
-| Open Android project | `npx cap open android` |
-| Build + sync + open iOS | `bun run mobile:ios` |
-| Build + sync + open Android | `bun run mobile:android` |
+| Goal                        | Command                                |
+| --------------------------- | -------------------------------------- |
+| Install deps                | `bun install`                          |
+| Typecheck                   | `bun run typecheck`                    |
+| Web dev server              | `bun run dev`                          |
+| Web production build        | `bun run build`                        |
+| Static SPA for Capacitor    | `bun run build:mobile`                 |
+| Sync web → native           | `npx cap sync` (or `bun run cap:sync`) |
+| Open iOS project            | `npx cap open ios`                     |
+| Open Android project        | `npx cap open android`                 |
+| Build + sync + open iOS     | `bun run mobile:ios`                   |
+| Build + sync + open Android | `bun run mobile:android`               |
 
 ---
 

@@ -47,7 +47,10 @@ export type SpeechErrorCode =
   | "unknown";
 
 export class SpeechError extends Error {
-  constructor(public readonly code: SpeechErrorCode, message: string) {
+  constructor(
+    public readonly code: SpeechErrorCode,
+    message: string,
+  ) {
     super(message);
     this.name = "SpeechError";
   }
@@ -117,12 +120,21 @@ function makeWebSpeech(): PlatformSpeech {
     async start({ lang = "en-US", partialResults = true, onResult, onError, onEnd }) {
       if (current) {
         // Defensive: a stale instance from a prior session.
-        try { current.abort(); } catch { /* noop */ }
+        try {
+          current.abort();
+        } catch {
+          /* noop */
+        }
         current = null;
       }
       const Ctor = getWebSpeechCtor();
       if (!Ctor) {
-        onError?.(new SpeechError("not_supported", "Voice capture isn't supported in this browser. Try Chrome, Edge, or Safari."));
+        onError?.(
+          new SpeechError(
+            "not_supported",
+            "Voice capture isn't supported in this browser. Try Chrome, Edge, or Safari.",
+          ),
+        );
         onEnd?.();
         return;
       }
@@ -150,7 +162,7 @@ function makeWebSpeech(): PlatformSpeech {
           "not-allowed": "permission_denied",
           "service-not-allowed": "permission_denied",
           "audio-capture": "mic_unavailable",
-          "network": "network",
+          network: "network",
         };
         const code = map[raw] ?? "unknown";
         onError?.(new SpeechError(code, friendlyMessage(code)));
@@ -164,7 +176,9 @@ function makeWebSpeech(): PlatformSpeech {
         rec.start();
       } catch (err) {
         release();
-        onError?.(new SpeechError("unknown", (err as Error)?.message ?? "Couldn't start recording."));
+        onError?.(
+          new SpeechError("unknown", (err as Error)?.message ?? "Couldn't start recording."),
+        );
         onEnd?.();
       }
     },
@@ -197,8 +211,16 @@ function makeNativeSpeech(): PlatformSpeech {
       clearTimeout(silenceTimer);
       silenceTimer = null;
     }
-    try { await partialHandle?.remove(); } catch { /* noop */ }
-    try { await listeningStateHandle?.remove(); } catch { /* noop */ }
+    try {
+      await partialHandle?.remove();
+    } catch {
+      /* noop */
+    }
+    try {
+      await listeningStateHandle?.remove();
+    } catch {
+      /* noop */
+    }
     partialHandle = null;
     listeningStateHandle = null;
     listening = false;
@@ -240,7 +262,14 @@ function makeNativeSpeech(): PlatformSpeech {
         return false;
       }
     },
-    async start({ lang = "en-US", silenceTimeoutMs = 3500, partialResults = true, onResult, onError, onEnd }) {
+    async start({
+      lang = "en-US",
+      silenceTimeoutMs = 3500,
+      partialResults = true,
+      onResult,
+      onError,
+      onEnd,
+    }) {
       if (listening) {
         // Hard guard against duplicate sessions.
         onError?.(new SpeechError("unknown", "Recording is already in progress."));
@@ -250,7 +279,9 @@ function makeNativeSpeech(): PlatformSpeech {
       try {
         ({ SpeechRecognition } = await import("@capacitor-community/speech-recognition"));
       } catch {
-        onError?.(new SpeechError("not_supported", "Voice capture isn't available on this device."));
+        onError?.(
+          new SpeechError("not_supported", "Voice capture isn't available on this device."),
+        );
         onEnd?.();
         return;
       }
@@ -258,12 +289,16 @@ function makeNativeSpeech(): PlatformSpeech {
       try {
         const { available } = await SpeechRecognition.available();
         if (!available) {
-          onError?.(new SpeechError("not_supported", "Voice capture isn't available on this device."));
+          onError?.(
+            new SpeechError("not_supported", "Voice capture isn't available on this device."),
+          );
           onEnd?.();
           return;
         }
       } catch {
-        onError?.(new SpeechError("not_supported", "Voice capture isn't available on this device."));
+        onError?.(
+          new SpeechError("not_supported", "Voice capture isn't available on this device."),
+        );
         onEnd?.();
         return;
       }
@@ -293,7 +328,9 @@ function makeNativeSpeech(): PlatformSpeech {
         silenceTimer = setTimeout(() => {
           // Native engines stop themselves on silence on some platforms.
           // Force-stop here to keep the timeout consistent across iOS/Android.
-          void SpeechRecognition.stop().catch(() => { /* swallow */ });
+          void SpeechRecognition.stop().catch(() => {
+            /* swallow */
+          });
         }, silenceTimeoutMs);
       };
 
@@ -328,7 +365,9 @@ function makeNativeSpeech(): PlatformSpeech {
         );
       } catch (err) {
         await teardown();
-        onError?.(new SpeechError("unknown", (err as Error)?.message ?? "Couldn't start recording."));
+        onError?.(
+          new SpeechError("unknown", (err as Error)?.message ?? "Couldn't start recording."),
+        );
         fireEnd();
         return;
       }

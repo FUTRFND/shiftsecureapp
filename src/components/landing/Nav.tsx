@@ -19,12 +19,18 @@ export function Nav() {
           <div className="relative grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
             <Activity className="h-4 w-4" strokeWidth={2.5} />
           </div>
-          ShiftSecure
+          Shift Secure
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-          <a href="#workflow" className="hover:text-foreground transition-colors">How it works</a>
-          <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+          <a href="#features" className="hover:text-foreground transition-colors">
+            Features
+          </a>
+          <a href="#workflow" className="hover:text-foreground transition-colors">
+            How it works
+          </a>
+          <a href="#pricing" className="hover:text-foreground transition-colors">
+            Pricing
+          </a>
         </nav>
         <div className="flex items-center gap-2">
           {user ? (

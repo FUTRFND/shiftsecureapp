@@ -6,10 +6,7 @@
  * swap the underlying store later without touching consumers.
  */
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import {
-  subscriptionService,
-  type SubscriptionState,
-} from "@/services/subscription";
+import { subscriptionService, type SubscriptionState } from "@/services/subscription";
 import type { Capability } from "@/config/subscription";
 
 const SubscriptionContext = createContext<SubscriptionState | undefined>(undefined);

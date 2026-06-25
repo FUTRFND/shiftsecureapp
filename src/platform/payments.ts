@@ -161,7 +161,9 @@ type RcPurchasesModule = {
       userCancelled?: boolean;
     }>;
     restorePurchases: () => Promise<{ customerInfo: unknown }>;
-    addCustomerInfoUpdateListener: (cb: (info: unknown) => void) => Promise<{ remove: () => Promise<void> }>;
+    addCustomerInfoUpdateListener: (
+      cb: (info: unknown) => void,
+    ) => Promise<{ remove: () => Promise<void> }>;
   };
   LOG_LEVEL?: Record<string, string>;
 };

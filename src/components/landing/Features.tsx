@@ -38,12 +38,15 @@ export function Features() {
     <section id="features" className="py-24 md:py-32 bg-gradient-subtle">
       <div className="container mx-auto px-6">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold text-primary uppercase tracking-wider">The platform</p>
+          <p className="text-sm font-semibold text-primary uppercase tracking-wider">
+            The platform
+          </p>
           <h2 className="mt-3 text-4xl md:text-5xl font-bold tracking-tight">
             Every detail of the handoff, accounted for.
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Five connected workflows that replace fragmented notes, sticky pads, and verbal-only handoffs.
+            Five connected workflows that replace fragmented notes, sticky pads, and verbal-only
+            handoffs.
           </p>
         </div>
 

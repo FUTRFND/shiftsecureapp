@@ -80,9 +80,7 @@ function main() {
       });
 
     console.error(
-      "\n❌ Coverage thresholds not met:\n\n  - " +
-        failedMetrics.join("\n  - ") +
-        "\n"
+      "\n❌ Coverage thresholds not met:\n\n  - " + failedMetrics.join("\n  - ") + "\n",
     );
     process.exit(1);
   }

@@ -1,18 +1,43 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Activity, ArrowLeft, Calendar, CircleDot, Loader2, Plus, Radio, Trash2, Wifi, WifiOff } from "lucide-react";
+import {
+  Activity,
+  ArrowLeft,
+  Calendar,
+  CircleDot,
+  Loader2,
+  Plus,
+  Radio,
+  Trash2,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TaskDialog } from "@/components/tasks/TaskDialog";
-import { COLUMNS, PRIORITY_META, STATUS_META, initials, type ProfileLite, type TaskRow, type TaskStatus } from "@/lib/tasks";
+import {
+  COLUMNS,
+  PRIORITY_META,
+  STATUS_META,
+  initials,
+  type ProfileLite,
+  type TaskRow,
+  type TaskStatus,
+} from "@/lib/tasks";
 
 export const Route = createFileRoute("/_authenticated/tasks")({
-  head: () => ({ meta: [{ title: "Tasks — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Tasks — Shift Secure" }] }),
   component: TasksPage,
 });
 
@@ -43,7 +68,9 @@ function TasksPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   // Realtime subscription
   useEffect(() => {
@@ -101,7 +128,12 @@ function TasksPage() {
   };
 
   const grouped = useMemo(() => {
-    const map: Record<TaskStatus, TaskRow[]> = { todo: [], in_progress: [], done: [], cancelled: [] };
+    const map: Record<TaskStatus, TaskRow[]> = {
+      todo: [],
+      in_progress: [],
+      done: [],
+      cancelled: [],
+    };
     for (const t of tasks) map[t.status].push(t);
     return map;
   }, [tasks]);
@@ -110,14 +142,17 @@ function TasksPage() {
     <div className="min-h-dvh bg-background">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
-          <Link to="/dashboard" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4" /> Dashboard
           </Link>
           <Link to="/" className="flex items-center gap-2 font-display font-bold">
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
               <Activity className="h-4 w-4" strokeWidth={2.5} />
             </div>
-            ShiftSecure
+            Shift Secure
           </Link>
         </div>
       </header>
@@ -126,7 +161,9 @@ function TasksPage() {
         <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
           <div>
             <p className="text-sm uppercase tracking-wider text-muted-foreground">Shift tasks</p>
-            <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">Real-time task ownership</h1>
+            <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">
+              Real-time task ownership
+            </h1>
             <p className="mt-1 text-muted-foreground max-w-xl">
               Assign every action item to a teammate. Updates sync live across the shift.
             </p>
@@ -134,9 +171,13 @@ function TasksPage() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {connected ? (
-                <><Wifi className="h-3.5 w-3.5 text-emerald-500" /> Live</>
+                <>
+                  <Wifi className="h-3.5 w-3.5 text-emerald-500" /> Live
+                </>
               ) : (
-                <><WifiOff className="h-3.5 w-3.5" /> Offline</>
+                <>
+                  <WifiOff className="h-3.5 w-3.5" /> Offline
+                </>
               )}
             </div>
             <Button variant="hero" onClick={openCreate}>
@@ -223,9 +264,7 @@ function TaskCard({
   const overdue = due && task.status !== "done" && due.getTime() < Date.now();
 
   return (
-    <article
-      className="group rounded-xl border border-border/60 bg-background p-3 shadow-card hover:shadow-elegant transition-shadow"
-    >
+    <article className="group rounded-xl border border-border/60 bg-background p-3 shadow-card hover:shadow-elegant transition-shadow">
       <div className="flex items-start justify-between gap-2">
         <button onClick={onEdit} className="text-left flex-1 min-w-0">
           <h3 className="font-medium leading-snug line-clamp-2">{task.title}</h3>
@@ -233,7 +272,9 @@ function TaskCard({
             <p className="text-xs text-muted-foreground mt-0.5 truncate">{task.patient_ref}</p>
           )}
         </button>
-        <Badge variant="outline" className={`shrink-0 ${priority.tone}`}>{priority.label}</Badge>
+        <Badge variant="outline" className={`shrink-0 ${priority.tone}`}>
+          {priority.label}
+        </Badge>
       </div>
 
       {task.description && (
@@ -243,13 +284,16 @@ function TaskCard({
       <div className="mt-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <Avatar className="h-7 w-7">
-            <AvatarFallback className={isMine ? "bg-primary text-primary-foreground text-xs" : "text-xs"}>
+            <AvatarFallback
+              className={isMine ? "bg-primary text-primary-foreground text-xs" : "text-xs"}
+            >
               {initials(assignee?.full_name ?? "", "?")}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             <p className="text-xs font-medium truncate">
-              {assignee?.full_name || "Unassigned"} {isMine && <span className="text-primary">· you</span>}
+              {assignee?.full_name || "Unassigned"}{" "}
+              {isMine && <span className="text-primary">· you</span>}
             </p>
             {creator && creator.id !== task.owner_id && (
               <p className="text-[10px] text-muted-foreground truncate">by {creator.full_name}</p>
@@ -257,9 +301,16 @@ function TaskCard({
           </div>
         </div>
         {due && (
-          <div className={`flex items-center gap-1 text-[11px] ${overdue ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+          <div
+            className={`flex items-center gap-1 text-[11px] ${overdue ? "text-destructive font-medium" : "text-muted-foreground"}`}
+          >
             <Calendar className="h-3 w-3" />
-            {due.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+            {due.toLocaleString(undefined, {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </div>
         )}
       </div>
@@ -277,7 +328,13 @@ function TaskCard({
           </SelectContent>
         </Select>
         {canDelete && (
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDelete} aria-label="Delete task">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={onDelete}
+            aria-label="Delete task"
+          >
             <Trash2 className="h-3.5 w-3.5 text-destructive" />
           </Button>
         )}
@@ -285,5 +342,3 @@ function TaskCard({
     </article>
   );
 }
-
-

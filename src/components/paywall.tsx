@@ -11,7 +11,14 @@
  */
 import { useEffect, useState } from "react";
 import { Loader2, Check, Sparkles } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -40,7 +47,7 @@ export function Paywall({
   onOpenChange,
   capability,
   featureTitle = "Unlock Pro",
-  featureDescription = "Get full access to every Handoff Hero feature.",
+  featureDescription = "Get full access to every Shift Secure feature.",
   benefits = [
     "AI-powered SBAR summaries",
     "Unlimited templates and history",
@@ -145,8 +152,8 @@ export function Paywall({
 
         {webOnly ? (
           <div className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
-            Subscriptions are managed in the Handoff Hero iOS and Android apps. Install the app
-            to subscribe, then sign in here to unlock Pro features.
+            Subscriptions are managed in the Shift Secure iOS and Android apps. Install the app to
+            subscribe, then sign in here to unlock Pro features.
           </div>
         ) : loadingOfferings ? (
           <div className="flex justify-center py-6">
@@ -165,7 +172,11 @@ export function Paywall({
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2 font-medium">
-                      {pkg.period === "annual" ? "Annual" : pkg.period === "monthly" ? "Monthly" : pkg.title}
+                      {pkg.period === "annual"
+                        ? "Annual"
+                        : pkg.period === "monthly"
+                          ? "Monthly"
+                          : pkg.title}
                       {pkg.period === "annual" && <Badge variant="secondary">Best value</Badge>}
                     </div>
                     <div className="text-xs text-muted-foreground">{pkg.description}</div>
@@ -187,7 +198,10 @@ export function Paywall({
         )}
 
         {error && (
-          <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive">
+          <div
+            role="alert"
+            className="rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive"
+          >
             {error}
           </div>
         )}

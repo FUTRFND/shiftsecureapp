@@ -16,14 +16,20 @@ import { join, resolve } from "node:path";
 
 const root = resolve(process.cwd());
 const SPA_DIR = join(root, "dist", "spa");
-const NITRO_PUBLIC = join(root, ".output", "public");
+// Nitro's preset emits client assets under `dist/client` for this template.
+// If the layout changes again, update this single path.
+const NITRO_PUBLIC = existsSync(join(root, ".output", "public"))
+  ? join(root, ".output", "public")
+  : join(root, "dist", "client");
 
 console.log("[build:mobile] running vite build");
 execSync("vite build", { stdio: "inherit", env: { ...process.env, MOBILE_BUILD: "1" } });
 
 if (!existsSync(NITRO_PUBLIC)) {
   console.error(`[build:mobile] expected client assets at ${NITRO_PUBLIC} but none were found.`);
-  console.error("[build:mobile] If the TanStack/Nitro output layout has changed, update scripts/build-mobile.mjs.");
+  console.error(
+    "[build:mobile] If the TanStack/Nitro output layout has changed, update scripts/build-mobile.mjs.",
+  );
   process.exit(1);
 }
 
@@ -40,7 +46,7 @@ if (!existsSync(indexHtml)) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <title>Handoff Hero</title>
+    <title>Shift Secure</title>
   </head>
   <body>
     <div id="app"></div>
@@ -48,7 +54,9 @@ if (!existsSync(indexHtml)) {
   </body>
 </html>`;
   writeFileSync(indexHtml, shell, "utf8");
-  console.warn("[build:mobile] SPA shell is a placeholder; client entry path is finalized in Phase 4.");
+  console.warn(
+    "[build:mobile] SPA shell is a placeholder; client entry path is finalized in Phase 4.",
+  );
 }
 
 const size = readFileSync(indexHtml).byteLength;

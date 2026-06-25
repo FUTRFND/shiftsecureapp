@@ -12,23 +12,44 @@ import { CheckEmailNotice } from "@/components/auth/CheckEmailNotice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { isNative } from "@/platform/runtime";
 import { buildAuthRedirectUrl, POST_AUTH_REDIRECT_PATH } from "@/config/auth";
 
 const schema = z.object({
-  fullName: z.string().trim().min(2, "Please enter your full name").max(100, "Name must be 100 characters or less"),
-  email: z.string().trim().email("Please enter a valid email address").max(255, "Email must be 255 characters or less"),
-  password: z.string().min(8, "Password must be at least 8 characters").max(72, "Password must be 72 characters or less"),
+  fullName: z
+    .string()
+    .trim()
+    .min(2, "Please enter your full name")
+    .max(100, "Name must be 100 characters or less"),
+  email: z
+    .string()
+    .trim()
+    .email("Please enter a valid email address")
+    .max(255, "Email must be 255 characters or less"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(72, "Password must be 72 characters or less"),
   role: z.enum(["resident", "attending", "nurse", "admin"], { message: "Please select a role" }),
-  department: z.string().trim().min(2, "Please enter your department").max(100, "Department must be 100 characters or less"),
+  department: z
+    .string()
+    .trim()
+    .min(2, "Please enter your department")
+    .max(100, "Department must be 100 characters or less"),
 });
 
 type Schema = z.infer<typeof schema>;
 
 export const Route = createFileRoute("/signup")({
-  head: () => ({ meta: [{ title: "Create account — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Create account — Shift Secure" }] }),
   component: SignupPage,
 });
 
@@ -83,10 +104,15 @@ function SignupPage() {
 
   const handleGoogle = async () => {
     if (isNative()) {
-      setError("root", { message: "Google sign-in isn't available in the mobile app yet — please create an account with email and password." });
+      setError("root", {
+        message:
+          "Google sign-in isn't available in the mobile app yet — please create an account with email and password.",
+      });
       return;
     }
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
     if (result.error) {
       setError("root", { message: result.error.message ?? "Google sign-in failed" });
     }
@@ -102,8 +128,6 @@ function SignupPage() {
     );
   }
 
-
-
   return (
     <AuthShell title="Create your account" subtitle="Start safer shift handoffs in minutes">
       {errors.root && (
@@ -114,7 +138,13 @@ function SignupPage() {
       )}
       {!isNative() && (
         <>
-          <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={isSubmitting}>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleGoogle}
+            disabled={isSubmitting}
+          >
             Continue with Google
           </Button>
           <div className="relative my-5 text-center text-xs uppercase tracking-wider text-muted-foreground">
@@ -132,7 +162,9 @@ function SignupPage() {
             aria-invalid={errors.fullName ? "true" : "false"}
             {...register("fullName")}
           />
-          {errors.fullName && <p className="text-sm font-medium text-destructive">{errors.fullName.message}</p>}
+          {errors.fullName && (
+            <p className="text-sm font-medium text-destructive">{errors.fullName.message}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Work email</Label>
@@ -143,7 +175,9 @@ function SignupPage() {
             aria-invalid={errors.email ? "true" : "false"}
             {...register("email")}
           />
-          {errors.email && <p className="text-sm font-medium text-destructive">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="text-sm font-medium text-destructive">{errors.email.message}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
@@ -154,12 +188,17 @@ function SignupPage() {
             aria-invalid={errors.password ? "true" : "false"}
             {...register("password")}
           />
-          {errors.password && <p className="text-sm font-medium text-destructive">{errors.password.message}</p>}
+          {errors.password && (
+            <p className="text-sm font-medium text-destructive">{errors.password.message}</p>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select value={roleValue} onValueChange={(v) => setValue("role", v as Schema["role"], { shouldValidate: true })}>
+            <Select
+              value={roleValue}
+              onValueChange={(v) => setValue("role", v as Schema["role"], { shouldValidate: true })}
+            >
               <SelectTrigger id="role" aria-invalid={errors.role ? "true" : "false"}>
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
@@ -170,7 +209,9 @@ function SignupPage() {
                 <SelectItem value="admin">Admin</SelectItem>
               </SelectContent>
             </Select>
-            {errors.role && <p className="text-sm font-medium text-destructive">{errors.role.message}</p>}
+            {errors.role && (
+              <p className="text-sm font-medium text-destructive">{errors.role.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="department">Department</Label>
@@ -180,7 +221,9 @@ function SignupPage() {
               aria-invalid={errors.department ? "true" : "false"}
               {...register("department")}
             />
-            {errors.department && <p className="text-sm font-medium text-destructive">{errors.department.message}</p>}
+            {errors.department && (
+              <p className="text-sm font-medium text-destructive">{errors.department.message}</p>
+            )}
           </div>
         </div>
         <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
@@ -190,7 +233,9 @@ function SignupPage() {
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link to="/login" className="text-primary font-medium hover:underline">Sign in</Link>
+        <Link to="/login" className="text-primary font-medium hover:underline">
+          Sign in
+        </Link>
       </p>
     </AuthShell>
   );

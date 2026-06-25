@@ -21,7 +21,12 @@
  * `platformStorage`. On cold start we hydrate from cache first, then refresh
  * in the background; paying users keep access during a temporary outage.
  */
-import { platformPayments, PaymentsError, type CustomerInfo, type SubscriptionPackage } from "@/platform/payments";
+import {
+  platformPayments,
+  PaymentsError,
+  type CustomerInfo,
+  type SubscriptionPackage,
+} from "@/platform/payments";
 import { platformStorage } from "@/platform/storage";
 import { telemetry } from "@/platform/telemetry";
 import { isNative } from "@/platform/runtime";
@@ -91,7 +96,8 @@ class SubscriptionServiceImpl {
       //    must not be locked out during an offline cold start.
       const cached = await this.readCache();
       if (cached) {
-        const stale = Date.now() - new Date(cached.refreshedAt).getTime() > ENTITLEMENT_CACHE_TTL_MS;
+        const stale =
+          Date.now() - new Date(cached.refreshedAt).getTime() > ENTITLEMENT_CACHE_TTL_MS;
         this.update({
           customerInfo: cached.customerInfo,
           capabilities: deriveCapabilities(cached.customerInfo),
@@ -119,7 +125,9 @@ class SubscriptionServiceImpl {
       }
 
       // 4. Background refresh — never block the UI on this.
-      void this.refresh().catch(() => {/* swallowed in refresh() */});
+      void this.refresh().catch(() => {
+        /* swallowed in refresh() */
+      });
 
       this.update({ ready: true });
     })();

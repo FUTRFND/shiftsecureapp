@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 /**
- * Capacitor configuration for Handoff Hero (iOS + Android).
+ * Capacitor configuration for Shift Secure (iOS + Android).
  *
  * - `webDir` points at the static SPA build emitted by `bun run build:mobile`.
  * - `appId` is the reverse-DNS bundle identifier used by both stores.
@@ -15,7 +15,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
  */
 const config: CapacitorConfig = {
   appId: "com.handoffhero.app",
-  appName: "Handoff Hero",
+  appName: "Shift Secure",
   webDir: "dist/spa",
   bundledWebRuntime: false,
   server: {

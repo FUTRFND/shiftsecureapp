@@ -6,13 +6,13 @@ web/JS layer is already wired by Phases 1–6 and is verified by
 
 ## Prerequisites (local dev machine)
 
-| Tool                | Version                  | Why                                                  |
-| ------------------- | ------------------------ | ---------------------------------------------------- |
-| Xcode               | 15.4+                    | iOS build, simulator, archive upload to TestFlight   |
-| CocoaPods           | latest (`brew install`)  | iOS native dep resolution                            |
-| Android Studio      | Hedgehog 2023.1.1+       | Android SDK 34, build, Play Console upload           |
-| JDK                 | 17                       | Required by AGP 8.x                                  |
-| Bun                 | matches `package.json`   | Project build                                        |
+| Tool           | Version                 | Why                                                |
+| -------------- | ----------------------- | -------------------------------------------------- |
+| Xcode          | 15.4+                   | iOS build, simulator, archive upload to TestFlight |
+| CocoaPods      | latest (`brew install`) | iOS native dep resolution                          |
+| Android Studio | Hedgehog 2023.1.1+      | Android SDK 34, build, Play Console upload         |
+| JDK            | 17                      | Required by AGP 8.x                                |
+| Bun            | matches `package.json`  | Project build                                      |
 
 ## One-time setup
 
@@ -30,7 +30,7 @@ Open `ios/App/App/Info.plist` and add:
 
 ```xml
 <key>NSMicrophoneUsageDescription</key>
-<string>Handoff Hero needs the microphone to record your dictated handoffs.</string>
+<string>Shift Secure needs the microphone to record your dictated handoffs.</string>
 <key>NSSpeechRecognitionUsageDescription</key>
 <string>Speech recognition turns your dictation into the transcript that becomes an SBAR handoff.</string>
 <key>UIBackgroundModes</key><array/>

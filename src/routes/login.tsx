@@ -23,7 +23,7 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign in — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Sign in — Shift Secure" }] }),
   component: LoginPage,
 });
 
@@ -47,7 +47,10 @@ function LoginPage() {
   }, [user, authLoading, navigate]);
 
   const onSubmit = async (data: Schema) => {
-    const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
     if (error) {
       const isUnconfirmed =
         error.message.toLowerCase().includes("not confirmed") ||
@@ -68,10 +71,15 @@ function LoginPage() {
       // WebView. Native Google Sign-In ships in a later phase via
       // @codetrix-studio/capacitor-google-auth or the RevenueCat-aligned
       // provider. Email/password remains fully available.
-      setError("root", { message: "Google sign-in isn't available in the mobile app yet — please use email and password." });
+      setError("root", {
+        message:
+          "Google sign-in isn't available in the mobile app yet — please use email and password.",
+      });
       return;
     }
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
     if (result.error) {
       setError("root", { message: result.error.message ?? "Google sign-in failed" });
     }
@@ -95,7 +103,7 @@ function LoginPage() {
   }
 
   return (
-    <AuthShell title="Welcome back" subtitle="Sign in to continue to ShiftSecure">
+    <AuthShell title="Welcome back" subtitle="Sign in to continue to Shift Secure">
       {errors.root && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
@@ -104,7 +112,13 @@ function LoginPage() {
       )}
       {!isNative() && (
         <>
-          <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={isSubmitting}>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleGoogle}
+            disabled={isSubmitting}
+          >
             Continue with Google
           </Button>
           <div className="relative my-5 text-center text-xs uppercase tracking-wider text-muted-foreground">
@@ -123,12 +137,16 @@ function LoginPage() {
             aria-invalid={errors.email ? "true" : "false"}
             {...register("email")}
           />
-          {errors.email && <p className="text-sm font-medium text-destructive">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="text-sm font-medium text-destructive">{errors.email.message}</p>
+          )}
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link to="/forgot-password" className="text-xs text-primary hover:underline">Forgot password?</Link>
+            <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+              Forgot password?
+            </Link>
           </div>
           <Input
             id="password"
@@ -136,7 +154,9 @@ function LoginPage() {
             aria-invalid={errors.password ? "true" : "false"}
             {...register("password")}
           />
-          {errors.password && <p className="text-sm font-medium text-destructive">{errors.password.message}</p>}
+          {errors.password && (
+            <p className="text-sm font-medium text-destructive">{errors.password.message}</p>
+          )}
         </div>
         <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
@@ -144,14 +164,24 @@ function LoginPage() {
         </Button>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        New to ShiftSecure?{" "}
-        <Link to="/signup" className="text-primary font-medium hover:underline">Create an account</Link>
+        New to Shift Secure?{" "}
+        <Link to="/signup" className="text-primary font-medium hover:underline">
+          Create an account
+        </Link>
       </p>
     </AuthShell>
   );
 }
 
-export function AuthShell({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
+export function AuthShell({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+}) {
   return (
     <div className="min-h-dvh bg-gradient-hero flex flex-col">
       <header className="container mx-auto px-6 py-6">
@@ -159,7 +189,7 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
           <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
             <Activity className="h-4 w-4" strokeWidth={2.5} />
           </div>
-          ShiftSecure
+          Shift Secure
         </Link>
       </header>
       <main className="flex-1 grid place-items-center px-6 pb-12">

@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/alerts")({
-  head: () => ({ meta: [{ title: "Critical Alerts — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Critical Alerts — Shift Secure" }] }),
   component: AlertsPage,
 });
 
@@ -88,8 +88,14 @@ const SEVERITY_META: Record<
 
 const STATUS_META: Record<Status, { label: string; tone: string }> = {
   active: { label: "Active", tone: "bg-destructive/15 text-destructive border-destructive/30" },
-  acknowledged: { label: "Acknowledged", tone: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
-  resolved: { label: "Resolved", tone: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  acknowledged: {
+    label: "Acknowledged",
+    tone: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
+  },
+  resolved: {
+    label: "Resolved",
+    tone: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+  },
 };
 
 function AlertsPage() {
@@ -171,7 +177,11 @@ function AlertsPage() {
     if (!user) return;
     const { error } = await supabase
       .from("patient_alerts")
-      .update({ status: "acknowledged", acknowledged_by: user.id, acknowledged_at: new Date().toISOString() })
+      .update({
+        status: "acknowledged",
+        acknowledged_by: user.id,
+        acknowledged_at: new Date().toISOString(),
+      })
       .eq("id", row.id);
     if (error) toast.error(error.message);
     else toast.success("Alert acknowledged");
@@ -208,7 +218,9 @@ function AlertsPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className={`flex items-center gap-1.5 text-xs ${connected ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+            <span
+              className={`flex items-center gap-1.5 text-xs ${connected ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}
+            >
               {connected ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
               {connected ? "Live" : "Offline"}
             </span>
@@ -224,7 +236,8 @@ function AlertsPage() {
           <div className="mb-6 flex items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-destructive">
             <ShieldAlert className="h-5 w-5 shrink-0" />
             <p className="text-sm font-medium">
-              {activeCriticalCount} active critical {activeCriticalCount === 1 ? "alert" : "alerts"} requiring attention.
+              {activeCriticalCount} active critical {activeCriticalCount === 1 ? "alert" : "alerts"}{" "}
+              requiring attention.
             </p>
           </div>
         )}
@@ -251,7 +264,9 @@ function AlertsPage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
         ) : visible.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-16 text-center">
@@ -273,7 +288,9 @@ function AlertsPage() {
                   style={isCritical ? { animation: "pulse 2s ease-in-out infinite" } : undefined}
                 >
                   <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-start">
-                    <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${meta.tone}`}>
+                    <div
+                      className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${meta.tone}`}
+                    >
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -284,14 +301,17 @@ function AlertsPage() {
                         </Badge>
                         <span className="font-mono text-sm font-semibold">{a.patient_ref}</span>
                         <span className="text-xs text-muted-foreground">
-                          · {new Date(a.created_at).toLocaleString()} · by {profilesById.get(a.created_by) ?? "—"}
+                          · {new Date(a.created_at).toLocaleString()} · by{" "}
+                          {profilesById.get(a.created_by) ?? "—"}
                         </span>
                       </div>
                       <p className="mt-2 whitespace-pre-wrap text-sm">{a.summary}</p>
                       {a.acknowledged_by && (
                         <p className="mt-2 text-xs text-muted-foreground">
                           Acknowledged by {profilesById.get(a.acknowledged_by) ?? "—"}
-                          {a.acknowledged_at ? ` · ${new Date(a.acknowledged_at).toLocaleString()}` : ""}
+                          {a.acknowledged_at
+                            ? ` · ${new Date(a.acknowledged_at).toLocaleString()}`
+                            : ""}
                         </p>
                       )}
                     </div>
@@ -307,7 +327,12 @@ function AlertsPage() {
                         </Button>
                       )}
                       {a.created_by === user?.id && (
-                        <Button size="icon" variant="ghost" onClick={() => remove(a)} aria-label="Delete">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => remove(a)}
+                          aria-label="Delete"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
@@ -399,7 +424,9 @@ function NewAlertDialog({
           <div className="grid gap-2">
             <Label htmlFor="severity">Severity</Label>
             <Select value={severity} onValueChange={(v) => setSeverity(v as Severity)}>
-              <SelectTrigger id="severity"><SelectValue /></SelectTrigger>
+              <SelectTrigger id="severity">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="critical">Critical</SelectItem>
                 <SelectItem value="warning">Warning</SelectItem>

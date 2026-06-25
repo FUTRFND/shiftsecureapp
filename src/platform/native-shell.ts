@@ -52,9 +52,7 @@ function syncThemeColor(): void {
   if (typeof document === "undefined") return;
   // Pull the resolved --background token so the browser status bar / Android
   // edge matches the active theme (light or dark).
-  const bg = getComputedStyle(document.documentElement)
-    .getPropertyValue("--background")
-    .trim();
+  const bg = getComputedStyle(document.documentElement).getPropertyValue("--background").trim();
   if (!bg) return;
   let tag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
   if (!tag) {
@@ -94,12 +92,7 @@ export async function initNativeShell({ router }: NativeShellOptions): Promise<v
   }
 
   try {
-    const [
-      { SplashScreen },
-      { StatusBar, Style },
-      { App },
-      { Keyboard },
-    ] = await Promise.all([
+    const [{ SplashScreen }, { StatusBar, Style }, { App }, { Keyboard }] = await Promise.all([
       import("@capacitor/splash-screen"),
       import("@capacitor/status-bar"),
       import("@capacitor/app"),
@@ -120,20 +113,15 @@ export async function initNativeShell({ router }: NativeShellOptions): Promise<v
     };
     await applyStatusBar();
     if (typeof window !== "undefined" && window.matchMedia) {
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", () => {
-          void applyStatusBar();
-          syncThemeColor();
-        });
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+        void applyStatusBar();
+        syncThemeColor();
+      });
     }
 
     // ---- Keyboard: tag <html> so CSS can lift fixed footers ------------
     Keyboard.addListener("keyboardWillShow", (info) => {
-      document.documentElement.style.setProperty(
-        "--keyboard-height",
-        `${info.keyboardHeight}px`,
-      );
+      document.documentElement.style.setProperty("--keyboard-height", `${info.keyboardHeight}px`);
       document.documentElement.classList.add("keyboard-open");
     });
     Keyboard.addListener("keyboardWillHide", () => {

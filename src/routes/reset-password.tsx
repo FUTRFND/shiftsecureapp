@@ -13,7 +13,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const schema = z
   .object({
-    password: z.string().min(8, "Password must be at least 8 characters").max(72, "Password must be 72 characters or less"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(72, "Password must be 72 characters or less"),
     confirm: z.string().min(1, "Please confirm your password"),
   })
   .refine((data) => data.password === data.confirm, {
@@ -24,7 +27,7 @@ const schema = z
 type Schema = z.infer<typeof schema>;
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Set new password — ShiftSecure" }] }),
+  head: () => ({ meta: [{ title: "Set new password — Shift Secure" }] }),
   component: ResetPasswordPage,
 });
 
@@ -52,7 +55,10 @@ function ResetPasswordPage() {
   };
 
   return (
-    <AuthShell title="Set a new password" subtitle="Choose a strong password you don't use elsewhere">
+    <AuthShell
+      title="Set a new password"
+      subtitle="Choose a strong password you don't use elsewhere"
+    >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {errors.root && (
           <Alert variant="destructive">
@@ -69,7 +75,9 @@ function ResetPasswordPage() {
             aria-invalid={errors.password ? "true" : "false"}
             {...register("password")}
           />
-          {errors.password && <p className="text-sm font-medium text-destructive">{errors.password.message}</p>}
+          {errors.password && (
+            <p className="text-sm font-medium text-destructive">{errors.password.message}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirm password</Label>
@@ -80,7 +88,9 @@ function ResetPasswordPage() {
             aria-invalid={errors.confirm ? "true" : "false"}
             {...register("confirm")}
           />
-          {errors.confirm && <p className="text-sm font-medium text-destructive">{errors.confirm.message}</p>}
+          {errors.confirm && (
+            <p className="text-sm font-medium text-destructive">{errors.confirm.message}</p>
+          )}
         </div>
         <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}

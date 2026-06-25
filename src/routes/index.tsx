@@ -10,14 +10,17 @@ import { Footer } from "@/components/landing/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ShiftSecure — Safer emergency medicine handoffs" },
+      { title: "Shift Secure — Safer emergency medicine handoffs" },
       {
         name: "description",
         content:
           "Structured handoff templates, real-time task ownership, and critical alerts for emergency medicine teams. Eliminate information loss at shift change.",
       },
-      { property: "og:title", content: "ShiftSecure — Safer ED handoffs" },
-      { property: "og:description", content: "Structured handoffs and real-time tasks for emergency medicine teams." },
+      { property: "og:title", content: "Shift Secure — Safer ED handoffs" },
+      {
+        property: "og:description",
+        content: "Structured handoffs and real-time tasks for emergency medicine teams.",
+      },
     ],
   }),
   component: Index,

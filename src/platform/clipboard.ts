@@ -9,7 +9,10 @@
 import { isNative } from "./runtime";
 
 export class ClipboardError extends Error {
-  constructor(public readonly code: "unsupported" | "denied" | "unknown", message: string) {
+  constructor(
+    public readonly code: "unsupported" | "denied" | "unknown",
+    message: string,
+  ) {
     super(message);
     this.name = "ClipboardError";
   }
@@ -76,7 +79,10 @@ const nativeClipboard: PlatformClipboard = {
       const { Clipboard } = await import("@capacitor/clipboard");
       await Clipboard.write({ string: text });
     } catch (err) {
-      throw new ClipboardError("unknown", (err as Error)?.message ?? "Couldn't copy to the clipboard.");
+      throw new ClipboardError(
+        "unknown",
+        (err as Error)?.message ?? "Couldn't copy to the clipboard.",
+      );
     }
   },
   async read() {
@@ -85,7 +91,10 @@ const nativeClipboard: PlatformClipboard = {
       const { value } = await Clipboard.read();
       return value ?? "";
     } catch (err) {
-      throw new ClipboardError("unknown", (err as Error)?.message ?? "Couldn't read from the clipboard.");
+      throw new ClipboardError(
+        "unknown",
+        (err as Error)?.message ?? "Couldn't read from the clipboard.",
+      );
     }
   },
 };
