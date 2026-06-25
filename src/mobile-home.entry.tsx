@@ -6,6 +6,7 @@ import { createClient, type Session } from "@supabase/supabase-js";
 import { AlertsScreen } from "./mobile/alerts";
 import { TemplatesScreen } from "./mobile/templates";
 import { TasksScreen } from "./mobile/tasks";
+import { VoiceScreen } from "./mobile/voice";
 import "./styles.css";
 
 declare global {
@@ -97,6 +98,12 @@ function MobileHome({
     );
   }
 
+  if (activeScreen === "Voice") {
+    return (
+      <VoiceScreen sb={sb} userId={userId} onBack={() => setActiveScreen(null)} />
+    );
+  }
+
   return (
     <main style={pageStyle}>
       <h1 style={{ margin: "0 0 8px", fontSize: 28, fontWeight: 700 }}>
@@ -114,8 +121,7 @@ function MobileHome({
 
       <div style={{ display: "grid", gap: 12 }}>
         {screens.map((screen) => {
-          const ready =
-            screen === "Alerts" || screen === "Templates" || screen === "Tasks";
+          const ready = true;
           return (
             <button
               key={screen}
