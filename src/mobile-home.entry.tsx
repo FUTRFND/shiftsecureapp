@@ -78,108 +78,122 @@ function MobileHome({
   userId: string;
   onSignOut: () => void;
 }) {
-  const [activeScreen, setActiveScreen] = useState<Screen | null>(null);
+  const [activeTab, setActiveTab] = useState<Screen>("Alerts");
+  const goAlerts = () => setActiveTab("Alerts");
 
-  if (activeScreen === "Alerts") {
-    return (
-      <AlertsScreen sb={sb} userId={userId} onBack={() => setActiveScreen(null)} />
-    );
-  }
+  const tabBarHeight = 64;
+  const contentWrapStyle: React.CSSProperties = {
+    paddingBottom: `calc(${tabBarHeight}px + env(safe-area-inset-bottom, 0px))`,
+    minHeight: "100vh",
+    background: palette.bg,
+  };
 
-  if (activeScreen === "Templates") {
-    return (
-      <TemplatesScreen sb={sb} userId={userId} onBack={() => setActiveScreen(null)} />
-    );
-  }
-
-  if (activeScreen === "Tasks") {
-    return (
-      <TasksScreen sb={sb} userId={userId} onBack={() => setActiveScreen(null)} />
-    );
-  }
-
-  if (activeScreen === "Voice") {
-    return (
-      <VoiceScreen sb={sb} userId={userId} onBack={() => setActiveScreen(null)} />
-    );
+  let screen: React.ReactNode = null;
+  if (activeTab === "Alerts") {
+    screen = <AlertsScreen sb={sb} userId={userId} onBack={goAlerts} />;
+  } else if (activeTab === "Templates") {
+    screen = <TemplatesScreen sb={sb} userId={userId} onBack={goAlerts} />;
+  } else if (activeTab === "Tasks") {
+    screen = <TasksScreen sb={sb} userId={userId} onBack={goAlerts} />;
+  } else if (activeTab === "Voice") {
+    screen = <VoiceScreen sb={sb} userId={userId} onBack={goAlerts} />;
   }
 
   return (
-    <main style={pageStyle}>
-      <h1 style={{ margin: "0 0 8px", fontSize: 28, fontWeight: 700 }}>
-        Shift Secure
-      </h1>
-      <p style={{ margin: "0 0 24px", fontSize: 14, color: palette.muted }}>
-        Signed in as {email}
-      </p>
-      <p
-        data-mobile-build={buildStamp}
-        style={{ margin: "0 0 20px", fontSize: 11, color: "#888" }}
-      >
-        {buildStamp}
-      </p>
-
-      <div style={{ display: "grid", gap: 12 }}>
-        {screens.map((screen) => {
-          const ready = true;
-          return (
-            <button
-              key={screen}
-              type="button"
-              onClick={() => ready && setActiveScreen(screen)}
-              style={{
-                width: "100%",
-                minHeight: 56,
-                border: `1px solid ${palette.border}`,
-                borderRadius: 0,
-                background: palette.surface,
-                color: palette.ink,
-                font: "inherit",
-                fontSize: 18,
-                fontWeight: 600,
-                textAlign: "left",
-                padding: "0 18px",
-                opacity: ready ? 1 : 0.45,
-              }}
-            >
-              {screen}
-              {!ready && (
-                <span
-                  style={{
-                    float: "right",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: palette.muted,
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  SOON
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+    <div data-mobile-build={buildStamp} style={{ position: "relative" }}>
+      <div style={contentWrapStyle}>{screen}</div>
 
       <button
         type="button"
         onClick={onSignOut}
+        aria-label={`Sign out ${email}`}
+        title={`Sign out ${email}`}
         style={{
-          marginTop: 40,
-          width: "100%",
-          minHeight: 48,
+          position: "fixed",
+          top: "calc(env(safe-area-inset-top, 0px) + 12px)",
+          right: 12,
+          minHeight: 32,
+          padding: "0 10px",
           border: `1px solid ${palette.border}`,
-          background: palette.surface,
+          background: "rgba(255,255,255,0.9)",
           color: palette.ink,
-          fontSize: 16,
+          fontSize: 12,
           fontWeight: 600,
+          cursor: "pointer",
+          touchAction: "manipulation",
+          WebkitTapHighlightColor: "transparent",
+          zIndex: 20,
         }}
       >
         Sign out
       </button>
-    </main>
+
+      <nav
+        role="tablist"
+        aria-label="Primary"
+        style={{
+          position: "fixed",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: "grid",
+          gridTemplateColumns: `repeat(${screens.length}, 1fr)`,
+          background: palette.surface,
+          borderTop: `1px solid ${palette.border}`,
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          zIndex: 30,
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        }}
+      >
+        {screens.map((tab) => {
+          const active = activeTab === tab;
+          return (
+            <button
+              key={tab}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                height: tabBarHeight,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 4,
+                background: "transparent",
+                border: "none",
+                borderTop: active
+                  ? `2px solid ${palette.ink}`
+                  : "2px solid transparent",
+                color: active ? palette.ink : palette.muted,
+                fontSize: 12,
+                fontWeight: active ? 700 : 500,
+                cursor: "pointer",
+                touchAction: "manipulation",
+                WebkitTapHighlightColor: "transparent",
+                padding: 0,
+              }}
+            >
+              <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>
+                {TAB_GLYPH[tab]}
+              </span>
+              <span>{tab}</span>
+            </button>
+          );
+        })}
+      </nav>
+    </div>
   );
 }
+
+const TAB_GLYPH: Record<Screen, string> = {
+  Alerts: "!",
+  Templates: "▤",
+  Tasks: "✓",
+  Voice: "🎙",
+};
+
 
 function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
   const [email, setEmail] = useState("");
