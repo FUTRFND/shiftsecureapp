@@ -1,7 +1,21 @@
 // Native Alerts screen — local state, plain HTML, Supabase realtime.
-// No shadcn, no sonner, no lucide, no router. Same palette as mobile-home.entry.
+// No shadcn, no sonner, no lucide, no router.
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  EmptyState,
+  LoadingBlock,
+  Spinner,
+  buttonBase,
+  inputStyle,
+  pageStyle,
+  palette,
+  primaryButton,
+  space,
+  useConfirm,
+  useKeyboardScrollIntoView,
+  usePullToRefresh,
+} from "./ui";
 
 type Severity = "info" | "warning" | "critical";
 type Status = "active" | "acknowledged" | "resolved";
@@ -22,18 +36,6 @@ export type AlertRow = {
 
 type ProfileLite = { id: string; full_name: string };
 
-const palette = {
-  bg: "#f7f7f2",
-  ink: "#121212",
-  muted: "#454545",
-  border: "#121212",
-  surface: "#ffffff",
-  critical: "#b00020",
-  warning: "#b15c00",
-  info: "#1b4d8f",
-  ok: "#0a7a3b",
-};
-
 const SEVERITY_COLOR: Record<Severity, string> = {
   critical: palette.critical,
   warning: palette.warning,
@@ -52,46 +54,6 @@ const STATUS_LABEL: Record<Status, string> = {
   resolved: "Resolved",
 };
 
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  boxSizing: "border-box",
-  padding: "20px 16px 80px",
-  background: palette.bg,
-  color: palette.ink,
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-};
-
-const buttonBase: React.CSSProperties = {
-  minHeight: 44,
-  border: `1px solid ${palette.border}`,
-  background: palette.surface,
-  color: palette.ink,
-  fontSize: 15,
-  fontWeight: 600,
-  padding: "0 14px",
-  borderRadius: 0,
-  font: "inherit",
-};
-
-const primaryButton: React.CSSProperties = {
-  ...buttonBase,
-  background: palette.ink,
-  color: palette.surface,
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  minHeight: 44,
-  padding: "10px 12px",
-  fontSize: 16,
-  border: `1px solid ${palette.border}`,
-  borderRadius: 0,
-  background: palette.surface,
-  color: palette.ink,
-  marginBottom: 10,
-  font: "inherit",
-};
 
 export function AlertsScreen({
   sb,
