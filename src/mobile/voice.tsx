@@ -743,13 +743,20 @@ export function VoiceScreen({
             <button
               type="button"
               onClick={saveDraft}
+              disabled={savingDraft}
+              className="mobile-tap"
               style={{
                 ...buttonBase,
                 background: palette.ok,
+                borderColor: palette.ok,
                 color: palette.surface,
-                opacity: savingDraft ? 0.6 : 1,
+                opacity: savingDraft ? 0.7 : 1,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
               }}
             >
+              {savingDraft && <Spinner size={14} color={palette.surface} />}
               {savingDraft ? "Saving…" : draftId ? "Update draft" : "Save draft"}
             </button>
             {saveErr && (
@@ -758,6 +765,7 @@ export function VoiceScreen({
           </div>
         </div>
       )}
+      {confirmDialog}
     </main>
   );
 }
