@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { createClient, type Session } from "@supabase/supabase-js";
+import { AlertsScreen } from "./mobile/alerts";
 import "./styles.css";
 
 declare global {
@@ -67,12 +68,20 @@ const pageStyle: React.CSSProperties = {
 
 function MobileHome({
   email,
+  userId,
   onSignOut,
 }: {
   email: string;
+  userId: string;
   onSignOut: () => void;
 }) {
-  const [activeScreen, setActiveScreen] = useState<Screen>("Alerts");
+  const [activeScreen, setActiveScreen] = useState<Screen | null>(null);
+
+  if (activeScreen === "Alerts") {
+    return (
+      <AlertsScreen sb={sb} userId={userId} onBack={() => setActiveScreen(null)} />
+    );
+  }
 
   return (
     <main style={pageStyle}>
@@ -90,39 +99,46 @@ function MobileHome({
       </p>
 
       <div style={{ display: "grid", gap: 12 }}>
-        {screens.map((screen) => (
-          <button
-            key={screen}
-            type="button"
-            onClick={() => setActiveScreen(screen)}
-            style={{
-              width: "100%",
-              minHeight: 56,
-              border: `1px solid ${palette.border}`,
-              borderRadius: 0,
-              background:
-                activeScreen === screen ? palette.ink : palette.surface,
-              color: activeScreen === screen ? palette.surface : palette.ink,
-              font: "inherit",
-              fontSize: 18,
-              fontWeight: 600,
-              textAlign: "left",
-              padding: "0 18px",
-            }}
-          >
-            {screen}
-          </button>
-        ))}
+        {screens.map((screen) => {
+          const ready = screen === "Alerts";
+          return (
+            <button
+              key={screen}
+              type="button"
+              onClick={() => ready && setActiveScreen(screen)}
+              style={{
+                width: "100%",
+                minHeight: 56,
+                border: `1px solid ${palette.border}`,
+                borderRadius: 0,
+                background: palette.surface,
+                color: palette.ink,
+                font: "inherit",
+                fontSize: 18,
+                fontWeight: 600,
+                textAlign: "left",
+                padding: "0 18px",
+                opacity: ready ? 1 : 0.45,
+              }}
+            >
+              {screen}
+              {!ready && (
+                <span
+                  style={{
+                    float: "right",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: palette.muted,
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  SOON
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
-
-      <section style={{ marginTop: 28 }}>
-        <h2 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 600 }}>
-          {activeScreen}
-        </h2>
-        <p style={{ margin: 0, fontSize: 16, color: palette.muted }}>
-          {activeScreen} content coming soon.
-        </p>
-      </section>
 
       <button
         type="button"
@@ -281,6 +297,7 @@ function App() {
   return (
     <MobileHome
       email={session.user.email ?? "unknown"}
+      userId={session.user.id}
       onSignOut={() => {
         sb.auth.signOut().then(() => setSession(null));
       }}
