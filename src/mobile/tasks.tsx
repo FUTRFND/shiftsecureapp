@@ -80,10 +80,6 @@ export function TasksScreen({
   >(null);
   useKeyboardScrollIntoView();
   const { confirm, dialog: confirmDialog } = useConfirm();
-  const { refreshing, indicator } = usePullToRefresh(load, {
-    enabled: !editing,
-  });
-
 
   const profilesById = useMemo(() => {
     const m = new Map<string, ProfileLite>();
@@ -112,9 +108,14 @@ export function TasksScreen({
     setLoading(false);
   }, [sb]);
 
+  const { refreshing, indicator } = usePullToRefresh(load, {
+    enabled: !editing,
+  });
+
   useEffect(() => {
     load();
   }, [load]);
+
 
   useEffect(() => {
     const channel = sb
