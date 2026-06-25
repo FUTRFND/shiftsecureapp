@@ -548,7 +548,7 @@ export function VoiceScreen({
                   </button>
                   <button
                     type="button"
-                    onClick={() => deleteDraft(d.id)}
+                    onClick={() => deleteDraft(d.id, d.title)}
                     style={{ ...buttonBase, minHeight: 36, padding: "0 10px", color: palette.critical }}
                   >
                     Delete
