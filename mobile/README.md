@@ -67,14 +67,29 @@ the native build.
 
 ## Configuration reference
 
-- **App identifier:** `com.badexy.shiftsecure` (set in `capacitor.config.ts`)
+- **App display name:** `Shift Secure`
+- **App identifier (bundle id / applicationId):** `com.badexy.shiftsecure`
+  (set in `capacitor.config.ts`; this is the value already reserved in App
+  Store Connect and the Google Play Console)
 - **Web dir:** `dist/spa` (output of `bun run build:mobile`)
-- **Custom URL scheme:** `handoffhero://` — wired in Phase 3 for Supabase auth
-  callbacks. Will be registered in `ios/App/App/Info.plist` (`CFBundleURLTypes`)
-  and `android/app/src/main/AndroidManifest.xml` (`<intent-filter>`).
-- **Universal/App Links host:** `handoffhero.app` (placeholder — replace with
-  your owned domain in Phase 3 before configuring Apple App Site Association
-  and Android `assetlinks.json`).
+
+### Technical identifiers intentionally not rebranded
+
+The following identifiers still carry the legacy `handoffhero` token. They
+are NOT user-facing — they're contract strings the rest of the system is
+already wired against. Renaming them would silently break auth callbacks or
+RevenueCat product lookups, so they're documented here instead.
+
+| Identifier                         | Where it lives                                              | Why it stays                                                                                       |
+| ---------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `handoffhero://` URL scheme        | `VITE_APP_URL_SCHEME`, Info.plist `CFBundleURLSchemes`, Android `<data android:scheme=...>` | Already registered in Supabase Auth → Additional Redirect URLs; changing it invalidates every magic link / password reset email already sent. |
+| `handoffhero.app` Universal Link host | `VITE_APP_UNIVERSAL_LINK_HOST`, iOS Associated Domains, Android `<data android:host=...>` | Apple AASA + Google `assetlinks.json` are tied to this domain. Move to a Shift Secure domain only as a coordinated change (new AASA file, new Supabase redirect entries, new entitlement). |
+| `handoffhero_pro_monthly` / `handoffhero_pro_annual` product IDs | `src/config/subscription.ts`, App Store Connect, Play Console, RevenueCat dashboard | Product IDs are immutable in App Store Connect / Play Console once created. If the products have not been created yet, you may rename them in all four places at the same time before first publish. |
+
+All three are overridable via env vars (`VITE_APP_URL_SCHEME`,
+`VITE_APP_UNIVERSAL_LINK_HOST`) or `src/config/subscription.ts`, so a future
+coordinated migration is straightforward — it just isn't a code-only change.
+
 
 ---
 
