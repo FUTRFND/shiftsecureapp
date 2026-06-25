@@ -763,8 +763,11 @@ export function VoiceScreen({
               {savingDraft ? "Saving…" : draftId ? "Update draft" : "Save draft"}
             </button>
             {saveErr && (
-              <p style={{ fontSize: 13, color: palette.critical, margin: "10px 0 0" }}>{saveErr}</p>
+              <div style={{ marginTop: 10, width: "100%" }}>
+                <Banner tone="error">{saveErr}</Banner>
+              </div>
             )}
+
           </div>
         </div>
       )}
