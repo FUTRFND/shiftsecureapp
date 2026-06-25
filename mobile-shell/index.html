@@ -11,6 +11,62 @@
       name="shift-secure-mobile-build"
       content="MOBILE_HOME_AUTH_LOCAL_STATE"
     />
+    <script>
+      // Earliest possible error capture — runs before any module loads so we
+      // catch syntax errors in the entry chunk, env-var crashes, and any
+      // exception thrown during React's initial render.
+      (function () {
+        var box;
+        function ensureBox() {
+          if (box) return box;
+          box = document.createElement("pre");
+          box.id = "__bootstrap_error__";
+          box.style.cssText =
+            "position:fixed;inset:0;z-index:2147483647;margin:0;padding:16px;" +
+            "background:#1b0000;color:#ffb4b4;font:12px/1.4 -apple-system,Menlo,monospace;" +
+            "white-space:pre-wrap;overflow:auto;";
+          if (document.body) document.body.appendChild(box);
+          else
+            document.addEventListener("DOMContentLoaded", function () {
+              document.body.appendChild(box);
+            });
+          return box;
+        }
+        function log(label, payload) {
+          try {
+            console.error("[bootstrap]", label, payload);
+          } catch (_) {}
+          var line = "[" + label + "] " + payload + "\n\n";
+          ensureBox().textContent += line;
+        }
+        window.addEventListener("error", function (e) {
+          log(
+            "window.onerror",
+            (e && e.message ? e.message : "unknown") +
+              "\n  at " +
+              (e.filename || "?") +
+              ":" +
+              (e.lineno || 0) +
+              ":" +
+              (e.colno || 0) +
+              (e.error && e.error.stack ? "\n" + e.error.stack : "")
+          );
+        });
+        window.addEventListener("unhandledrejection", function (e) {
+          var r = e && e.reason;
+          var msg =
+            r && r.stack
+              ? r.stack
+              : r && r.message
+                ? r.message
+                : typeof r === "string"
+                  ? r
+                  : JSON.stringify(r);
+          log("unhandledrejection", msg);
+        });
+        window.__bootstrapError = log;
+      })();
+    </script>
   </head>
   <body style="margin: 0">
     <div id="root"></div>

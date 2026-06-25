@@ -5,14 +5,38 @@ import ReactDOM from "react-dom/client";
 import { createClient, type Session } from "@supabase/supabase-js";
 import "./styles.css";
 
+declare global {
+  interface Window {
+    __bootstrapError?: (label: string, payload: string) => void;
+  }
+}
+
+const reportBoot = (label: string, payload: unknown) => {
+  const msg =
+    payload instanceof Error
+      ? (payload.stack ?? payload.message)
+      : typeof payload === "string"
+        ? payload
+        : JSON.stringify(payload);
+  console.error("[bootstrap]", label, msg);
+  window.__bootstrapError?.(label, msg);
+};
+
 const buildStamp = "MOBILE_HOME_AUTH_LOCAL_STATE";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env
-  .VITE_SUPABASE_PUBLISHABLE_KEY as string;
+  .VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  reportBoot(
+    "env",
+    `Missing Supabase env. VITE_SUPABASE_URL=${String(SUPABASE_URL)} VITE_SUPABASE_PUBLISHABLE_KEY=${SUPABASE_PUBLISHABLE_KEY ? "set" : "missing"}`,
+  );
+}
 
 // Minimal client: localStorage only. No Capacitor Preferences bridge yet.
-const sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+const sb = createClient(SUPABASE_URL ?? "", SUPABASE_PUBLISHABLE_KEY ?? "", {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
@@ -222,11 +246,17 @@ function App() {
 
   useEffect(() => {
     let mounted = true;
-    sb.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      setSession(data.session);
-      setReady(true);
-    });
+    sb.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!mounted) return;
+        setSession(data.session);
+        setReady(true);
+      })
+      .catch((err) => {
+        reportBoot("getSession", err);
+        if (mounted) setReady(true);
+      });
     const { data: sub } = sb.auth.onAuthStateChange((_event, next) => {
       setSession(next);
     });
@@ -258,7 +288,44 @@ function App() {
   );
 }
 
-const rootElement = document.getElementById("root");
-if (rootElement) {
-  ReactDOM.createRoot(rootElement).render(<App />);
+class BootErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    reportBoot("React render", `${error.stack ?? error.message}\n${info.componentStack ?? ""}`);
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <main style={pageStyle}>
+          <h1 style={{ fontSize: 20, margin: "0 0 12px" }}>Render error</h1>
+          <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, color: "#b00020" }}>
+            {this.state.error.stack ?? this.state.error.message}
+          </pre>
+        </main>
+      );
+    }
+    return this.props.children;
+  }
 }
+
+try {
+  const rootElement = document.getElementById("root");
+  if (!rootElement) {
+    reportBoot("mount", "#root element not found in DOM");
+  } else {
+    ReactDOM.createRoot(rootElement).render(
+      <BootErrorBoundary>
+        <App />
+      </BootErrorBoundary>,
+    );
+  }
+} catch (err) {
+  reportBoot("mount", err as Error);
+}
+
