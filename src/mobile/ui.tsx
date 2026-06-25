@@ -12,28 +12,46 @@ import React, {
 
 // ---- Design tokens -------------------------------------------------------
 
+// Shift Secure brand: calm green primary, off-white green background.
+// Tuned for an Apple-style grouped feel (Reminders / Notes / Health).
 export const palette = {
-  bg: "#f2f2f7",          // iOS system grouped background
-  ink: "#1c1c1e",
-  muted: "#5b5b60",
-  subtle: "#8e8e93",
-  border: "#1c1c1e",
-  hairline: "#d8d8de",
+  bg: "#f4f8f5",           // very light green / off-white
+  bgAlt: "#eef3ef",
+  ink: "#1c2024",          // never harsh black
+  muted: "#5b6168",
+  subtle: "#8a9099",
+  border: "#1c2024",
+  hairline: "#e3e8e4",     // very light gray-green
   surface: "#ffffff",
-  surfaceAlt: "#ebebf0",
-  accent: "#0a84ff",       // iOS system blue
-  critical: "#d70015",
-  warning: "#b15c00",
-  info: "#1b4d8f",
-  ok: "#0a7a3b",
-  overlay: "rgba(20,20,22,0.45)",
+  surfaceAlt: "#f1f5f2",
+  accent: "#16a34a",       // brand green
+  accentSoft: "#dcf2e3",
+  accentDeep: "#0f7a37",
+  accentGlow: "#22c55e",
+  critical: "#d7263d",
+  criticalSoft: "#fde7ea",
+  warning: "#b46a00",
+  warningSoft: "#fdeecf",
+  info: "#1d5bbf",
+  infoSoft: "#e2ecff",
+  ok: "#0f7a37",
+  overlay: "rgba(20,24,28,0.45)",
+};
+
+// Brand gradient used on primary CTAs and key surfaces.
+export const gradient = {
+  primary: `linear-gradient(135deg, ${palette.accent} 0%, ${palette.accentGlow} 100%)`,
+  primaryDeep: `linear-gradient(135deg, ${palette.accentDeep} 0%, ${palette.accent} 100%)`,
+  page: `linear-gradient(180deg, ${palette.bg} 0%, ${palette.bgAlt} 100%)`,
 };
 
 export const radii = {
   sm: 8,
-  md: 10,
-  lg: 14,
-  xl: 18,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  pill: 999,
 };
 
 export const space = {
@@ -46,8 +64,24 @@ export const space = {
 };
 
 export const shadow = {
-  card: "0 1px 2px rgba(20,20,22,0.05), 0 1px 1px rgba(20,20,22,0.04)",
-  raised: "0 8px 24px rgba(20,20,22,0.12)",
+  hairline: "0 0 0 1px rgba(20,24,28,0.04)",
+  card: "0 1px 2px rgba(20,24,28,0.04), 0 4px 14px rgba(20,24,28,0.05)",
+  raised: "0 10px 30px rgba(20,24,28,0.12)",
+  primary: "0 6px 18px rgba(22,163,74,0.32)",
+};
+
+// Apple typography scale (in px). Match HIG: Large Title 34, Title1 28, etc.
+export const type = {
+  largeTitle: 34,
+  title1: 28,
+  title2: 22,
+  title3: 20,
+  headline: 17,
+  body: 16,
+  callout: 15,
+  subhead: 14,
+  footnote: 13,
+  caption: 12,
 };
 
 const SYS_FONT =
