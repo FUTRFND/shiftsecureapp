@@ -310,7 +310,7 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
       <ScreenHeader title="Account" subtitle="Profile, plan, and billing" />
 
       {/* Profile */}
-      <SectionHeader>Profile</SectionHeader>
+      <SectionHeader title="Profile" />
       <Card>
         {profileLoading ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -396,7 +396,7 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
       </Card>
 
       {/* Current plan */}
-      <SectionHeader>Current plan</SectionHeader>
+      <SectionHeader title="Current plan" />
       <Card>
         <div
           style={{
@@ -464,7 +464,7 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
       {/* Plan comparison */}
       {!isPro && (
         <>
-          <SectionHeader>Upgrade</SectionHeader>
+          <SectionHeader title="Upgrade" />
           <PlanCard
             name="Resident"
             price="Free"
@@ -497,7 +497,7 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
       )}
 
       {/* Billing actions */}
-      <SectionHeader>Billing</SectionHeader>
+      <SectionHeader title="Billing" />
       <Card>
         {actionErr && <Banner tone="error">{actionErr}</Banner>}
         {actionOk && <Banner tone="success">{actionOk}</Banner>}
