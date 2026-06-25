@@ -41,6 +41,9 @@ import { platformHaptics } from "@/platform/haptics";
 import { platformPermissions } from "@/platform/permissions";
 import { useNetworkStatus } from "@/hooks/use-network-status";
 import { OfflineBanner } from "@/components/offline-banner";
+import { useCapability } from "@/hooks/use-subscription";
+import { Paywall } from "@/components/paywall";
+import { Lock } from "lucide-react";
 
 function VoiceErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -194,6 +197,8 @@ function VoicePage() {
   const finalRef = useRef("");
   const recordingRef = useRef(false);
   const generationIdRef = useRef(0);
+  const canUseAI = useCapability("ai.summarize");
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   // Probe support once on mount through the platform layer (web Speech API or
   // native plugin) — no Web Speech API access in the component itself.
