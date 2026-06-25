@@ -153,7 +153,7 @@ function LoginPage() {
 
 export function AuthShell({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-hero flex flex-col">
+    <div className="min-h-dvh bg-gradient-hero flex flex-col">
       <header className="container mx-auto px-6 py-6">
         <Link to="/" className="inline-flex items-center gap-2 font-display font-bold text-lg">
           <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">

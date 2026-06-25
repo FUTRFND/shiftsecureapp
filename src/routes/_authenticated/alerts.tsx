@@ -193,7 +193,7 @@ function AlertsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-3">
