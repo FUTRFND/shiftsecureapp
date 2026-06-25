@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AUTH_CALLBACK_PATH, buildAuthRedirectUrl, RESET_PASSWORD_ROUTE } from "@/config/auth";
 
 const schema = z.object({
   email: z.string().trim().email("Please enter a valid email address"),
@@ -39,8 +40,11 @@ function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
 
   const onSubmit = async (data: Schema) => {
+    // Web sends users to /reset-password directly; native funnels through the
+    // custom-scheme callback so the deep-link handler routes them to the
+    // reset-password screen after exchanging the recovery tokens.
     const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: buildAuthRedirectUrl(RESET_PASSWORD_ROUTE, AUTH_CALLBACK_PATH),
     });
 
     if (error) {

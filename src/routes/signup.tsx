@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { isNative } from "@/platform/runtime";
+import { buildAuthRedirectUrl, POST_AUTH_REDIRECT_PATH } from "@/config/auth";
 
 const schema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name").max(100, "Name must be 100 characters or less"),
@@ -56,7 +58,7 @@ function SignupPage() {
       email: data.email,
       password: data.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: buildAuthRedirectUrl(POST_AUTH_REDIRECT_PATH),
         data: {
           full_name: data.fullName,
           role: data.role,
@@ -80,6 +82,10 @@ function SignupPage() {
   };
 
   const handleGoogle = async () => {
+    if (isNative()) {
+      setError("root", { message: "Google sign-in isn't available in the mobile app yet — please create an account with email and password." });
+      return;
+    }
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (result.error) {
       setError("root", { message: result.error.message ?? "Google sign-in failed" });
@@ -106,13 +112,17 @@ function SignupPage() {
           <AlertDescription>{errors.root.message}</AlertDescription>
         </Alert>
       )}
-      <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={isSubmitting}>
-        Continue with Google
-      </Button>
-      <div className="relative my-5 text-center text-xs uppercase tracking-wider text-muted-foreground">
-        <span className="bg-background px-3 relative z-10">or</span>
-        <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
-      </div>
+      {!isNative() && (
+        <>
+          <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={isSubmitting}>
+            Continue with Google
+          </Button>
+          <div className="relative my-5 text-center text-xs uppercase tracking-wider text-muted-foreground">
+            <span className="bg-background px-3 relative z-10">or</span>
+            <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
+          </div>
+        </>
+      )}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="space-y-2">
           <Label htmlFor="fullName">Full name</Label>
