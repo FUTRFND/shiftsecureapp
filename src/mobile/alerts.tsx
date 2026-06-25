@@ -363,8 +363,9 @@ function AlertCard({
     <article
       style={{
         background: palette.surface,
-        border: `1px solid ${palette.border}`,
-        borderLeft: `6px solid ${tone}`,
+        border: `1px solid ${palette.hairline}`,
+        borderLeft: `4px solid ${tone}`,
+        borderRadius: 12,
         padding: 14,
       }}
     >
@@ -489,7 +490,8 @@ function NewAlertComposer({
     <section
       style={{
         background: palette.surface,
-        border: `1px solid ${palette.border}`,
+        border: `1px solid ${palette.hairline}`,
+        borderRadius: 12,
         padding: 14,
         marginBottom: 14,
       }}
@@ -541,12 +543,18 @@ function NewAlertComposer({
         type="button"
         onClick={save}
         disabled={saving}
+        className="mobile-tap"
         style={{
           ...primaryButton,
           width: "100%",
           opacity: saving ? 0.6 : 1,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
         }}
       >
+        {saving && <Spinner size={14} color={palette.surface} />}
         {saving ? "Broadcasting…" : "Broadcast alert"}
       </button>
     </section>
