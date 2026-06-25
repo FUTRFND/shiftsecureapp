@@ -180,35 +180,9 @@ function MobileHome({
         <ScreenFade k={activeTab}>{screen}</ScreenFade>
       </div>
 
-      <button
-        type="button"
-        onClick={onSignOut}
-        aria-label={`Sign out ${email}`}
-        title={`Sign out ${email}`}
-        className="mobile-tap"
-        style={{
-          position: "fixed",
-          top: "calc(env(safe-area-inset-top, 0px) + 10px)",
-          right: 12,
-          height: 32,
-          padding: "0 12px",
-          border: `1px solid ${palette.hairline}`,
-          background: "rgba(255,255,255,0.82)",
-          backdropFilter: "saturate(180%) blur(14px)",
-          WebkitBackdropFilter: "saturate(180%) blur(14px)",
-          color: palette.ink,
-          fontSize: 12,
-          fontWeight: 600,
-          borderRadius: 999,
-          cursor: "pointer",
-          touchAction: "manipulation",
-          WebkitTapHighlightColor: "transparent",
-          zIndex: 20,
-          boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
-        }}
-      >
-        Sign out
-      </button>
+      {/* Sign out moved to Account tab */}
+
+
 
       {/* Floating translucent tab bar */}
       <nav
