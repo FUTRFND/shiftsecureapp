@@ -908,6 +908,14 @@ function VoicePage() {
           </Card>
         )}
       </main>
+      <Paywall
+        open={paywallOpen}
+        onOpenChange={setPaywallOpen}
+        capability="ai.summarize"
+        featureTitle="AI summaries are a Pro feature"
+        featureDescription="Subscribe to generate structured SBAR handoffs from your dictation."
+        onUnlocked={() => void generate()}
+      />
     </div>
   );
 }
