@@ -1,101 +1,57 @@
 import { useState } from "react";
-import { Bell, FileText, ListChecks, Mic } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Section = "alerts" | "templates" | "tasks" | "voice";
-
-const SECTIONS: Array<{
-  id: Section;
-  title: string;
-  description: string;
-  icon: typeof Bell;
-  placeholder: string;
-}> = [
-  {
-    id: "alerts",
-    title: "Alerts",
-    description: "Critical handoff notifications",
-    icon: Bell,
-    placeholder: "Alerts will appear here once the mobile alerts view is wired up.",
-  },
-  {
-    id: "templates",
-    title: "Templates",
-    description: "Reusable handoff structures",
-    icon: FileText,
-    placeholder: "Your shift templates will live here.",
-  },
-  {
-    id: "tasks",
-    title: "Tasks",
-    description: "Open and pending follow-ups",
-    icon: ListChecks,
-    placeholder: "Tasks assigned to you will appear here.",
-  },
-  {
-    id: "voice",
-    title: "Voice",
-    description: "Dictate a new handoff",
-    icon: Mic,
-    placeholder: "The native voice capture screen will load here.",
-  },
-];
 
 export function MobileHome() {
   const [active, setActive] = useState<Section | null>(null);
 
-  const activeSection = SECTIONS.find((s) => s.id === active) ?? null;
+  const message =
+    active === "alerts"
+      ? "Alerts screen coming soon"
+      : active === "templates"
+        ? "Templates screen coming soon"
+        : active === "tasks"
+          ? "Tasks screen coming soon"
+          : active === "voice"
+            ? "Voice screen coming soon"
+            : "";
 
   return (
-    <div className="min-h-dvh bg-background flex flex-col">
-      <header className="px-5 pt-4 pb-3 border-b border-border">
-        <h1 className="text-xl font-semibold tracking-tight">Shift Secure</h1>
-        <p className="text-xs text-muted-foreground">Mobile preview</p>
-      </header>
+    <div style={{ padding: 20, fontFamily: "system-ui, sans-serif" }}>
+      <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>Shift Secure</h1>
 
-      <main className="flex-1 px-5 py-5 space-y-4 safe-bottom">
-        {activeSection ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <activeSection.icon className="h-5 w-5" />
-                {activeSection.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">{activeSection.placeholder}</p>
-              <Button variant="outline" onClick={() => setActive(null)}>
-                Back
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 gap-3">
-            {SECTIONS.map((s) => {
-              const Icon = s.icon;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setActive(s.id)}
-                  className="text-left rounded-xl border border-border bg-card p-4 active:scale-[0.99] transition-transform"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 grid place-items-center">
-                      <Icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium">{s.title}</div>
-                      <div className="text-xs text-muted-foreground">{s.description}</div>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </main>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <button
+          type="button"
+          onClick={() => setActive("alerts")}
+          style={{ padding: 16, fontSize: 16, textAlign: "left" }}
+        >
+          Alerts
+        </button>
+        <button
+          type="button"
+          onClick={() => setActive("templates")}
+          style={{ padding: 16, fontSize: 16, textAlign: "left" }}
+        >
+          Templates
+        </button>
+        <button
+          type="button"
+          onClick={() => setActive("tasks")}
+          style={{ padding: 16, fontSize: 16, textAlign: "left" }}
+        >
+          Tasks
+        </button>
+        <button
+          type="button"
+          onClick={() => setActive("voice")}
+          style={{ padding: 16, fontSize: 16, textAlign: "left" }}
+        >
+          Voice
+        </button>
+      </div>
+
+      {message ? <p style={{ marginTop: 20, fontSize: 14 }}>{message}</p> : null}
     </div>
   );
 }
