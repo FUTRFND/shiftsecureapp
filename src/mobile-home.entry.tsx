@@ -118,6 +118,13 @@ function TabIcon({ name, active }: { name: Screen; active: boolean }) {
           <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
         </svg>
       );
+    case "Account":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8.5" r="3.5" fill={active ? palette.accentSoft : "none"} />
+          <path d="M4.5 20c1.6-3.5 4.4-5 7.5-5s5.9 1.5 7.5 5" />
+        </svg>
+      );
   }
   // exhaustive
   const _: never = name;
