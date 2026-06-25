@@ -362,4 +362,4 @@ const nativePayments: PlatformPayments = {
   },
 };
 
-export const platformPayments: PlatformPayments = isNative() ? nativePayments : webPayments;
+export const platformPayments: PlatformPayments = webPayments;
