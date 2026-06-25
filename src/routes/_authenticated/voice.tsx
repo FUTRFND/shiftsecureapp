@@ -506,7 +506,7 @@ function VoicePage() {
         assessment: typeof data.assessment === "string" ? data.assessment : "",
         recommendation: typeof data.recommendation === "string" ? data.recommendation : "",
         actions: Array.isArray(data.actions)
-          ? (data.actions as any[]).filter((a): a is string => typeof a === "string")
+          ? (data.actions as unknown[]).filter((a): a is string => typeof a === "string")
           : [],
       });
       setHasSummary(true);
