@@ -617,7 +617,7 @@ function TaskEditor({
           marginBottom: 12,
         }}
       >
-        <button type="button" onClick={onCancel} style={buttonBase}>
+        <button type="button" onClick={onCancel} style={buttonBase} className="mobile-tap">
           ← Cancel
         </button>
         <button
@@ -626,8 +626,16 @@ function TaskEditor({
             console.log("[tasks] save tapped", { canSave, saving });
             handleSubmit();
           }}
-          style={{ ...primaryButton, opacity: saving ? 0.6 : 1 }}
+          className="mobile-tap"
+          style={{
+            ...primaryButton,
+            opacity: saving ? 0.7 : 1,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+          }}
         >
+          {saving && <Spinner size={14} color={palette.surface} />}
           {saving ? "Saving…" : "Save"}
         </button>
       </div>
