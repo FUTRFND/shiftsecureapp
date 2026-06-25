@@ -660,13 +660,7 @@ export function VoiceScreen({
         </>
       )}
 
-      <SectionHeader
-        title={
-          <span style={{ display: "inline-flex", alignItems: "center" }}>
-            <StepBadge n={1} /> Capture
-          </span>
-        as unknown as string}
-      />
+      <SectionHeader title="1 · Capture" />
       <Card>
         {!speechSupported && (
           <Banner tone="info">
