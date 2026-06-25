@@ -101,7 +101,9 @@ function MobileHome({
 
   return (
     <div data-mobile-build={buildStamp} style={{ position: "relative" }}>
-      <div style={contentWrapStyle}>{screen}</div>
+      <div style={contentWrapStyle}>
+        <ScreenFade k={activeTab}>{screen}</ScreenFade>
+      </div>
 
       <button
         type="button"
