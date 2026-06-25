@@ -230,15 +230,16 @@ export function TasksScreen({
 
   return (
     <main style={pageStyle}>
+      {indicator}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 12,
+          marginBottom: space.md,
         }}
       >
-        <button type="button" onClick={onBack} style={buttonBase}>
+        <button type="button" onClick={onBack} style={buttonBase} className="mobile-tap">
           ← Back
         </button>
         <span
@@ -255,7 +256,7 @@ export function TasksScreen({
       <h1 style={{ margin: "0 0 4px", fontSize: 26, fontWeight: 700 }}>
         Shift Tasks
       </h1>
-      <p style={{ margin: "0 0 16px", fontSize: 13, color: palette.muted }}>
+      <p style={{ margin: `0 0 ${space.lg}px`, fontSize: 13, color: palette.muted }}>
         Assign action items. Updates sync live across the shift.
       </p>
 
@@ -267,7 +268,8 @@ export function TasksScreen({
             color: palette.critical,
             padding: "8px 10px",
             fontSize: 13,
-            marginBottom: 12,
+            borderRadius: 10,
+            marginBottom: space.md,
           }}
         >
           {error}
@@ -279,7 +281,7 @@ export function TasksScreen({
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: 6,
-          marginBottom: 14,
+          marginBottom: space.md,
         }}
       >
         {(["todo", "in_progress", "done", "all"] as const).map((f) => (
@@ -287,6 +289,7 @@ export function TasksScreen({
             key={f}
             type="button"
             onClick={() => setFilter(f)}
+            className="mobile-tap"
             style={{
               ...buttonBase,
               minHeight: 36,
@@ -307,25 +310,24 @@ export function TasksScreen({
           console.log("[tasks] new tapped");
           setEditing({ mode: "create" });
         }}
-        style={{ ...primaryButton, width: "100%", marginBottom: 14 }}
+        className="mobile-tap"
+        style={{ ...primaryButton, width: "100%", marginBottom: space.md }}
       >
         + New task
       </button>
 
-      {loading ? (
-        <p style={{ fontSize: 14, color: palette.muted }}>Loading tasks…</p>
+      {loading && !refreshing ? (
+        <LoadingBlock label="Loading tasks…" />
       ) : visible.length === 0 ? (
-        <div
-          style={{
-            border: `1px dashed ${palette.border}`,
-            padding: 24,
-            textAlign: "center",
-            color: palette.muted,
-            fontSize: 14,
-          }}
-        >
-          No {filter === "all" ? "" : STATUS_LABEL[filter].toLowerCase()} tasks.
-        </div>
+        <EmptyState
+          icon="✓"
+          title={
+            filter === "all"
+              ? "No tasks yet"
+              : `No ${STATUS_LABEL[filter].toLowerCase()} tasks`
+          }
+          body="Tap + New task to assign action items to your team."
+        />
       ) : (
         <div style={{ display: "grid", gap: 10 }}>
           {visible.map((t) => (
@@ -343,9 +345,11 @@ export function TasksScreen({
           ))}
         </div>
       )}
+      {confirmDialog}
     </main>
   );
 }
+
 
 function TaskCard({
   row,
