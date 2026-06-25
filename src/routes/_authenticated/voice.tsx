@@ -174,8 +174,8 @@ function formatSbar(s: Sbar): string {
 }
 
 function VoicePage() {
-  const SRClass = getSpeechRecognition();
-  const supported = !!SRClass;
+  const network = useNetworkStatus();
+  const [supported, setSupported] = useState(true);
 
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -191,47 +191,84 @@ function VoicePage() {
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [draftsOpen, setDraftsOpen] = useState(false);
-  const recRef = useRef<SR | null>(null);
   const finalRef = useRef("");
+  const recordingRef = useRef(false);
+  const generationIdRef = useRef(0);
 
-  const stop = useCallback(() => {
-    recRef.current?.stop();
+  // Probe support once on mount through the platform layer (web Speech API or
+  // native plugin) — no Web Speech API access in the component itself.
+  useEffect(() => {
+    let cancelled = false;
+    void platformSpeech.isSupported().then((s) => {
+      if (!cancelled) setSupported(s);
+    });
+    return () => {
+      cancelled = true;
+      // Hard guarantee: never leave a session running across navigation.
+      void platformSpeech.cancel();
+    };
   }, []);
 
-  const start = useCallback(() => {
-    if (!SRClass) {
-      toast.error("Voice capture isn't supported in this browser. Try Chrome or Edge.");
+  const stop = useCallback(() => {
+    if (!recordingRef.current) return;
+    void platformSpeech.stop();
+  }, []);
+
+  const start = useCallback(async () => {
+    if (recordingRef.current) return; // de-dupe rapid clicks
+
+    if (!supported) {
+      toast.error("Voice capture isn't available on this device. You can paste a transcript below.");
       return;
     }
-    const rec = new SRClass();
-    rec.continuous = true;
-    rec.interimResults = true;
-    rec.lang = navigator.language || "en-US";
-    finalRef.current = transcript ? transcript + " " : "";
-    rec.onresult = (e: any) => {
-      let interimText = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const r = e.results[i];
-        if (r.isFinal) finalRef.current += r[0].transcript + " ";
-        else interimText += r[0].transcript;
-      }
-      setTranscript(finalRef.current.trim());
-      setInterim(interimText);
-    };
-    rec.onerror = (e: any) => {
-      if (e.error === "no-speech" || e.error === "aborted") return;
-      toast.error(`Mic error: ${e.error}`);
-    };
-    rec.onend = () => {
-      setRecording(false);
-      setInterim("");
-    };
-    recRef.current = rec;
-    rec.start();
-    setRecording(true);
-  }, [SRClass, transcript]);
 
-  useEffect(() => () => recRef.current?.abort(), []);
+    // Centralized permission flow — same shape on web and native.
+    const granted = await platformPermissions.ensure("microphone");
+    if (!granted) {
+      toast.error("Microphone access is required. Enable it in your device settings.");
+      return;
+    }
+
+    finalRef.current = transcript ? transcript + " " : "";
+    recordingRef.current = true;
+    setRecording(true);
+    setInterim("");
+    void platformHaptics.impact("light");
+
+    let lastInterim = "";
+    await platformSpeech.start({
+      lang: typeof navigator !== "undefined" ? navigator.language || "en-US" : "en-US",
+      silenceTimeoutMs: 4000,
+      partialResults: true,
+      onResult: ({ transcript: text, isFinal }) => {
+        if (isFinal) {
+          finalRef.current += text + " ";
+          setTranscript(finalRef.current.trim());
+          setInterim("");
+          lastInterim = "";
+        } else {
+          setInterim(text);
+          lastInterim = text;
+        }
+      },
+      onError: (err: SpeechError) => {
+        if (err.code === "aborted" || err.code === "no_speech") return;
+        toast.error(err.message);
+      },
+      onEnd: () => {
+        // Commit any trailing partial that never got finalized (common on
+        // native, where the session ends without a final-callback).
+        if (lastInterim) {
+          finalRef.current += lastInterim + " ";
+          setTranscript(finalRef.current.trim());
+        }
+        recordingRef.current = false;
+        setRecording(false);
+        setInterim("");
+        void platformHaptics.impact("light");
+      },
+    });
+  }, [supported, transcript]);
 
   async function generate() {
     if (transcript.trim().length < 10) {
