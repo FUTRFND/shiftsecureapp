@@ -8,11 +8,17 @@
     "prebuild": "rm -rf coverage && npm run typecheck && npm run lint && npm run test",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:mobile": "node scripts/build-mobile.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.prebuild.json",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run --coverage",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "cap:sync": "npx cap sync",
+    "cap:ios": "npx cap open ios",
+    "cap:android": "npx cap open android",
+    "mobile:ios": "bun run build:mobile && npx cap sync ios && npx cap open ios",
+    "mobile:android": "bun run build:mobile && npx cap sync android && npx cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
