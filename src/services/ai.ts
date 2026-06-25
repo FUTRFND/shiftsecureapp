@@ -87,8 +87,12 @@ async function invokeAI<T>(
 
       // FunctionsHttpError surfaces non-2xx; parse body for our envelope.
       if (error) {
-        // @ts-expect-error - context.response exists on FunctionsHttpError
-        const response: Response | undefined = error.context?.response ?? error.context;
+        const ctx = (error as unknown as { context?: unknown }).context;
+        const response = (
+          ctx && typeof ctx === "object" && "response" in (ctx as Record<string, unknown>)
+            ? (ctx as { response?: Response }).response
+            : (ctx as Response | undefined)
+        );
         let envelope: ServerEnvelope<T> | undefined;
         if (response && typeof response.json === "function") {
           try {

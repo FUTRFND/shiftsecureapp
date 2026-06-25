@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft,
   Copy,
@@ -35,7 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
-import { summarizeHandoff } from "@/lib/summarize.functions";
+import { aiService, AIError } from "@/services/ai";
 
 function VoiceErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -189,7 +188,6 @@ function formatSbar(s: Sbar): string {
 }
 
 function VoicePage() {
-  const summarize = useServerFn(summarizeHandoff);
   const SRClass = getSpeechRecognition();
   const supported = !!SRClass;
 
@@ -256,11 +254,20 @@ function VoicePage() {
     }
     setGenerating(true);
     try {
-      const { summary } = await summarize({ data: { transcript, context: context || undefined } });
+      const { summary } = await aiService.summarizeHandoff({
+        transcript,
+        context: context || undefined,
+      });
       setSbar(parseSummary(summary));
       setHasSummary(true);
-    } catch (err: any) {
-      toast.error(err?.message ?? "Couldn't generate summary");
+    } catch (err) {
+      const msg =
+        err instanceof AIError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : "Couldn't generate summary";
+      toast.error(msg);
     } finally {
       setGenerating(false);
     }
