@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { createRoot } from "react-dom/client";
+import React, { useState } from "react";
+import ReactDOM from "react-dom/client";
+import "./styles.css";
 
 const screens = ["Alerts", "Templates", "Tasks", "Voice"] as const;
-const buildStamp = "SHIFT_SECURE_DIAGNOSTIC_2026_06_25_REACT_ONLY";
+const buildStamp = "MOBILE_DIAGNOSTIC_NO_CAPACITOR_IMPORTS";
 
 type Screen = (typeof screens)[number];
 
@@ -100,5 +101,5 @@ function MobileDiagnostic() {
 const rootElement = document.getElementById("root");
 
 if (rootElement) {
-  createRoot(rootElement).render(<MobileDiagnostic />);
+  ReactDOM.createRoot(rootElement).render(<MobileDiagnostic />);
 }

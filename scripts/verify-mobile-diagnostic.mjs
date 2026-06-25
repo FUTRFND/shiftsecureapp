@@ -1,34 +1,50 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const root = resolve(process.cwd());
-const required = "SHIFT_SECURE_DIAGNOSTIC_2026_06_25_REACT_ONLY";
-const forbidden = ["/_build/assets/client.js", '<div id="app"></div>', "MobileHome", "AuthProvider"];
-const paths = [
-  join(root, "dist", "spa", "index.html"),
-  join(root, "ios", "App", "App", "public", "index.html"),
+const required = "MOBILE_DIAGNOSTIC_NO_CAPACITOR_IMPORTS";
+const forbidden = [
+  "@capacitor",
+  "Preferences",
+  "Keyboard",
+  "StatusBar",
+  "SplashScreen",
+  "App.addListener",
+  "supabase",
+  "getRouter",
+  "RouterProvider",
 ];
+const roots = [join(root, "dist", "spa"), join(root, "ios", "App", "App", "public")];
 
 let failed = false;
 
-for (const filePath of paths) {
-  if (!existsSync(filePath)) {
-    console.error(`[verify-mobile-diagnostic] missing ${filePath}`);
+function listFiles(dir) {
+  const entries = readdirSync(dir);
+  return entries.flatMap((entry) => {
+    const path = join(dir, entry);
+    return statSync(path).isDirectory() ? listFiles(path) : [path];
+  });
+}
+
+for (const assetRoot of roots) {
+  if (!existsSync(assetRoot)) {
+    console.error(`[verify-mobile-diagnostic] missing ${assetRoot}`);
     failed = true;
     continue;
   }
 
-  const html = readFileSync(filePath, "utf8");
+  const files = listFiles(assetRoot);
+  const text = files.map((filePath) => readFileSync(filePath, "utf8")).join("\n");
 
-  if (!html.includes(required)) {
-    console.error(`[verify-mobile-diagnostic] ${filePath} is not the diagnostic bundle`);
+  if (!text.includes(required)) {
+    console.error(`[verify-mobile-diagnostic] ${assetRoot} is not the diagnostic bundle`);
     failed = true;
   }
 
   for (const marker of forbidden) {
-    if (html.includes(marker)) {
-      console.error(`[verify-mobile-diagnostic] ${filePath} contains stale marker: ${marker}`);
+    if (text.includes(marker)) {
+      console.error(`[verify-mobile-diagnostic] ${assetRoot} contains forbidden marker: ${marker}`);
       failed = true;
     }
   }
@@ -38,4 +54,4 @@ if (failed) {
   process.exit(1);
 }
 
-console.log("[verify-mobile-diagnostic] dist/spa and ios/App/App/public contain the diagnostic shell.");
+console.log("[verify-mobile-diagnostic] dist/spa and ios/App/App/public contain only the standalone diagnostic shell.");
