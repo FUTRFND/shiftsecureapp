@@ -7,6 +7,7 @@ import { AlertsScreen } from "./mobile/alerts";
 import { TemplatesScreen } from "./mobile/templates";
 import { TasksScreen } from "./mobile/tasks";
 import { VoiceScreen } from "./mobile/voice";
+import { ScreenFade } from "./mobile/ui";
 import "./styles.css";
 
 declare global {
