@@ -245,109 +245,151 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
   return (
     <main
       style={{
-        ...pageStyle,
+        minHeight: "100vh",
+        boxSizing: "border-box",
+        padding: `calc(env(safe-area-inset-top, 0px) + 48px) 20px 48px`,
+        background: `radial-gradient(120% 60% at 50% 0%, ${palette.accentSoft} 0%, ${palette.bg} 55%, ${palette.bgAlt} 100%)`,
+        color: palette.ink,
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif',
         display: "flex",
         flexDirection: "column",
+        alignItems: "center",
         justifyContent: "center",
-        padding: `calc(env(safe-area-inset-top, 0px) + 64px) 20px 64px`,
       }}
     >
+      {/* Brand mark */}
       <div
         aria-hidden="true"
         style={{
-          width: 56,
-          height: 56,
-          borderRadius: radii.lg,
-          background: palette.ink,
-          color: palette.surface,
+          width: 72,
+          height: 72,
+          borderRadius: 22,
+          background: gradient.primary,
+          color: "#fff",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontWeight: 800,
-          fontSize: 24,
+          fontSize: 28,
           marginBottom: space.lg,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+          boxShadow: shadow.primary,
+          letterSpacing: -1,
         }}
       >
         SS
       </div>
+
       <h1
         style={{
           margin: "0 0 6px",
-          fontSize: 30,
+          fontSize: 32,
           fontWeight: 700,
-          letterSpacing: -0.6,
+          letterSpacing: -0.8,
+          textAlign: "center",
         }}
       >
-        Shift Secure
+        Welcome back
       </h1>
       <p
         style={{
           margin: `0 0 ${space.xl}px`,
           fontSize: 15,
           color: palette.muted,
+          textAlign: "center",
         }}
       >
-        Sign in to continue
+        Sign in to Shift Secure to continue
       </p>
 
-      <form onSubmit={handleSubmit} noValidate>
-        <label style={labelStyle} htmlFor="login-email">
-          Email
-        </label>
-        <input
-          id="login-email"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          autoCapitalize="none"
-          autoCorrect="off"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={inputStyle}
-        />
-        <label style={labelStyle} htmlFor="login-password">
-          Password
-        </label>
-        <input
-          id="login-password"
-          type="password"
-          autoComplete="current-password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={inputStyle}
-        />
-        {error && <Banner tone="error">{error}</Banner>}
-        <button
-          type="submit"
-          disabled={busy || !email || !password}
-          className="mobile-tap"
-          style={{
-            ...primaryButton,
-            width: "100%",
-            minHeight: 50,
-            fontSize: 16,
-            marginTop: space.sm,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-          }}
-        >
-          {busy ? (
-            <>
-              <Spinner size={16} color={palette.surface} />
-              <span>Signing in…</span>
-            </>
-          ) : (
-            "Sign in"
-          )}
-        </button>
-      </form>
+      {/* Centered card */}
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 380,
+          background: palette.surface,
+          border: `1px solid ${palette.hairline}`,
+          borderRadius: 24,
+          padding: 22,
+          boxShadow: "0 10px 30px rgba(20,24,28,0.08)",
+        }}
+      >
+        <form onSubmit={handleSubmit} noValidate>
+          <label style={labelStyle} htmlFor="login-email">
+            Email
+          </label>
+          <input
+            id="login-email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={inputStyle}
+          />
+          <label style={labelStyle} htmlFor="login-password">
+            Password
+          </label>
+          <input
+            id="login-password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{ ...inputStyle, marginBottom: space.md }}
+          />
+          {error && <Banner tone="error">{error}</Banner>}
+          <button
+            type="submit"
+            disabled={busy || !email || !password}
+            className="mobile-tap"
+            style={{
+              ...primaryButton,
+              width: "100%",
+              minHeight: 52,
+              fontSize: 16,
+              marginTop: 4,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              borderRadius: radii.lg,
+            }}
+          >
+            {busy ? (
+              <>
+                <Spinner size={16} color={palette.surface} />
+                <span>Signing in…</span>
+              </>
+            ) : (
+              "Sign in"
+            )}
+          </button>
+
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: space.md,
+              fontSize: 13,
+              color: palette.muted,
+            }}
+          >
+            <a
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              style={{ color: palette.accentDeep, fontWeight: 600, textDecoration: "none" }}
+            >
+              Forgot password?
+            </a>
+          </div>
+        </form>
+      </div>
 
       <p
         data-mobile-build={buildStamp}
@@ -359,7 +401,7 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
           letterSpacing: 0.4,
         }}
       >
-        {buildStamp}
+        Shift Secure · Secure handoff
       </p>
     </main>
   );
