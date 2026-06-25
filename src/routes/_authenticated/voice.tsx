@@ -405,7 +405,7 @@ function VoicePage() {
       }
       setDraftTitle(title);
     } catch (err) {
-      toast.error(err?.message ?? "Couldn't save draft");
+      toast.error((err as { message?: string })?.message ?? "Couldn't save draft");
     } finally {
       setSavingDraft(false);
     }
@@ -415,10 +415,10 @@ function VoicePage() {
   const [skipped, setSkipped] = useState<SkippedDraft[]>([]);
 
   function validateDraftRow(
-    row: any,
+    row: unknown,
   ): { ok: true; row: DraftRow } | { ok: false; skipped: SkippedDraft } {
     const id =
-      row && typeof row === "object" && typeof row.id === "string" && row.id ? row.id : null;
+      (row as Record<string, unknown>) && typeof (row as any) === "object" && typeof row.id === "string" && row.id ? row.id : null;
     const reasons: string[] = [];
     if (!row || typeof row !== "object") {
       reasons.push("row is not an object");
@@ -433,7 +433,7 @@ function VoicePage() {
       ok: false,
       skipped: {
         id,
-        title: row && typeof row.title === "string" ? row.title : null,
+        title: (row as Record<string, unknown>) && typeof (row as any).title === "string" ? row.title : null,
         reason: reasons.join(", "),
       },
     };
@@ -461,7 +461,7 @@ function VoicePage() {
       setSkipped(skippedRows);
       setDrafts(valid);
     } catch (err) {
-      const msg = err?.message ?? "Couldn't load drafts";
+      const msg = (err as { message?: string })?.message ?? "Couldn't load drafts";
       setDraftsError(msg);
       toast.error(msg);
     } finally {
@@ -476,7 +476,7 @@ function VoicePage() {
       setSkipped((s) => s.filter((x) => x.id !== id));
       toast.success("Corrupted draft deleted");
     } catch (err) {
-      toast.error(err?.message ?? "Couldn't delete draft");
+      toast.error((err as { message?: string })?.message ?? "Couldn't delete draft");
     }
   }
 
@@ -513,7 +513,7 @@ function VoicePage() {
       setDraftsOpen(false);
       toast.success("Draft loaded");
     } catch (err) {
-      toast.error(err?.message ?? "Couldn't open draft");
+      toast.error((err as { message?: string })?.message ?? "Couldn't open draft");
     }
   }
 
@@ -528,7 +528,7 @@ function VoicePage() {
       }
       toast.success("Draft deleted");
     } catch (err) {
-      toast.error(err?.message ?? "Couldn't delete draft");
+      toast.error((err as { message?: string })?.message ?? "Couldn't delete draft");
     }
   }
 
