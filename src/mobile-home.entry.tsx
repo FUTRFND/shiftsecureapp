@@ -246,11 +246,17 @@ function App() {
 
   useEffect(() => {
     let mounted = true;
-    sb.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      setSession(data.session);
-      setReady(true);
-    });
+    sb.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!mounted) return;
+        setSession(data.session);
+        setReady(true);
+      })
+      .catch((err) => {
+        reportBoot("getSession", err);
+        if (mounted) setReady(true);
+      });
     const { data: sub } = sb.auth.onAuthStateChange((_event, next) => {
       setSession(next);
     });
@@ -282,7 +288,44 @@ function App() {
   );
 }
 
-const rootElement = document.getElementById("root");
-if (rootElement) {
-  ReactDOM.createRoot(rootElement).render(<App />);
+class BootErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    reportBoot("React render", `${error.stack ?? error.message}\n${info.componentStack ?? ""}`);
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <main style={pageStyle}>
+          <h1 style={{ fontSize: 20, margin: "0 0 12px" }}>Render error</h1>
+          <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, color: "#b00020" }}>
+            {this.state.error.stack ?? this.state.error.message}
+          </pre>
+        </main>
+      );
+    }
+    return this.props.children;
+  }
 }
+
+try {
+  const rootElement = document.getElementById("root");
+  if (!rootElement) {
+    reportBoot("mount", "#root element not found in DOM");
+  } else {
+    ReactDOM.createRoot(rootElement).render(
+      <BootErrorBoundary>
+        <App />
+      </BootErrorBoundary>,
+    );
+  }
+} catch (err) {
+  reportBoot("mount", err as Error);
+}
+
