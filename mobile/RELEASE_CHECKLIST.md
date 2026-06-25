@@ -31,7 +31,7 @@ release after that. Pair with `mobile/QA_CHECKLIST.md` for functional QA.
 ## iOS — TestFlight
 
 1. **App Store Connect setup**
-   - [ ] App record created with bundle id `com.handoffhero.app`
+   - [ ] App record created with bundle id `com.badexy.shiftsecure`
    - [ ] App Privacy questionnaire answered (mic, speech recognition, subscriptions, analytics)
    - [ ] Subscriptions group created, monthly + annual SKUs in **Ready to Submit**
    - [ ] App Store shared secret generated → pasted into RevenueCat iOS app settings
@@ -59,7 +59,7 @@ release after that. Pair with `mobile/QA_CHECKLIST.md` for functional QA.
 ## Android — Play Internal Testing
 
 1. **Play Console setup**
-   - [ ] App created with package `com.handoffhero.app`
+   - [ ] App created with package `com.badexy.shiftsecure`
    - [ ] App content (privacy policy URL, data safety, target audience) completed
    - [ ] Subscriptions created: `handoffhero_pro_monthly`, `handoffhero_pro_annual`
    - [ ] Service account JSON generated and uploaded to RevenueCat Android app settings

@@ -67,7 +67,7 @@ the native build.
 
 ## Configuration reference
 
-- **App identifier:** `com.handoffhero.app` (set in `capacitor.config.ts`)
+- **App identifier:** `com.badexy.shiftsecure` (set in `capacitor.config.ts`)
 - **Web dir:** `dist/spa` (output of `bun run build:mobile`)
 - **Custom URL scheme:** `handoffhero://` — wired in Phase 3 for Supabase auth
   callbacks. Will be registered in `ios/App/App/Info.plist` (`CFBundleURLTypes`)

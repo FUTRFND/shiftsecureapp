@@ -10,7 +10,7 @@ Everything you must edit by hand after `npx cap add ios` and
 
 ### Bundle identifier + signing (Xcode → Signing & Capabilities)
 
-- **Bundle Identifier**: `com.handoffhero.app` (must match `appId` in `capacitor.config.ts`)
+- **Bundle Identifier**: `com.badexy.shiftsecure` (must match `appId` in `capacitor.config.ts`)
 - **Team**: your Apple Developer team
 - **Signing**: Automatically manage signing → ON for development; for
   release, use a distribution provisioning profile.
@@ -32,7 +32,7 @@ Everything you must edit by hand after `npx cap add ios` and
 <array>
   <dict>
     <key>CFBundleTypeRole</key><string>Editor</string>
-    <key>CFBundleURLName</key><string>com.handoffhero.app</string>
+    <key>CFBundleURLName</key><string>com.badexy.shiftsecure</string>
     <key>CFBundleURLSchemes</key>
     <array><string>handoffhero</string></array>
   </dict>
@@ -50,7 +50,7 @@ Universal Links: requires `apple-app-site-association` served from
     "apps": [],
     "details": [
       {
-        "appID": "<TEAMID>.com.handoffhero.app",
+        "appID": "<TEAMID>.com.badexy.shiftsecure",
         "paths": ["/auth/*", "/reset-password", "/dashboard"]
       }
     ]
@@ -85,7 +85,7 @@ locally. If `npm install` already added it, just run `pod install`.
 
 ### `build.gradle` (module)
 
-- `applicationId "com.handoffhero.app"` (must match `appId`)
+- `applicationId "com.badexy.shiftsecure"` (must match `appId`)
 - `minSdkVersion 23`, `targetSdkVersion 34`, `compileSdkVersion 34`
 - **Signing config**: create a `release` keystore (`keytool -genkey -v ...`),
   store it outside the repo, reference in `signingConfigs { release { ... } }`
@@ -132,7 +132,7 @@ App Links verification: host `https://handoffhero.app/.well-known/assetlinks.jso
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.handoffhero.app",
+      "package_name": "com.badexy.shiftsecure",
       "sha256_cert_fingerprints": ["<RELEASE_KEYSTORE_SHA256>"]
     }
   }
@@ -167,8 +167,8 @@ App Links verification: host `https://handoffhero.app/.well-known/assetlinks.jso
 
 | Item                | Value                                                                                                                          |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| iOS app             | bundle id `com.handoffhero.app`, App Store Connect shared secret configured                                                    |
-| Android app         | package `com.handoffhero.app`, Play service-account JSON uploaded                                                              |
+| iOS app             | bundle id `com.badexy.shiftsecure`, App Store Connect shared secret configured                                                    |
+| Android app         | package `com.badexy.shiftsecure`, Play service-account JSON uploaded                                                              |
 | Entitlement         | id `pro` (matches `ENTITLEMENT_IDS.pro` in `src/config/subscription.ts`)                                                       |
 | Products attached   | `handoffhero_pro_monthly`, `handoffhero_pro_annual`                                                                            |
 | Offering            | one default offering containing both packages                                                                                  |
