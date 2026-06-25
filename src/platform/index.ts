@@ -25,7 +25,12 @@ export {
   type SpeechErrorCode,
   type StartSpeechOptions,
 } from "./speech";
-export { platformPermissions, type PlatformPermissions, type PermissionName, type PermissionStatus } from "./permissions";
+export {
+  platformPermissions,
+  type PlatformPermissions,
+  type PermissionName,
+  type PermissionStatus,
+} from "./permissions";
 export { ClipboardError } from "./clipboard";
 export { platformClipboard, type PlatformClipboard } from "./clipboard";
 export { platformNetwork, type PlatformNetwork, type NetworkStatus } from "./network";

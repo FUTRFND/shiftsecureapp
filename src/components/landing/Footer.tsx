@@ -10,7 +10,9 @@ export function Footer() {
           </div>
           ShiftSecure
         </div>
-        <p className="text-sm text-muted-foreground">© 2026 ShiftSecure. Built for the people who keep us alive.</p>
+        <p className="text-sm text-muted-foreground">
+          © 2026 ShiftSecure. Built for the people who keep us alive.
+        </p>
       </div>
     </footer>
   );

@@ -48,10 +48,12 @@ Universal Links: requires `apple-app-site-association` served from
 {
   "applinks": {
     "apps": [],
-    "details": [{
-      "appID": "<TEAMID>.com.handoffhero.app",
-      "paths": ["/auth/*", "/reset-password", "/dashboard"]
-    }]
+    "details": [
+      {
+        "appID": "<TEAMID>.com.handoffhero.app",
+        "paths": ["/auth/*", "/reset-password", "/dashboard"]
+      }
+    ]
   }
 }
 ```
@@ -125,14 +127,16 @@ locally. If `npm install` already added it, just run `pod install`.
 App Links verification: host `https://handoffhero.app/.well-known/assetlinks.json`:
 
 ```json
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.handoffhero.app",
-    "sha256_cert_fingerprints": ["<RELEASE_KEYSTORE_SHA256>"]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.handoffhero.app",
+      "sha256_cert_fingerprints": ["<RELEASE_KEYSTORE_SHA256>"]
+    }
   }
-}]
+]
 ```
 
 ### Play Billing + RevenueCat
@@ -148,44 +152,44 @@ App Links verification: host `https://handoffhero.app/.well-known/assetlinks.jso
 
 ## Supabase dashboard checklist
 
-| Setting | Value |
-| --- | --- |
-| Auth → URL Configuration → Site URL | your web app origin |
-| Auth → Additional Redirect URLs | `handoffhero://auth/callback`, `https://handoffhero.app/auth/callback`, `https://handoffhero.app/reset-password`, web equivalents |
-| Auth → Email templates | confirm/reset links use `{{ .RedirectTo }}` (default) |
-| Edge Functions → ai-handoff | deployed, `verify_jwt = true` |
-| Edge Function secrets | `LOVABLE_API_KEY`, `REVENUECAT_SECRET_API_KEY` |
-| RLS | enabled on every user-data table; policies scope to `auth.uid()` |
+| Setting                             | Value                                                                                                                             |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Auth → URL Configuration → Site URL | your web app origin                                                                                                               |
+| Auth → Additional Redirect URLs     | `handoffhero://auth/callback`, `https://handoffhero.app/auth/callback`, `https://handoffhero.app/reset-password`, web equivalents |
+| Auth → Email templates              | confirm/reset links use `{{ .RedirectTo }}` (default)                                                                             |
+| Edge Functions → ai-handoff         | deployed, `verify_jwt = true`                                                                                                     |
+| Edge Function secrets               | `LOVABLE_API_KEY`, `REVENUECAT_SECRET_API_KEY`                                                                                    |
+| RLS                                 | enabled on every user-data table; policies scope to `auth.uid()`                                                                  |
 
 ---
 
 ## RevenueCat dashboard checklist
 
-| Item | Value |
-| --- | --- |
-| iOS app | bundle id `com.handoffhero.app`, App Store Connect shared secret configured |
-| Android app | package `com.handoffhero.app`, Play service-account JSON uploaded |
-| Entitlement | id `pro` (matches `ENTITLEMENT_IDS.pro` in `src/config/subscription.ts`) |
-| Products attached | `handoffhero_pro_monthly`, `handoffhero_pro_annual` |
-| Offering | one default offering containing both packages |
-| API keys | iOS public, Android public → into `.env.local`; **Secret API key** → Supabase Edge Function secret `REVENUECAT_SECRET_API_KEY` |
-| Webhooks (optional) | point to a `/api/public/webhooks/revenuecat` route if you add server-side billing event handling later |
+| Item                | Value                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| iOS app             | bundle id `com.handoffhero.app`, App Store Connect shared secret configured                                                    |
+| Android app         | package `com.handoffhero.app`, Play service-account JSON uploaded                                                              |
+| Entitlement         | id `pro` (matches `ENTITLEMENT_IDS.pro` in `src/config/subscription.ts`)                                                       |
+| Products attached   | `handoffhero_pro_monthly`, `handoffhero_pro_annual`                                                                            |
+| Offering            | one default offering containing both packages                                                                                  |
+| API keys            | iOS public, Android public → into `.env.local`; **Secret API key** → Supabase Edge Function secret `REVENUECAT_SECRET_API_KEY` |
+| Webhooks (optional) | point to a `/api/public/webhooks/revenuecat` route if you add server-side billing event handling later                         |
 
 ---
 
 ## Where each identifier is defined in code
 
-| What | Single source of truth |
-| --- | --- |
-| App bundle id | `capacitor.config.ts` (`appId`) |
-| URL scheme | `.env.local` → `VITE_APP_URL_SCHEME`, read in `src/config/auth.ts` |
-| Universal link host | `.env.local` → `VITE_APP_UNIVERSAL_LINK_HOST` |
-| Auth callback paths | `src/config/auth.ts` |
-| Entitlement ids | `src/config/subscription.ts` → `ENTITLEMENT_IDS` |
-| Product ids | `src/config/subscription.ts` → `PRODUCT_IDS` |
-| Capabilities | `src/config/subscription.ts` → `CAPABILITY_ENTITLEMENTS` |
-| RC public API keys | `.env.local` → `VITE_REVENUECAT_*_KEY` |
-| RC secret API key | Supabase Edge Function secret `REVENUECAT_SECRET_API_KEY` |
+| What                | Single source of truth                                             |
+| ------------------- | ------------------------------------------------------------------ |
+| App bundle id       | `capacitor.config.ts` (`appId`)                                    |
+| URL scheme          | `.env.local` → `VITE_APP_URL_SCHEME`, read in `src/config/auth.ts` |
+| Universal link host | `.env.local` → `VITE_APP_UNIVERSAL_LINK_HOST`                      |
+| Auth callback paths | `src/config/auth.ts`                                               |
+| Entitlement ids     | `src/config/subscription.ts` → `ENTITLEMENT_IDS`                   |
+| Product ids         | `src/config/subscription.ts` → `PRODUCT_IDS`                       |
+| Capabilities        | `src/config/subscription.ts` → `CAPABILITY_ENTITLEMENTS`           |
+| RC public API keys  | `.env.local` → `VITE_REVENUECAT_*_KEY`                             |
+| RC secret API key   | Supabase Edge Function secret `REVENUECAT_SECRET_API_KEY`          |
 
 Nothing above is hardcoded in screens or business logic. If you ever need to
 rename the bundle id or scheme, edit the env var / config file — do **not**

@@ -31,7 +31,7 @@ export type TemplateRow = {
 };
 
 export const newSectionId = () =>
-  (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2));
+  globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2);
 
 export const PRESETS: { label: string; template: TemplateInput }[] = [
   {
@@ -42,10 +42,30 @@ export const PRESETS: { label: string; template: TemplateInput }[] = [
       specialty: "Emergency Medicine",
       is_default: false,
       sections: [
-        { id: newSectionId(), title: "Situation", placeholder: "Patient name, age, chief complaint, current status", required: true },
-        { id: newSectionId(), title: "Background", placeholder: "Relevant history, comorbidities, allergies, current meds", required: true },
-        { id: newSectionId(), title: "Assessment", placeholder: "Vitals, exam findings, working diagnosis, severity", required: true },
-        { id: newSectionId(), title: "Recommendation", placeholder: "Pending tasks, anticipated needs, disposition plan", required: true },
+        {
+          id: newSectionId(),
+          title: "Situation",
+          placeholder: "Patient name, age, chief complaint, current status",
+          required: true,
+        },
+        {
+          id: newSectionId(),
+          title: "Background",
+          placeholder: "Relevant history, comorbidities, allergies, current meds",
+          required: true,
+        },
+        {
+          id: newSectionId(),
+          title: "Assessment",
+          placeholder: "Vitals, exam findings, working diagnosis, severity",
+          required: true,
+        },
+        {
+          id: newSectionId(),
+          title: "Recommendation",
+          placeholder: "Pending tasks, anticipated needs, disposition plan",
+          required: true,
+        },
       ],
     },
   },
@@ -57,11 +77,36 @@ export const PRESETS: { label: string; template: TemplateInput }[] = [
       specialty: "Emergency Medicine",
       is_default: false,
       sections: [
-        { id: newSectionId(), title: "Illness severity", placeholder: "Stable / watcher / unstable", required: true },
-        { id: newSectionId(), title: "Patient summary", placeholder: "Brief summary, events of shift", required: true },
-        { id: newSectionId(), title: "Action list", placeholder: "To-dos with owner and timing", required: true },
-        { id: newSectionId(), title: "Situation awareness & contingencies", placeholder: "If/then planning for likely changes", required: true },
-        { id: newSectionId(), title: "Synthesis by receiver", placeholder: "Receiver read-back and questions", required: false },
+        {
+          id: newSectionId(),
+          title: "Illness severity",
+          placeholder: "Stable / watcher / unstable",
+          required: true,
+        },
+        {
+          id: newSectionId(),
+          title: "Patient summary",
+          placeholder: "Brief summary, events of shift",
+          required: true,
+        },
+        {
+          id: newSectionId(),
+          title: "Action list",
+          placeholder: "To-dos with owner and timing",
+          required: true,
+        },
+        {
+          id: newSectionId(),
+          title: "Situation awareness & contingencies",
+          placeholder: "If/then planning for likely changes",
+          required: true,
+        },
+        {
+          id: newSectionId(),
+          title: "Synthesis by receiver",
+          placeholder: "Receiver read-back and questions",
+          required: false,
+        },
       ],
     },
   },

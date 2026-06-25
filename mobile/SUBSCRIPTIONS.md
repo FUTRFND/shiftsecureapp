@@ -9,7 +9,7 @@ that lets us swap the provider later without touching screens.
 `screens` → `useSubscription` / `useCapability` →
 `subscriptionService` → `platformPayments` → **RevenueCat SDK**.
 
-Screens only ask the app-facing service about *capabilities* (`ai.summarize`,
+Screens only ask the app-facing service about _capabilities_ (`ai.summarize`,
 `templates.unlimited`). The service derives capabilities from RC
 entitlements via `src/config/subscription.ts`, caches state in
 `platformStorage` for offline launches, and fans out updates to React via
@@ -22,10 +22,12 @@ the server is the source of truth.
 ## Required environment
 
 **Client (Vite, public — safe to ship):**
+
 - `VITE_REVENUECAT_IOS_KEY` — RC public API key for iOS
 - `VITE_REVENUECAT_ANDROID_KEY` — RC public API key for Android
 
 **Server (Supabase secret — never ship to client):**
+
 - `REVENUECAT_SECRET_API_KEY` — RC secret API key (Project → API keys → "Secret")
 
 Add the client keys to `.env`, the server key with `supabase secrets set`.
@@ -63,17 +65,17 @@ adapter degrades to "web" behaviour so the web build still loads.
 
 ## Manual test matrix
 
-| Scenario | Expected |
-|---|---|
-| Fresh install, free user | Generate button shows "Unlock AI summaries"; tap opens paywall |
-| Purchase monthly (sandbox) | Toast "Welcome to Pro"; Generate works immediately |
-| Restore on new device | Restore button reactivates entitlement |
-| Sign out → sign in (other user) | Entitlement clears, then reflects the new user |
-| Offline cold start (paying user) | Cached entitlement keeps AI unlocked; refresh on reconnect |
-| Subscription expired | Server returns `entitlement_required`; paywall reopens |
-| Billing grace period | Treated as active by both client cache and server check |
-| User cancels purchase | No error toast, paywall stays open |
-| Web build | Paywall explains "subscribe in the mobile apps"; restore disabled |
+| Scenario                         | Expected                                                          |
+| -------------------------------- | ----------------------------------------------------------------- |
+| Fresh install, free user         | Generate button shows "Unlock AI summaries"; tap opens paywall    |
+| Purchase monthly (sandbox)       | Toast "Welcome to Pro"; Generate works immediately                |
+| Restore on new device            | Restore button reactivates entitlement                            |
+| Sign out → sign in (other user)  | Entitlement clears, then reflects the new user                    |
+| Offline cold start (paying user) | Cached entitlement keeps AI unlocked; refresh on reconnect        |
+| Subscription expired             | Server returns `entitlement_required`; paywall reopens            |
+| Billing grace period             | Treated as active by both client cache and server check           |
+| User cancels purchase            | No error toast, paywall stays open                                |
+| Web build                        | Paywall explains "subscribe in the mobile apps"; restore disabled |
 
 ## Replacing RevenueCat later
 

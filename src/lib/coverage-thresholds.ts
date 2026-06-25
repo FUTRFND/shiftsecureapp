@@ -34,10 +34,7 @@ function parseNum(v: string | undefined): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-export function resolveThresholds(
-  env: ThresholdEnv,
-  branch?: string,
-): Thresholds {
+export function resolveThresholds(env: ThresholdEnv, branch?: string): Thresholds {
   const base = parseNum(env.COVERAGE_THRESHOLD) ?? branchDefault(branch);
   return {
     statements: parseNum(env.COVERAGE_THRESHOLD_STATEMENTS) ?? base,

@@ -63,7 +63,8 @@ function ForgotPasswordPage() {
           <Alert className="border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             <AlertDescription>
-              Check <span className="font-semibold">{emailValue}</span> for a reset link. If it doesn't appear, check your spam folder.
+              Check <span className="font-semibold">{emailValue}</span> for a reset link. If it
+              doesn't appear, check your spam folder.
             </AlertDescription>
           </Alert>
           <Button asChild variant="outline" className="w-full">
@@ -87,14 +88,19 @@ function ForgotPasswordPage() {
               aria-invalid={errors.email ? "true" : "false"}
               {...register("email")}
             />
-            {errors.email && <p className="text-sm font-medium text-destructive">{errors.email.message}</p>}
+            {errors.email && (
+              <p className="text-sm font-medium text-destructive">{errors.email.message}</p>
+            )}
           </div>
           <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
             Send reset link
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            Remembered it? <Link to="/login" className="text-primary font-medium hover:underline">Sign in</Link>
+            Remembered it?{" "}
+            <Link to="/login" className="text-primary font-medium hover:underline">
+              Sign in
+            </Link>
           </p>
         </form>
       )}

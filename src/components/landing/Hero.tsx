@@ -16,12 +16,11 @@ export function Hero() {
             Built for emergency medicine teams
           </div>
           <h1 className="mt-6 text-5xl md:text-7xl font-bold tracking-tight">
-            Shift changes,{" "}
-            <span className="text-gradient">without the gaps.</span>
+            Shift changes, <span className="text-gradient">without the gaps.</span>
           </h1>
           <p className="mt-6 text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            Structured handoffs, real-time task ownership, and critical alerts —
-            so nothing falls through the cracks when the shift changes.
+            Structured handoffs, real-time task ownership, and critical alerts — so nothing falls
+            through the cracks when the shift changes.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
             <Button variant="hero" size="xl">

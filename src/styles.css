@@ -41,8 +41,16 @@
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px -8px rgb(16 64 48 / 0.08);
 
   --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-glow) 100%);
-  --gradient-hero: radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in oklab, var(--primary) 18%, transparent), transparent 70%);
-  --gradient-subtle: linear-gradient(180deg, var(--background) 0%, color-mix(in oklab, var(--primary) 4%, var(--background)) 100%);
+  --gradient-hero: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    color-mix(in oklab, var(--primary) 18%, transparent),
+    transparent 70%
+  );
+  --gradient-subtle: linear-gradient(
+    180deg,
+    var(--background) 0%,
+    color-mix(in oklab, var(--primary) 4%, var(--background)) 100%
+  );
 }
 
 :root {
@@ -122,7 +130,10 @@
     /* Prevent rubber-band scroll bleed-through on iOS standalone. */
     overscroll-behavior-y: none;
   }
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
   }
@@ -144,12 +155,24 @@
 }
 
 @layer utilities {
-  .bg-gradient-primary { background-image: var(--gradient-primary); }
-  .bg-gradient-hero { background-image: var(--gradient-hero); }
-  .bg-gradient-subtle { background-image: var(--gradient-subtle); }
-  .shadow-elegant { box-shadow: var(--shadow-elegant); }
-  .shadow-glow { box-shadow: var(--shadow-glow); }
-  .shadow-card { box-shadow: var(--shadow-card); }
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+  .bg-gradient-hero {
+    background-image: var(--gradient-hero);
+  }
+  .bg-gradient-subtle {
+    background-image: var(--gradient-subtle);
+  }
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
   .text-gradient {
     background: var(--gradient-primary);
     -webkit-background-clip: text;
@@ -157,13 +180,29 @@
     color: transparent;
   }
 
-  .safe-top    { padding-top:    var(--safe-top); }
-  .safe-bottom { padding-bottom: var(--safe-bottom); }
-  .safe-left   { padding-left:   var(--safe-left); }
-  .safe-right  { padding-right:  var(--safe-right); }
-  .safe-x      { padding-left:   var(--safe-left); padding-right: var(--safe-right); }
-  .safe-y      { padding-top:    var(--safe-top); padding-bottom: var(--safe-bottom); }
-  .min-h-dvh   { min-height: 100dvh; }
+  .safe-top {
+    padding-top: var(--safe-top);
+  }
+  .safe-bottom {
+    padding-bottom: var(--safe-bottom);
+  }
+  .safe-left {
+    padding-left: var(--safe-left);
+  }
+  .safe-right {
+    padding-right: var(--safe-right);
+  }
+  .safe-x {
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
+  }
+  .safe-y {
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
 
   /* Lifts fixed elements above the on-screen keyboard. Falls back to
      just safe-bottom on web (--keyboard-height stays 0). */
@@ -179,8 +218,16 @@ html.native body {
 }
 
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 40%, transparent); }
-  70% { box-shadow: 0 0 0 14px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 40%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
-.pulse-ring { animation: pulse-ring 2s infinite; }
+.pulse-ring {
+  animation: pulse-ring 2s infinite;
+}

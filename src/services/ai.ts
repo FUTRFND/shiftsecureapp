@@ -41,11 +41,7 @@ type ServerEnvelope<T> = {
   meta?: { requestId?: string };
 };
 
-const RETRYABLE_SERVER_CODES = new Set<string>([
-  "rate_limited",
-  "ai_unavailable",
-  "timeout",
-]);
+const RETRYABLE_SERVER_CODES = new Set<string>(["rate_limited", "ai_unavailable", "timeout"]);
 
 function mapServerError(code: string): AIErrorCode {
   switch (code) {
@@ -80,22 +76,18 @@ async function invokeAI<T>(
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
     try {
-      const { data, error } = await supabase.functions.invoke<ServerEnvelope<T>>(
-        "ai-handoff",
-        {
-          body: { task, input, modelHint },
-        },
-      );
+      const { data, error } = await supabase.functions.invoke<ServerEnvelope<T>>("ai-handoff", {
+        body: { task, input, modelHint },
+      });
       clearTimeout(timer);
 
       // FunctionsHttpError surfaces non-2xx; parse body for our envelope.
       if (error) {
         const ctx = (error as unknown as { context?: unknown }).context;
-        const response = (
+        const response =
           ctx && typeof ctx === "object" && "response" in (ctx as Record<string, unknown>)
             ? (ctx as { response?: Response }).response
-            : (ctx as Response | undefined)
-        );
+            : (ctx as Response | undefined);
         let envelope: ServerEnvelope<T> | undefined;
         if (response && typeof response.json === "function") {
           try {
@@ -137,7 +129,12 @@ async function invokeAI<T>(
         );
       }
       if (data.data === undefined) {
-        throw new AIError("ai_failed", "AI returned an empty response.", true, data.meta?.requestId);
+        throw new AIError(
+          "ai_failed",
+          "AI returned an empty response.",
+          true,
+          data.meta?.requestId,
+        );
       }
       return data.data;
     } catch (err) {
@@ -193,12 +190,7 @@ export const aiService = {
     // Telemetry: timing + outcome only. No transcript / context payload.
     return telemetry.time(
       "ai.summarize_handoff",
-      () =>
-        invokeAI<SummarizeHandoffResult>(
-          "summarize_handoff",
-          input,
-          opts?.modelHint,
-        ),
+      () => invokeAI<SummarizeHandoffResult>("summarize_handoff", input, opts?.modelHint),
       {
         modelHint: opts?.modelHint,
         transcriptLen: input.transcript.length,

@@ -148,18 +148,14 @@ export const telemetry = {
     fn: () => Promise<T>,
     extraProps?: TelemetryEvent["props"],
   ): Promise<T> {
-    const start =
-      typeof performance !== "undefined" ? performance.now() : Date.now();
+    const start = typeof performance !== "undefined" ? performance.now() : Date.now();
     try {
       const result = await fn();
       emit(
         `${name}.success`,
         "info",
         extraProps,
-        Math.round(
-          (typeof performance !== "undefined" ? performance.now() : Date.now()) -
-            start,
-        ),
+        Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - start),
       );
       return result;
     } catch (err) {
@@ -173,10 +169,7 @@ export const telemetry = {
         `${name}.failure`,
         "error",
         { ...extraProps, code },
-        Math.round(
-          (typeof performance !== "undefined" ? performance.now() : Date.now()) -
-            start,
-        ),
+        Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - start),
       );
       throw err;
     }

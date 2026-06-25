@@ -38,9 +38,11 @@ release after that. Pair with `mobile/QA_CHECKLIST.md` for functional QA.
    - [ ] Sandbox testers created (Users and Access → Sandbox Testers)
 
 2. **Local archive**
+
    ```bash
    bun run mobile:ios
    ```
+
    In Xcode:
    - [ ] Scheme set to `App` → Any iOS Device
    - [ ] Product → Archive
@@ -64,9 +66,11 @@ release after that. Pair with `mobile/QA_CHECKLIST.md` for functional QA.
    - [ ] License test accounts added (Setup → License testing)
 
 2. **Signed bundle**
+
    ```bash
    bun run mobile:android
    ```
+
    In Android Studio:
    - [ ] Build → Generate Signed App Bundle → AAB
    - [ ] Use the release keystore from `mobile/NATIVE_CONFIG.md`

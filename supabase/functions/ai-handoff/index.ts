@@ -16,8 +16,7 @@ import { entitlementsGrant, getEntitlementsForUser } from "../_shared/revenuecat
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -52,7 +51,8 @@ function clientError(code: string, message: string, status = 400) {
 }
 
 function validate(body: unknown): RequestBody {
-  if (!body || typeof body !== "object") throw new ValidationError("invalid_body", "Request body is required.");
+  if (!body || typeof body !== "object")
+    throw new ValidationError("invalid_body", "Request body is required.");
   const b = body as Record<string, unknown>;
   if (b.task !== "summarize_handoff")
     throw new ValidationError("unknown_task", "Unsupported AI task.");
@@ -84,7 +84,10 @@ function validate(body: unknown): RequestBody {
 }
 
 class ValidationError extends Error {
-  constructor(public readonly code: string, message: string) {
+  constructor(
+    public readonly code: string,
+    message: string,
+  ) {
     super(message);
   }
 }
@@ -132,7 +135,11 @@ async function callWithRetry(
 function mapProviderError(err: ProviderError): Response {
   switch (err.code) {
     case "rate_limited":
-      return clientError("rate_limited", "The AI service is busy. Please try again in a moment.", 429);
+      return clientError(
+        "rate_limited",
+        "The AI service is busy. Please try again in a moment.",
+        429,
+      );
     case "credits_exhausted":
       return clientError(
         "credits_exhausted",

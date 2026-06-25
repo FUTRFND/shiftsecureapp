@@ -1,13 +1,38 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Activity, ArrowLeft, ClipboardList, Loader2, Plus, Pencil, Trash2, Star } from "lucide-react";
+import {
+  Activity,
+  ArrowLeft,
+  ClipboardList,
+  Loader2,
+  Plus,
+  Pencil,
+  Trash2,
+  Star,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { TemplateEditorDialog } from "@/components/templates/TemplateEditorDialog";
 import { PRESETS, type TemplateInput, type TemplateRow } from "@/lib/templates";
 
@@ -37,7 +62,9 @@ function TemplatesPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const openCreate = (preset?: TemplateInput) => {
     setEditing(null);
@@ -67,13 +94,19 @@ function TemplatesPage() {
         .from("handoff_templates")
         .update({ ...input })
         .eq("id", editing.id);
-      if (error) { toast.error(error.message); return; }
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       toast.success("Template updated");
     } else {
       const { error } = await supabase
         .from("handoff_templates")
         .insert({ ...input, user_id: user.id });
-      if (error) { toast.error(error.message); return; }
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       toast.success("Template created");
     }
     setEditorOpen(false);
@@ -83,20 +116,23 @@ function TemplatesPage() {
   const confirmDelete = async () => {
     if (!deleting) return;
     const { error } = await supabase.from("handoff_templates").delete().eq("id", deleting.id);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Template deleted");
     setDeleting(null);
     await load();
   };
 
-
-
-
   return (
     <div className="min-h-dvh bg-background">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
-          <Link to="/dashboard" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4" /> Dashboard
           </Link>
           <Link to="/" className="flex items-center gap-2 font-display font-bold">
@@ -112,7 +148,9 @@ function TemplatesPage() {
         <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
           <div>
             <p className="text-sm uppercase tracking-wider text-muted-foreground">Templates</p>
-            <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">Handoff templates</h1>
+            <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">
+              Handoff templates
+            </h1>
             <p className="mt-1 text-muted-foreground max-w-xl">
               Structured templates ensure nothing critical is missed during shift change.
             </p>
@@ -131,7 +169,10 @@ function TemplatesPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {templates.map((t) => (
-              <Card key={t.id} className="shadow-card hover:shadow-elegant transition-shadow flex flex-col">
+              <Card
+                key={t.id}
+                className="shadow-card hover:shadow-elegant transition-shadow flex flex-col"
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between gap-3">
                     <div className="grid h-10 w-10 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
@@ -155,10 +196,20 @@ function TemplatesPage() {
                   </div>
                 </CardContent>
                 <CardFooter className="gap-2">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => openEdit(t)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => openEdit(t)}
+                  >
                     <Pencil className="h-4 w-4" /> Edit
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setDeleting(t)} aria-label="Delete template">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDeleting(t)}
+                    aria-label="Delete template"
+                  >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </CardFooter>
@@ -186,7 +237,10 @@ function TemplatesPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -196,7 +250,13 @@ function TemplatesPage() {
   );
 }
 
-function EmptyState({ onUsePreset, onBlank }: { onUsePreset: (p: TemplateInput) => void; onBlank: () => void }) {
+function EmptyState({
+  onUsePreset,
+  onBlank,
+}: {
+  onUsePreset: (p: TemplateInput) => void;
+  onBlank: () => void;
+}) {
   return (
     <div className="rounded-2xl border border-dashed border-border/70 bg-card/40 p-10 text-center">
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary/10 text-primary">

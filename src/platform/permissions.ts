@@ -24,7 +24,11 @@ export interface PlatformPermissions {
 
 async function webCheck(name: PermissionName): Promise<PermissionStatus> {
   if (typeof navigator === "undefined") return "unsupported";
-  const perms = (navigator as Navigator & { permissions?: { query: (p: { name: string }) => Promise<{ state: string }> } }).permissions;
+  const perms = (
+    navigator as Navigator & {
+      permissions?: { query: (p: { name: string }) => Promise<{ state: string }> };
+    }
+  ).permissions;
   if (!perms?.query) return "prompt";
   try {
     switch (name) {
@@ -34,7 +38,9 @@ async function webCheck(name: PermissionName): Promise<PermissionStatus> {
         return (await perms.query({ name: "camera" })).state as PermissionStatus;
       case "notifications":
         if (typeof Notification === "undefined") return "unsupported";
-        return Notification.permission === "default" ? "prompt" : (Notification.permission as PermissionStatus);
+        return Notification.permission === "default"
+          ? "prompt"
+          : (Notification.permission as PermissionStatus);
       case "location":
         return (await perms.query({ name: "geolocation" })).state as PermissionStatus;
     }
@@ -71,7 +77,8 @@ async function webRequest(name: PermissionName): Promise<PermissionStatus> {
     }
     case "location": {
       return new Promise((resolve) => {
-        if (typeof navigator === "undefined" || !navigator.geolocation) return resolve("unsupported");
+        if (typeof navigator === "undefined" || !navigator.geolocation)
+          return resolve("unsupported");
         navigator.geolocation.getCurrentPosition(
           () => resolve("granted"),
           (e) => resolve(e.code === 1 ? "denied" : "prompt"),

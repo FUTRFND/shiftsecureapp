@@ -16,10 +16,7 @@ export function CheckEmailNotice({ email }: { email: string }) {
 
   useEffect(() => {
     if (status.kind !== "sent" || status.cooldown <= 0) return;
-    const t = setTimeout(
-      () => setStatus({ kind: "sent", cooldown: status.cooldown - 1 }),
-      1000,
-    );
+    const t = setTimeout(() => setStatus({ kind: "sent", cooldown: status.cooldown - 1 }), 1000);
     return () => clearTimeout(t);
   }, [status]);
 
@@ -45,13 +42,10 @@ export function CheckEmailNotice({ email }: { email: string }) {
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary/10 text-primary">
         <MailCheck className="h-7 w-7" />
       </div>
-      <h2 className="mt-4 font-display text-xl font-semibold tracking-tight">
-        Confirm your email
-      </h2>
+      <h2 className="mt-4 font-display text-xl font-semibold tracking-tight">Confirm your email</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        We sent a confirmation link to{" "}
-        <span className="font-medium text-foreground">{email}</span>. Click the
-        link in that email to activate your account.
+        We sent a confirmation link to <span className="font-medium text-foreground">{email}</span>.
+        Click the link in that email to activate your account.
       </p>
 
       {status.kind === "sent" && (

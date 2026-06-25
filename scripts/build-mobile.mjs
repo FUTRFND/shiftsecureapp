@@ -23,7 +23,9 @@ execSync("vite build", { stdio: "inherit", env: { ...process.env, MOBILE_BUILD: 
 
 if (!existsSync(NITRO_PUBLIC)) {
   console.error(`[build:mobile] expected client assets at ${NITRO_PUBLIC} but none were found.`);
-  console.error("[build:mobile] If the TanStack/Nitro output layout has changed, update scripts/build-mobile.mjs.");
+  console.error(
+    "[build:mobile] If the TanStack/Nitro output layout has changed, update scripts/build-mobile.mjs.",
+  );
   process.exit(1);
 }
 
@@ -48,7 +50,9 @@ if (!existsSync(indexHtml)) {
   </body>
 </html>`;
   writeFileSync(indexHtml, shell, "utf8");
-  console.warn("[build:mobile] SPA shell is a placeholder; client entry path is finalized in Phase 4.");
+  console.warn(
+    "[build:mobile] SPA shell is a placeholder; client entry path is finalized in Phase 4.",
+  );
 }
 
 const size = readFileSync(indexHtml).byteLength;

@@ -17,7 +17,10 @@ export const Route = createFileRoute("/")({
           "Structured handoff templates, real-time task ownership, and critical alerts for emergency medicine teams. Eliminate information loss at shift change.",
       },
       { property: "og:title", content: "ShiftSecure — Safer ED handoffs" },
-      { property: "og:description", content: "Structured handoffs and real-time tasks for emergency medicine teams." },
+      {
+        property: "og:description",
+        content: "Structured handoffs and real-time tasks for emergency medicine teams.",
+      },
     ],
   }),
   component: Index,

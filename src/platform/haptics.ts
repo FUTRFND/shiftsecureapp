@@ -42,7 +42,11 @@ const nativeHaptics: PlatformHaptics = {
   async impact(style = "light") {
     try {
       const { Haptics, ImpactStyle } = await import("@capacitor/haptics");
-      const map = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy } as const;
+      const map = {
+        light: ImpactStyle.Light,
+        medium: ImpactStyle.Medium,
+        heavy: ImpactStyle.Heavy,
+      } as const;
       await Haptics.impact({ style: map[style] });
     } catch {
       /* haptics are best-effort */

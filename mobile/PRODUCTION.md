@@ -6,13 +6,13 @@ web/JS layer is already wired by Phases 1–6 and is verified by
 
 ## Prerequisites (local dev machine)
 
-| Tool                | Version                  | Why                                                  |
-| ------------------- | ------------------------ | ---------------------------------------------------- |
-| Xcode               | 15.4+                    | iOS build, simulator, archive upload to TestFlight   |
-| CocoaPods           | latest (`brew install`)  | iOS native dep resolution                            |
-| Android Studio      | Hedgehog 2023.1.1+       | Android SDK 34, build, Play Console upload           |
-| JDK                 | 17                       | Required by AGP 8.x                                  |
-| Bun                 | matches `package.json`   | Project build                                        |
+| Tool           | Version                 | Why                                                |
+| -------------- | ----------------------- | -------------------------------------------------- |
+| Xcode          | 15.4+                   | iOS build, simulator, archive upload to TestFlight |
+| CocoaPods      | latest (`brew install`) | iOS native dep resolution                          |
+| Android Studio | Hedgehog 2023.1.1+      | Android SDK 34, build, Play Console upload         |
+| JDK            | 17                      | Required by AGP 8.x                                |
+| Bun            | matches `package.json`  | Project build                                      |
 
 ## One-time setup
 

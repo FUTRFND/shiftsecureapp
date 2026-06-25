@@ -31,7 +31,10 @@ export const STATUS_META: Record<TaskStatus, { label: string; tone: string }> = 
 export const PRIORITY_META: Record<TaskPriority, { label: string; tone: string }> = {
   low: { label: "Low", tone: "bg-muted text-muted-foreground border-border" },
   normal: { label: "Normal", tone: "bg-secondary text-secondary-foreground border-border" },
-  high: { label: "High", tone: "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30" },
+  high: {
+    label: "High",
+    tone: "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30",
+  },
   urgent: { label: "Urgent", tone: "bg-destructive/15 text-destructive border-destructive/30" },
 };
 

@@ -20,22 +20,24 @@ Single Supabase auth flow that runs identically on web, iOS, and Android:
 ## Files
 
 ### Created
-| File | Purpose |
-|---|---|
-| `src/config/auth.ts` | All URLs, scheme, host, paths. `buildAuthRedirectUrl()` picks web vs native target. |
-| `src/platform/deep-links.ts` | Feature-agnostic deep-link router. Dedupe window, cold-start `getLaunchUrl()`, multi-handler dispatch. |
-| `src/lib/auth-deep-link.ts` | Registers the Supabase auth handler. Parses hash + query, runs `exchangeCodeForSession` or `setSession`, routes by `type` (`recovery` → `/reset-password`, else `/dashboard`). |
-| `mobile/AUTH.md` | This file. |
+
+| File                         | Purpose                                                                                                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/config/auth.ts`         | All URLs, scheme, host, paths. `buildAuthRedirectUrl()` picks web vs native target.                                                                                            |
+| `src/platform/deep-links.ts` | Feature-agnostic deep-link router. Dedupe window, cold-start `getLaunchUrl()`, multi-handler dispatch.                                                                         |
+| `src/lib/auth-deep-link.ts`  | Registers the Supabase auth handler. Parses hash + query, runs `exchangeCodeForSession` or `setSession`, routes by `type` (`recovery` → `/reset-password`, else `/dashboard`). |
+| `mobile/AUTH.md`             | This file.                                                                                                                                                                     |
 
 ### Modified
-| File | Why |
-|---|---|
-| `src/platform/storage.ts` | Added `keys()`, `hydrateAuthStorage()`, `clearAuthStorage()`. Sync adapter now passes through to `localStorage` directly on web (no cache divergence). |
-| `src/integrations/supabase/client.ts` | `storage: platformStorageSync`, added `detectSessionInUrl: true` and `flowType: 'pkce'`. |
-| `src/lib/auth.tsx` | Ordered boot (hydrate → listener → deep-link → getSession). Sign-out hygiene with storage wipe + router navigate. Strict-mode safe via `bootRef`. |
-| `src/platform/native-shell.ts` | Removed inline `appUrlOpen` listener — deep links now flow through `startDeepLinkListener()` registered by `AuthProvider`. |
-| `src/routes/login.tsx` `signup.tsx` | Hide Google sign-in on native (Lovable's iframe OAuth doesn't work in Capacitor WebView). Use config for redirect URL. |
-| `src/routes/forgot-password.tsx` | `redirectTo` uses `buildAuthRedirectUrl(RESET_PASSWORD_ROUTE, AUTH_CALLBACK_PATH)` — web goes straight to `/reset-password`, native funnels through `handoffhero://auth/callback` and the handler routes to `/reset-password` after exchanging tokens. |
+
+| File                                  | Why                                                                                                                                                                                                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/platform/storage.ts`             | Added `keys()`, `hydrateAuthStorage()`, `clearAuthStorage()`. Sync adapter now passes through to `localStorage` directly on web (no cache divergence).                                                                                                 |
+| `src/integrations/supabase/client.ts` | `storage: platformStorageSync`, added `detectSessionInUrl: true` and `flowType: 'pkce'`.                                                                                                                                                               |
+| `src/lib/auth.tsx`                    | Ordered boot (hydrate → listener → deep-link → getSession). Sign-out hygiene with storage wipe + router navigate. Strict-mode safe via `bootRef`.                                                                                                      |
+| `src/platform/native-shell.ts`        | Removed inline `appUrlOpen` listener — deep links now flow through `startDeepLinkListener()` registered by `AuthProvider`.                                                                                                                             |
+| `src/routes/login.tsx` `signup.tsx`   | Hide Google sign-in on native (Lovable's iframe OAuth doesn't work in Capacitor WebView). Use config for redirect URL.                                                                                                                                 |
+| `src/routes/forgot-password.tsx`      | `redirectTo` uses `buildAuthRedirectUrl(RESET_PASSWORD_ROUTE, AUTH_CALLBACK_PATH)` — web goes straight to `/reset-password`, native funnels through `handoffhero://auth/callback` and the handler routes to `/reset-password` after exchanging tokens. |
 
 ## Native deep-link setup (one-time, per platform)
 
@@ -94,18 +96,18 @@ reset on native.
 
 ## Manual test matrix
 
-| Flow | Web | iOS | Android |
-|---|---|---|---|
-| Email/password sign in | ✅ ready | ✅ ready | ✅ ready |
-| Email/password sign up + confirmation email | ✅ ready | ✅ ready after Info.plist | ✅ ready after manifest |
-| Password reset email → set new password | ✅ ready | ✅ ready after Info.plist | ✅ ready after manifest |
-| Cold-start session restore | ✅ via localStorage | ✅ via Preferences hydration | ✅ via Preferences hydration |
-| Auto token refresh | ✅ Supabase built-in | ✅ Supabase built-in | ✅ Supabase built-in |
-| Sign-out wipes storage + redirects | ✅ | ✅ | ✅ |
-| Google sign-in | ✅ via Lovable broker | ⛔ disabled (Phase 7) | ⛔ disabled (Phase 7) |
-| Duplicate `appUrlOpen` events | n/a | ✅ deduped (2s window) | ✅ deduped (2s window) |
-| Malformed deep link | ✅ logged + ignored | ✅ logged + ignored | ✅ logged + ignored |
-| Auth callback with `error_description` | ✅ toast + redirect to /login | ✅ toast + redirect | ✅ toast + redirect |
+| Flow                                        | Web                           | iOS                          | Android                      |
+| ------------------------------------------- | ----------------------------- | ---------------------------- | ---------------------------- |
+| Email/password sign in                      | ✅ ready                      | ✅ ready                     | ✅ ready                     |
+| Email/password sign up + confirmation email | ✅ ready                      | ✅ ready after Info.plist    | ✅ ready after manifest      |
+| Password reset email → set new password     | ✅ ready                      | ✅ ready after Info.plist    | ✅ ready after manifest      |
+| Cold-start session restore                  | ✅ via localStorage           | ✅ via Preferences hydration | ✅ via Preferences hydration |
+| Auto token refresh                          | ✅ Supabase built-in          | ✅ Supabase built-in         | ✅ Supabase built-in         |
+| Sign-out wipes storage + redirects          | ✅                            | ✅                           | ✅                           |
+| Google sign-in                              | ✅ via Lovable broker         | ⛔ disabled (Phase 7)        | ⛔ disabled (Phase 7)        |
+| Duplicate `appUrlOpen` events               | n/a                           | ✅ deduped (2s window)       | ✅ deduped (2s window)       |
+| Malformed deep link                         | ✅ logged + ignored           | ✅ logged + ignored          | ✅ logged + ignored          |
+| Auth callback with `error_description`      | ✅ toast + redirect to /login | ✅ toast + redirect          | ✅ toast + redirect          |
 
 ## Remaining blockers before mobile production
 
@@ -127,6 +129,7 @@ reset on native.
 ## Web behavior — unchanged
 
 Verified:
+
 - Same Supabase publishable key + `VITE_*` envs.
 - `localStorage` keys identical (`sb-<ref>-auth-token`).
 - `redirectTo` URLs identical on web (`window.location.origin + path`).

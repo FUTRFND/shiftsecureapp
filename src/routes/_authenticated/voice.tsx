@@ -51,14 +51,21 @@ function VoiceErrorBoundary({ error, reset }: { error: Error; reset: () => void 
     <div className="min-h-dvh flex items-center justify-center bg-background px-6">
       <div className="max-w-md w-full text-center space-y-5">
         <div className="mx-auto h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
-          <svg className="h-6 w-6 text-destructive" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            className="h-6 w-6 text-destructive"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
           </svg>
         </div>
         <div>
           <h1 className="text-lg font-semibold">Something went wrong</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            A runtime error on this page stopped it from loading. You can try again or go back to the dashboard.
+            A runtime error on this page stopped it from loading. You can try again or go back to
+            the dashboard.
           </p>
         </div>
         {error.message && (
@@ -90,7 +97,6 @@ export const Route = createFileRoute("/_authenticated/voice")({
   component: VoicePage,
   errorComponent: VoiceErrorBoundary,
 });
-
 
 type Sbar = {
   patient: string;
@@ -125,13 +131,24 @@ const EMPTY_SBAR: Sbar = {
 
 function parseSummary(text: string): Sbar {
   const sections: Record<string, string> = {};
-  const headers = ["PATIENT", "SITUATION", "BACKGROUND", "ASSESSMENT", "RECOMMENDATION", "ACTION ITEMS"];
+  const headers = [
+    "PATIENT",
+    "SITUATION",
+    "BACKGROUND",
+    "ASSESSMENT",
+    "RECOMMENDATION",
+    "ACTION ITEMS",
+  ];
   const pattern = new RegExp(`^\\s*\\**\\s*(${headers.join("|")})\\s*\\**\\s*:?\\s*$`, "i");
   const lines = text.split(/\r?\n/);
   let current: string | null = null;
   for (const raw of lines) {
     const line = raw.replace(/^\s*[#>*-]+\s*/, "");
-    const m = line.match(pattern) || raw.match(/^\s*\**\s*(PATIENT|SITUATION|BACKGROUND|ASSESSMENT|RECOMMENDATION|ACTION ITEMS)\s*\**\s*:/i);
+    const m =
+      line.match(pattern) ||
+      raw.match(
+        /^\s*\**\s*(PATIENT|SITUATION|BACKGROUND|ASSESSMENT|RECOMMENDATION|ACTION ITEMS)\s*\**\s*:/i,
+      );
     if (m) {
       current = m[1].toUpperCase();
       sections[current] = "";
@@ -158,9 +175,7 @@ function parseSummary(text: string): Sbar {
 }
 
 function formatSbar(s: Sbar): string {
-  const actions = s.actions.length
-    ? s.actions.map((a) => `- ${a}`).join("\n")
-    : "(none)";
+  const actions = s.actions.length ? s.actions.map((a) => `- ${a}`).join("\n") : "(none)";
   return [
     `PATIENT: ${s.patient}`,
     ``,
@@ -223,7 +238,9 @@ function VoicePage() {
     if (recordingRef.current) return; // de-dupe rapid clicks
 
     if (!supported) {
-      toast.error("Voice capture isn't available on this device. You can paste a transcript below.");
+      toast.error(
+        "Voice capture isn't available on this device. You can paste a transcript below.",
+      );
       return;
     }
 
@@ -371,10 +388,7 @@ function VoicePage() {
     };
     try {
       if (draftId) {
-        const { error } = await supabase
-          .from("handoff_drafts")
-          .update(payload)
-          .eq("id", draftId);
+        const { error } = await supabase.from("handoff_drafts").update(payload).eq("id", draftId);
         if (error) throw error;
         toast.success("Draft updated");
         void platformHaptics.notificationSuccess();
@@ -578,9 +592,7 @@ function VoicePage() {
               <DialogContent className="max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Saved handoff drafts</DialogTitle>
-                  <DialogDescription>
-                    Pick a draft to reload it into the editor.
-                  </DialogDescription>
+                  <DialogDescription>Pick a draft to reload it into the editor.</DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="max-h-[60vh] pr-2">
                   {skipped.length > 0 && (
@@ -642,10 +654,7 @@ function VoicePage() {
                           key={d.id}
                           className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 p-3 hover:bg-muted/60"
                         >
-                          <button
-                            className="flex-1 text-left"
-                            onClick={() => openDraft(d.id)}
-                          >
+                          <button className="flex-1 text-left" onClick={() => openDraft(d.id)}>
                             <div className="font-medium text-sm truncate">{d.title}</div>
                             <div className="text-xs text-muted-foreground truncate">
                               {d.patient || "—"} · {new Date(d.updated_at).toLocaleString()}
@@ -665,7 +674,9 @@ function VoicePage() {
                   )}
                 </ScrollArea>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setDraftsOpen(false)}>Close</Button>
+                  <Button variant="outline" onClick={() => setDraftsOpen(false)}>
+                    Close
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -679,8 +690,12 @@ function VoicePage() {
       <main className="container mx-auto px-6 py-8 space-y-6">
         <OfflineBanner message="You're offline. Recording works, but generating the AI summary needs a connection." />
         <div>
-          <p className="text-sm uppercase tracking-wider text-muted-foreground">Dictate &amp; structure</p>
-          <h1 className="font-display text-3xl font-bold tracking-tight">Voice-to-text handoff summary</h1>
+          <p className="text-sm uppercase tracking-wider text-muted-foreground">
+            Dictate &amp; structure
+          </p>
+          <h1 className="font-display text-3xl font-bold tracking-tight">
+            Voice-to-text handoff summary
+          </h1>
           <p className="mt-1 text-muted-foreground">
             Dictate freely, then let AI turn it into a structured SBAR handoff.
           </p>
@@ -716,7 +731,11 @@ function VoicePage() {
                   <Square className="h-4 w-4" /> Stop
                 </Button>
               )}
-              <Button variant="outline" onClick={reset} disabled={recording || (!transcript && !hasSummary)}>
+              <Button
+                variant="outline"
+                onClick={reset}
+                disabled={recording || (!transcript && !hasSummary)}
+              >
                 <Trash2 className="h-4 w-4" /> Clear
               </Button>
               {recording && (
@@ -735,7 +754,9 @@ function VoicePage() {
               <Textarea
                 id="transcript"
                 rows={8}
-                placeholder={supported ? "Your speech will appear here…" : "Paste a transcript here…"}
+                placeholder={
+                  supported ? "Your speech will appear here…" : "Paste a transcript here…"
+                }
                 value={transcript + (interim ? (transcript ? " " : "") + interim : "")}
                 onChange={(e) => {
                   setTranscript(e.target.value);
@@ -762,11 +783,15 @@ function VoicePage() {
               <Sparkles className="h-5 w-5 text-primary" /> 2. Generate structured summary
             </CardTitle>
             <CardDescription>
-              AI rewrites your dictation into an SBAR handoff with action items. Tweak any field before saving.
+              AI rewrites your dictation into an SBAR handoff with action items. Tweak any field
+              before saving.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button onClick={generate} disabled={generating || recording || transcript.trim().length < 10}>
+            <Button
+              onClick={generate}
+              disabled={generating || recording || transcript.trim().length < 10}
+            >
               {generating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" /> Generating…
@@ -777,14 +802,16 @@ function VoicePage() {
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4" /> {hasSummary ? "Regenerate summary" : "Generate summary"}
+                  <Sparkles className="h-4 w-4" />{" "}
+                  {hasSummary ? "Regenerate summary" : "Generate summary"}
                 </>
               )}
             </Button>
 
             {!supported && !hasSummary && (
               <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                <MicOff className="h-3.5 w-3.5" /> Browser mic capture unavailable — you can still paste a transcript above.
+                <MicOff className="h-3.5 w-3.5" /> Browser mic capture unavailable — you can still
+                paste a transcript above.
               </p>
             )}
           </CardContent>
@@ -832,11 +859,15 @@ function VoicePage() {
                 <Label>Action items</Label>
                 <div className="space-y-2">
                   {sbar.actions.length === 0 && (
-                    <p className="text-xs text-muted-foreground">No action items yet — add one below.</p>
+                    <p className="text-xs text-muted-foreground">
+                      No action items yet — add one below.
+                    </p>
                   )}
                   {sbar.actions.map((a, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <span className="mt-2 text-xs text-muted-foreground w-5 text-right">{i + 1}.</span>
+                      <span className="mt-2 text-xs text-muted-foreground w-5 text-right">
+                        {i + 1}.
+                      </span>
                       <Textarea
                         rows={1}
                         value={a}
@@ -867,7 +898,12 @@ function VoicePage() {
                       }
                     }}
                   />
-                  <Button type="button" variant="outline" onClick={addAction} disabled={!newAction.trim()}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addAction}
+                    disabled={!newAction.trim()}
+                  >
                     <Plus className="h-4 w-4" /> Add
                   </Button>
                 </div>
