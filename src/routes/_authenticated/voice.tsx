@@ -417,23 +417,23 @@ function VoicePage() {
   function validateDraftRow(
     row: unknown,
   ): { ok: true; row: DraftRow } | { ok: false; skipped: SkippedDraft } {
-    const id =
-      (row as Record<string, unknown>) && typeof (row as any) === "object" && typeof row.id === "string" && row.id ? row.id : null;
+    const r = (row && typeof row === "object" ? (row as Record<string, unknown>) : null) ?? {};
+    const id = typeof r.id === "string" && r.id ? r.id : null;
     const reasons: string[] = [];
     if (!row || typeof row !== "object") {
       reasons.push("row is not an object");
     } else {
-      if (typeof row.id !== "string" || !row.id) reasons.push("missing id");
-      if (typeof row.title !== "string") reasons.push("invalid title");
-      if (typeof row.patient !== "string") reasons.push("invalid patient");
-      if (typeof row.updated_at !== "string") reasons.push("invalid timestamp");
+      if (typeof r.id !== "string" || !r.id) reasons.push("missing id");
+      if (typeof r.title !== "string") reasons.push("invalid title");
+      if (typeof r.patient !== "string") reasons.push("invalid patient");
+      if (typeof r.updated_at !== "string") reasons.push("invalid timestamp");
     }
     if (reasons.length === 0) return { ok: true, row: row as DraftRow };
     return {
       ok: false,
       skipped: {
         id,
-        title: (row as Record<string, unknown>) && typeof (row as any).title === "string" ? row.title : null,
+        title: typeof r.title === "string" ? r.title : null,
         reason: reasons.join(", "),
       },
     };
