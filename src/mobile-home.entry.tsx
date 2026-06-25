@@ -7,7 +7,18 @@ import { AlertsScreen } from "./mobile/alerts";
 import { TemplatesScreen } from "./mobile/templates";
 import { TasksScreen } from "./mobile/tasks";
 import { VoiceScreen } from "./mobile/voice";
-import { ScreenFade } from "./mobile/ui";
+import {
+  Banner,
+  ScreenFade,
+  Spinner,
+  inputStyle,
+  labelStyle,
+  pageStyle,
+  palette,
+  primaryButton,
+  radii,
+  space,
+} from "./mobile/ui";
 import "./styles.css";
 
 declare global {
@@ -53,21 +64,11 @@ const sb = createClient(SUPABASE_URL ?? "", SUPABASE_PUBLISHABLE_KEY ?? "", {
 const screens = ["Alerts", "Templates", "Tasks", "Voice"] as const;
 type Screen = (typeof screens)[number];
 
-const palette = {
-  bg: "#f7f7f2",
-  ink: "#121212",
-  muted: "#454545",
-  border: "#121212",
-  surface: "#ffffff",
-};
-
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  boxSizing: "border-box",
-  padding: "48px 20px",
-  background: palette.bg,
-  color: palette.ink,
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+const TAB_GLYPH: Record<Screen, string> = {
+  Alerts: "!",
+  Templates: "▤",
+  Tasks: "✓",
+  Voice: "●",
 };
 
 function MobileHome({
@@ -82,7 +83,7 @@ function MobileHome({
   const [activeTab, setActiveTab] = useState<Screen>("Alerts");
   const goAlerts = () => setActiveTab("Alerts");
 
-  const tabBarHeight = 64;
+  const tabBarHeight = 68;
   const contentWrapStyle: React.CSSProperties = {
     paddingBottom: `calc(${tabBarHeight}px + env(safe-area-inset-bottom, 0px))`,
     minHeight: "100vh",
@@ -111,21 +112,26 @@ function MobileHome({
         onClick={onSignOut}
         aria-label={`Sign out ${email}`}
         title={`Sign out ${email}`}
+        className="mobile-tap"
         style={{
           position: "fixed",
-          top: "calc(env(safe-area-inset-top, 0px) + 12px)",
+          top: "calc(env(safe-area-inset-top, 0px) + 10px)",
           right: 12,
-          minHeight: 32,
-          padding: "0 10px",
-          border: `1px solid ${palette.border}`,
-          background: "rgba(255,255,255,0.9)",
+          height: 32,
+          padding: "0 12px",
+          border: `1px solid ${palette.hairline}`,
+          background: "rgba(255,255,255,0.92)",
+          backdropFilter: "saturate(180%) blur(10px)",
+          WebkitBackdropFilter: "saturate(180%) blur(10px)",
           color: palette.ink,
           fontSize: 12,
           fontWeight: 600,
+          borderRadius: 999,
           cursor: "pointer",
           touchAction: "manipulation",
           WebkitTapHighlightColor: "transparent",
           zIndex: 20,
+          boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
         }}
       >
         Sign out
@@ -141,11 +147,15 @@ function MobileHome({
           bottom: 0,
           display: "grid",
           gridTemplateColumns: `repeat(${screens.length}, 1fr)`,
-          background: palette.surface,
-          borderTop: `1px solid ${palette.border}`,
+          background: "rgba(255,255,255,0.92)",
+          backdropFilter: "saturate(180%) blur(20px)",
+          WebkitBackdropFilter: "saturate(180%) blur(20px)",
+          borderTop: `1px solid ${palette.hairline}`,
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          paddingTop: 4,
           zIndex: 30,
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
         }}
       >
         {screens.map((tab) => {
@@ -157,28 +167,45 @@ function MobileHome({
               role="tab"
               aria-selected={active}
               onClick={() => setActiveTab(tab)}
+              className="mobile-tap"
               style={{
-                height: tabBarHeight,
+                height: tabBarHeight - 4,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 4,
+                gap: 3,
                 background: "transparent",
                 border: "none",
-                borderTop: active
-                  ? `2px solid ${palette.ink}`
-                  : "2px solid transparent",
-                color: active ? palette.ink : palette.muted,
-                fontSize: 12,
+                color: active ? palette.accent : palette.subtle,
+                fontSize: 11,
                 fontWeight: active ? 700 : 500,
+                letterSpacing: 0.1,
                 cursor: "pointer",
                 touchAction: "manipulation",
                 WebkitTapHighlightColor: "transparent",
                 padding: 0,
               }}
             >
-              <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>
+              <span
+                aria-hidden="true"
+                style={{
+                  width: 30,
+                  height: 30,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 16,
+                  lineHeight: 1,
+                  borderRadius: 999,
+                  background: active
+                    ? "rgba(10,132,255,0.15)"
+                    : "transparent",
+                  color: active ? palette.accent : palette.subtle,
+                  fontWeight: 700,
+                  transition: "background 160ms ease, color 160ms ease",
+                }}
+              >
                 {TAB_GLYPH[tab]}
               </span>
               <span>{tab}</span>
@@ -189,13 +216,6 @@ function MobileHome({
     </div>
   );
 }
-
-const TAB_GLYPH: Record<Screen, string> = {
-  Alerts: "!",
-  Templates: "▤",
-  Tasks: "✓",
-  Voice: "🎙",
-};
 
 
 function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
@@ -220,76 +240,125 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
     if (data.session) onSession(data.session);
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    boxSizing: "border-box",
-    minHeight: 48,
-    padding: "0 14px",
-    fontSize: 16,
-    border: `1px solid ${palette.border}`,
-    borderRadius: 0,
-    background: palette.surface,
-    color: palette.ink,
-    marginBottom: 12,
-  };
-
   return (
-    <main style={pageStyle}>
-      <h1 style={{ margin: "0 0 8px", fontSize: 28, fontWeight: 700 }}>
+    <main
+      style={{
+        ...pageStyle,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        padding: `calc(env(safe-area-inset-top, 0px) + 64px) 20px 64px`,
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: radii.lg,
+          background: palette.ink,
+          color: palette.surface,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: 800,
+          fontSize: 24,
+          marginBottom: space.lg,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+        }}
+      >
+        SS
+      </div>
+      <h1
+        style={{
+          margin: "0 0 6px",
+          fontSize: 30,
+          fontWeight: 700,
+          letterSpacing: -0.6,
+        }}
+      >
         Shift Secure
       </h1>
-      <p style={{ margin: "0 0 24px", fontSize: 14, color: palette.muted }}>
+      <p
+        style={{
+          margin: `0 0 ${space.xl}px`,
+          fontSize: 15,
+          color: palette.muted,
+        }}
+      >
         Sign in to continue
       </p>
-      <p
-        data-mobile-build={buildStamp}
-        style={{ margin: "0 0 20px", fontSize: 11, color: "#888" }}
-      >
-        {buildStamp}
-      </p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
+        <label style={labelStyle} htmlFor="login-email">
+          Email
+        </label>
         <input
+          id="login-email"
           type="email"
           inputMode="email"
           autoComplete="email"
-          placeholder="Email"
+          autoCapitalize="none"
+          autoCorrect="off"
+          placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           style={inputStyle}
         />
+        <label style={labelStyle} htmlFor="login-password">
+          Password
+        </label>
         <input
+          id="login-password"
           type="password"
           autoComplete="current-password"
-          placeholder="Password"
+          placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           style={inputStyle}
         />
-        {error && (
-          <p style={{ color: "#b00020", fontSize: 14, margin: "0 0 12px" }}>
-            {error}
-          </p>
-        )}
+        {error && <Banner tone="error">{error}</Banner>}
         <button
           type="submit"
-          disabled={busy}
+          disabled={busy || !email || !password}
+          className="mobile-tap"
           style={{
+            ...primaryButton,
             width: "100%",
-            minHeight: 52,
-            border: `1px solid ${palette.border}`,
-            background: palette.ink,
-            color: palette.surface,
-            fontSize: 17,
-            fontWeight: 600,
-            opacity: busy ? 0.6 : 1,
+            minHeight: 50,
+            fontSize: 16,
+            marginTop: space.sm,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
           }}
         >
-          {busy ? "Signing in..." : "Sign in"}
+          {busy ? (
+            <>
+              <Spinner size={16} color={palette.surface} />
+              <span>Signing in…</span>
+            </>
+          ) : (
+            "Sign in"
+          )}
         </button>
       </form>
+
+      <p
+        data-mobile-build={buildStamp}
+        style={{
+          margin: `${space.xl}px 0 0`,
+          fontSize: 10,
+          color: palette.subtle,
+          textAlign: "center",
+          letterSpacing: 0.4,
+        }}
+      >
+        {buildStamp}
+      </p>
     </main>
   );
 }
@@ -322,8 +391,15 @@ function App() {
 
   if (!ready) {
     return (
-      <main style={pageStyle}>
-        <p style={{ fontSize: 16 }}>Loading…</p>
+      <main
+        style={{
+          ...pageStyle,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Spinner label="Loading…" />
       </main>
     );
   }
@@ -359,7 +435,7 @@ class BootErrorBoundary extends React.Component<
       return (
         <main style={pageStyle}>
           <h1 style={{ fontSize: 20, margin: "0 0 12px" }}>Render error</h1>
-          <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, color: "#b00020" }}>
+          <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, color: palette.critical }}>
             {this.state.error.stack ?? this.state.error.message}
           </pre>
         </main>
@@ -383,4 +459,3 @@ try {
 } catch (err) {
   reportBoot("mount", err as Error);
 }
-
