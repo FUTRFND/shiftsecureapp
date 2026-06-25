@@ -64,15 +64,64 @@ const sb = createClient(SUPABASE_URL ?? "", SUPABASE_PUBLISHABLE_KEY ?? "", {
   },
 });
 
-const screens = ["Alerts", "Templates", "Tasks", "Voice"] as const;
+const screens = ["Home", "Alerts", "Templates", "Tasks", "Voice"] as const;
 type Screen = (typeof screens)[number];
 
-const TAB_GLYPH: Record<Screen, string> = {
-  Alerts: "!",
-  Templates: "▤",
-  Tasks: "✓",
-  Voice: "●",
-};
+// Inline SVG icons matched to SF Symbols feel.
+function TabIcon({ name, active }: { name: Screen; active: boolean }) {
+  const stroke = active ? palette.accentDeep : palette.subtle;
+  const fill = active ? palette.accent : "none";
+  const common = {
+    width: 24,
+    height: 24,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke,
+    strokeWidth: 1.8,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
+  switch (name) {
+    case "Home":
+      return (
+        <svg {...common}>
+          <path d="M3 11.5 12 4l9 7.5" />
+          <path d="M5 10.5V20h14V10.5" fill={active ? palette.accentSoft : "none"} />
+        </svg>
+      );
+    case "Alerts":
+      return (
+        <svg {...common}>
+          <path d="M6 17V11a6 6 0 1 1 12 0v6l1.5 2H4.5z" fill={active ? palette.accentSoft : "none"} />
+          <path d="M10 21h4" />
+        </svg>
+      );
+    case "Templates":
+      return (
+        <svg {...common}>
+          <rect x="4" y="4" width="16" height="16" rx="3" fill={active ? palette.accentSoft : "none"} />
+          <path d="M8 9h8M8 13h8M8 17h5" />
+        </svg>
+      );
+    case "Tasks":
+      return (
+        <svg {...common}>
+          <rect x="4" y="4" width="16" height="16" rx="4" fill={active ? palette.accentSoft : "none"} />
+          <path d="m8 12 3 3 5-6" stroke={active ? palette.accentDeep : stroke} />
+        </svg>
+      );
+    case "Voice":
+      return (
+        <svg {...common}>
+          <rect x="9" y="3" width="6" height="12" rx="3" fill={active ? palette.accentSoft : "none"} />
+          <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+        </svg>
+      );
+  }
+  // exhaustive
+  const _: never = name;
+  return _;
+}
 
 function MobileHome({
   email,
@@ -83,18 +132,27 @@ function MobileHome({
   userId: string;
   onSignOut: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState<Screen>("Alerts");
+  const [activeTab, setActiveTab] = useState<Screen>("Home");
   const goAlerts = () => setActiveTab("Alerts");
 
-  const tabBarHeight = 68;
+  const tabBarHeight = 72;
   const contentWrapStyle: React.CSSProperties = {
-    paddingBottom: `calc(${tabBarHeight}px + env(safe-area-inset-bottom, 0px))`,
+    paddingBottom: `calc(${tabBarHeight}px + 18px + env(safe-area-inset-bottom, 0px))`,
     minHeight: "100vh",
     background: palette.bg,
   };
 
   let screen: React.ReactNode = null;
-  if (activeTab === "Alerts") {
+  if (activeTab === "Home") {
+    screen = (
+      <HomeScreen
+        sb={sb}
+        userId={userId}
+        email={email}
+        onNavigate={(t) => setActiveTab(t)}
+      />
+    );
+  } else if (activeTab === "Alerts") {
     screen = <AlertsScreen sb={sb} userId={userId} onBack={goAlerts} />;
   } else if (activeTab === "Templates") {
     screen = <TemplatesScreen sb={sb} userId={userId} onBack={goAlerts} />;
@@ -123,9 +181,9 @@ function MobileHome({
           height: 32,
           padding: "0 12px",
           border: `1px solid ${palette.hairline}`,
-          background: "rgba(255,255,255,0.92)",
-          backdropFilter: "saturate(180%) blur(10px)",
-          WebkitBackdropFilter: "saturate(180%) blur(10px)",
+          background: "rgba(255,255,255,0.82)",
+          backdropFilter: "saturate(180%) blur(14px)",
+          WebkitBackdropFilter: "saturate(180%) blur(14px)",
           color: palette.ink,
           fontSize: 12,
           fontWeight: 600,
@@ -140,22 +198,28 @@ function MobileHome({
         Sign out
       </button>
 
+      {/* Floating translucent tab bar */}
       <nav
         role="tablist"
         aria-label="Primary"
         style={{
           position: "fixed",
-          left: 0,
-          right: 0,
-          bottom: 0,
+          left: 10,
+          right: 10,
+          bottom: `calc(env(safe-area-inset-bottom, 0px) + 10px)`,
           display: "grid",
           gridTemplateColumns: `repeat(${screens.length}, 1fr)`,
-          background: "rgba(255,255,255,0.92)",
-          backdropFilter: "saturate(180%) blur(20px)",
-          WebkitBackdropFilter: "saturate(180%) blur(20px)",
-          borderTop: `1px solid ${palette.hairline}`,
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          paddingTop: 4,
+          background: "rgba(255,255,255,0.78)",
+          backdropFilter: "saturate(180%) blur(24px)",
+          WebkitBackdropFilter: "saturate(180%) blur(24px)",
+          border: `1px solid rgba(255,255,255,0.7)`,
+          borderRadius: 24,
+          boxShadow:
+            "0 10px 30px rgba(20,24,28,0.12), 0 2px 6px rgba(20,24,28,0.06)",
+          paddingTop: 6,
+          paddingBottom: 6,
+          paddingLeft: 4,
+          paddingRight: 4,
           zIndex: 30,
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
@@ -172,46 +236,42 @@ function MobileHome({
               onClick={() => setActiveTab(tab)}
               className="mobile-tap"
               style={{
-                height: tabBarHeight - 4,
+                height: tabBarHeight - 12,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 3,
+                gap: 2,
                 background: "transparent",
                 border: "none",
-                color: active ? palette.accent : palette.subtle,
-                fontSize: 11,
+                color: active ? palette.accentDeep : palette.subtle,
+                fontSize: 10.5,
                 fontWeight: active ? 700 : 500,
                 letterSpacing: 0.1,
                 cursor: "pointer",
                 touchAction: "manipulation",
                 WebkitTapHighlightColor: "transparent",
                 padding: 0,
+                position: "relative",
               }}
             >
               <span
                 aria-hidden="true"
                 style={{
-                  width: 30,
+                  width: 44,
                   height: 30,
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 16,
-                  lineHeight: 1,
                   borderRadius: 999,
-                  background: active
-                    ? "rgba(10,132,255,0.15)"
-                    : "transparent",
-                  color: active ? palette.accent : palette.subtle,
-                  fontWeight: 700,
-                  transition: "background 160ms ease, color 160ms ease",
+                  background: active ? palette.accentSoft : "transparent",
+                  transition: "background 180ms ease, transform 180ms ease",
+                  transform: active ? "translateY(-1px)" : "translateY(0)",
                 }}
               >
-                {TAB_GLYPH[tab]}
+                <TabIcon name={tab} active={active} />
               </span>
-              <span>{tab}</span>
+              <span style={{ marginTop: 1 }}>{tab}</span>
             </button>
           );
         })}
@@ -219,6 +279,7 @@ function MobileHome({
     </div>
   );
 }
+
 
 
 function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
