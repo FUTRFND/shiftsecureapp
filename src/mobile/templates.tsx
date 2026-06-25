@@ -10,18 +10,26 @@ import {
 } from "../lib/templates";
 import {
   Banner,
+  Card,
   EmptyState,
+  FAB,
+  Pill,
   ScreenHeader,
-  LoadingBlock,
+  SectionHeader,
+  SkeletonCard,
   Spinner,
   buttonBase,
+  ghostButton,
   inputStyle,
   labelStyle,
   pageStyle,
   palette,
   primaryButton,
+  radii,
+  shadow,
   space,
   textareaStyle,
+  type,
   useConfirm,
   useKeyboardScrollIntoView,
   usePullToRefresh,
@@ -31,7 +39,7 @@ import {
 export function TemplatesScreen({
   sb,
   userId,
-  onBack,
+  onBack: _onBack,
 }: {
   sb: SupabaseClient;
   userId: string;
@@ -45,6 +53,7 @@ export function TemplatesScreen({
     | { mode: "edit"; row: TemplateRow }
     | null
   >(null);
+  const [presetSheet, setPresetSheet] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -137,6 +146,8 @@ export function TemplatesScreen({
     );
   }
 
+  const presets = PRESETS.filter((p) => p.label !== "Blank");
+
   return (
     <main style={pageStyle}>
       {indicator}
@@ -151,18 +162,56 @@ export function TemplatesScreen({
         </Banner>
       )}
 
-      <button
-        type="button"
-        onClick={() => setEditing({ mode: "create", initial: null })}
-        className="mobile-tap"
-        style={{ ...primaryButton, width: "100%", marginBottom: space.md }}
-      >
-        + New template
-      </button>
-
+      {/* Preset quick-start row */}
+      {!loading && templates.length > 0 && (
+        <>
+          <SectionHeader title="Start from a preset" />
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              overflowX: "auto",
+              paddingBottom: 4,
+              marginBottom: space.md,
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+            }}
+          >
+            {presets.map((p) => (
+              <button
+                key={p.label}
+                type="button"
+                className="mobile-tap"
+                onClick={() => setEditing({ mode: "create", initial: p.template })}
+                style={{
+                  flex: "0 0 auto",
+                  padding: "10px 14px",
+                  borderRadius: radii.pill,
+                  border: `1px solid ${palette.hairline}`,
+                  background: palette.surface,
+                  color: palette.ink,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  WebkitAppearance: "none",
+                  touchAction: "manipulation",
+                  boxShadow: shadow.card,
+                }}
+              >
+                + {p.label}
+              </button>
+            ))}
+          </div>
+          <SectionHeader title="Your templates" />
+        </>
+      )}
 
       {loading && !refreshing ? (
-        <LoadingBlock label="Loading templates…" />
+        <div style={{ display: "grid", gap: 10 }}>
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       ) : templates.length === 0 ? (
         <EmptyState
           icon="▤"
@@ -170,12 +219,12 @@ export function TemplatesScreen({
           body="Start from a preset to build your first handoff template."
           action={
             <div style={{ display: "grid", gap: 8, minWidth: 240 }}>
-              {PRESETS.filter((p) => p.label !== "Blank").map((p) => (
+              {presets.map((p) => (
                 <button
                   key={p.label}
                   type="button"
                   className="mobile-tap"
-                  style={buttonBase}
+                  style={{ ...primaryButton }}
                   onClick={() =>
                     setEditing({ mode: "create", initial: p.template })
                   }
@@ -183,11 +232,19 @@ export function TemplatesScreen({
                   Start from {p.label}
                 </button>
               ))}
+              <button
+                type="button"
+                className="mobile-tap"
+                style={ghostButton}
+                onClick={() => setEditing({ mode: "create", initial: null })}
+              >
+                Start blank
+              </button>
             </div>
           }
         />
       ) : (
-        <div style={{ display: "grid", gap: 10 }}>
+        <div style={{ display: "grid", gap: 12 }}>
           {templates.map((t) => (
             <TemplateCard
               key={t.id}
@@ -198,11 +255,156 @@ export function TemplatesScreen({
           ))}
         </div>
       )}
+
+      <FAB label="New" onClick={() => setPresetSheet(true)} />
+
+      {presetSheet && (
+        <PresetSheet
+          presets={presets}
+          onPick={(initial) => {
+            setPresetSheet(false);
+            setEditing({ mode: "create", initial });
+          }}
+          onBlank={() => {
+            setPresetSheet(false);
+            setEditing({ mode: "create", initial: null });
+          }}
+          onClose={() => setPresetSheet(false)}
+        />
+      )}
+
       {confirmDialog}
     </main>
   );
 }
 
+function PresetSheet({
+  presets,
+  onPick,
+  onBlank,
+  onClose,
+}: {
+  presets: typeof PRESETS;
+  onPick: (initial: TemplateInput) => void;
+  onBlank: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: palette.overlay,
+        zIndex: 100,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+        padding: space.md,
+        paddingBottom: `calc(${space.md}px + env(safe-area-inset-bottom, 0px))`,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%",
+          maxWidth: 420,
+          background: palette.surface,
+          borderRadius: radii.xxl,
+          padding: space.lg,
+          boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
+          animation: "mobile-fade-in 200ms ease-out both",
+        }}
+      >
+        <h2
+          style={{
+            margin: `0 0 4px`,
+            fontSize: type.title3,
+            fontWeight: 700,
+            letterSpacing: -0.3,
+          }}
+        >
+          New template
+        </h2>
+        <p
+          style={{
+            margin: `0 0 ${space.md}px`,
+            fontSize: 13,
+            color: palette.muted,
+          }}
+        >
+          Pick a starting point.
+        </p>
+        <div style={{ display: "grid", gap: 8 }}>
+          {presets.map((p) => (
+            <button
+              key={p.label}
+              type="button"
+              className="mobile-tap"
+              onClick={() => onPick(p.template)}
+              style={{
+                ...buttonBase,
+                justifyContent: "flex-start",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                padding: "12px 14px",
+                minHeight: 56,
+                background: palette.surfaceAlt,
+                borderColor: "transparent",
+                textAlign: "left",
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  background: palette.accentSoft,
+                  color: palette.accentDeep,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 800,
+                  fontSize: 16,
+                }}
+              >
+                {p.label.charAt(0)}
+              </span>
+              <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                <span style={{ fontWeight: 700, color: palette.ink }}>
+                  {p.label}
+                </span>
+                <span style={{ fontSize: 12, color: palette.muted }}>
+                  {p.template.sections.length} sections
+                </span>
+              </div>
+            </button>
+          ))}
+          <button
+            type="button"
+            className="mobile-tap"
+            style={ghostButton}
+            onClick={onBlank}
+          >
+            Start blank
+          </button>
+          <button
+            type="button"
+            className="mobile-tap"
+            style={{ ...ghostButton, marginTop: 4 }}
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function TemplateCard({
   row,
@@ -213,70 +415,95 @@ function TemplateCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const sectionCount = row.sections?.length ?? 0;
   return (
-    <article
-      style={{
-        background: palette.surface,
-        border: `1px solid ${palette.hairline}`,
-        borderRadius: 12,
-        padding: 14,
-      }}
-    >
+    <Card>
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 4,
+          alignItems: "flex-start",
+          gap: space.md,
         }}
       >
-        <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>{row.name}</h2>
-        {row.is_default && (
-          <span
+        <span
+          aria-hidden="true"
+          style={{
+            flex: "0 0 auto",
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: palette.accentSoft,
+            color: palette.accentDeep,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 18,
+            fontWeight: 800,
+          }}
+        >
+          {row.name?.charAt(0)?.toUpperCase() || "T"}
+        </span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
             style={{
-              background: palette.ink,
-              color: palette.surface,
-              fontSize: 11,
-              fontWeight: 700,
-              padding: "2px 8px",
-              textTransform: "uppercase",
-              letterSpacing: 0.4,
+              display: "flex",
+              gap: 8,
+              alignItems: "center",
+              flexWrap: "wrap",
             }}
           >
-            Default
-          </span>
-        )}
+            <h2
+              style={{
+                margin: 0,
+                fontSize: type.headline,
+                fontWeight: 700,
+                letterSpacing: -0.2,
+                color: palette.ink,
+              }}
+            >
+              {row.name}
+            </h2>
+            {row.is_default && <Pill tone="accent">Default</Pill>}
+          </div>
+          {row.description && (
+            <p
+              style={{
+                margin: "4px 0 0",
+                fontSize: 13,
+                color: palette.muted,
+                lineHeight: 1.4,
+              }}
+            >
+              {row.description}
+            </p>
+          )}
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              marginTop: 8,
+            }}
+          >
+            {row.specialty && <Pill tone="info">{row.specialty}</Pill>}
+            <Pill tone="neutral">
+              {sectionCount} {sectionCount === 1 ? "section" : "sections"}
+            </Pill>
+          </div>
+        </div>
       </div>
-      {row.description && (
-        <p style={{ margin: "0 0 8px", fontSize: 14, color: palette.muted }}>
-          {row.description}
-        </p>
-      )}
+
       <div
         style={{
           display: "flex",
-          flexWrap: "wrap",
-          gap: 6,
-          marginBottom: 10,
-          fontSize: 11,
-          color: palette.muted,
+          gap: 8,
+          marginTop: space.md,
         }}
       >
-        {row.specialty && (
-          <span style={{ border: `1px solid ${palette.border}`, padding: "2px 6px" }}>
-            {row.specialty}
-          </span>
-        )}
-        <span style={{ border: `1px solid ${palette.border}`, padding: "2px 6px" }}>
-          {row.sections?.length ?? 0} sections
-        </span>
-      </div>
-      <div style={{ display: "flex", gap: 8 }}>
         <button
           type="button"
           className="mobile-tap"
-          style={{ ...buttonBase, flex: 1 }}
+          style={{ ...primaryButton, flex: 1 }}
           onClick={onEdit}
         >
           Edit
@@ -284,13 +511,20 @@ function TemplateCard({
         <button
           type="button"
           className="mobile-tap"
-          style={{ ...buttonBase, color: palette.critical }}
+          aria-label={`Delete ${row.name}`}
+          style={{
+            ...ghostButton,
+            color: palette.critical,
+            borderColor: "rgba(215,38,61,0.25)",
+            paddingLeft: 14,
+            paddingRight: 14,
+          }}
           onClick={onDelete}
         >
           Delete
         </button>
       </div>
-    </article>
+    </Card>
   );
 }
 
@@ -318,6 +552,86 @@ function toInput(row: TemplateRow): TemplateInput {
   };
 }
 
+function ToggleRow({
+  checked,
+  onChange,
+  label,
+  hint,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+  hint?: string;
+}) {
+  return (
+    <label
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        padding: "12px 14px",
+        background: palette.surface,
+        border: `1px solid ${palette.hairline}`,
+        borderRadius: radii.md,
+        cursor: "pointer",
+      }}
+    >
+      <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: palette.ink }}>
+          {label}
+        </span>
+        {hint && (
+          <span style={{ fontSize: 12, color: palette.muted, marginTop: 2 }}>
+            {hint}
+          </span>
+        )}
+      </span>
+      <span
+        role="switch"
+        aria-checked={checked}
+        style={{
+          position: "relative",
+          width: 50,
+          height: 30,
+          borderRadius: 999,
+          background: checked ? palette.accent : palette.surfaceAlt,
+          border: `1px solid ${checked ? palette.accent : palette.hairline}`,
+          transition: "background 160ms ease, border-color 160ms ease",
+          flex: "0 0 auto",
+        }}
+      >
+        <span
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top: 2,
+            left: checked ? 22 : 2,
+            width: 24,
+            height: 24,
+            borderRadius: "50%",
+            background: "#fff",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.18)",
+            transition: "left 160ms ease",
+          }}
+        />
+      </span>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        style={{
+          position: "absolute",
+          opacity: 0,
+          pointerEvents: "none",
+          width: 0,
+          height: 0,
+        }}
+      />
+    </label>
+  );
+}
+
 function TemplateEditor({
   initial,
   editingName,
@@ -337,7 +651,6 @@ function TemplateEditor({
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   useKeyboardScrollIntoView();
-
 
   const canSave = useMemo(
     () =>
@@ -415,13 +728,14 @@ function TemplateEditor({
 
   return (
     <main style={pageStyle}>
+      {/* Sticky-feeling top bar */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 8,
-          marginBottom: 12,
+          marginBottom: space.md,
         }}
       >
         <button
@@ -430,7 +744,8 @@ function TemplateEditor({
             console.log("[templates] cancel tapped");
             onCancel();
           }}
-          style={{ ...buttonBase, ...tapFix }}
+          className="mobile-tap"
+          style={{ ...ghostButton, ...tapFix }}
         >
           ← Cancel
         </button>
@@ -445,7 +760,6 @@ function TemplateEditor({
           style={{
             ...primaryButton,
             ...tapFix,
-            opacity: saving ? 0.7 : 1,
             display: "inline-flex",
             alignItems: "center",
             gap: 8,
@@ -456,115 +770,135 @@ function TemplateEditor({
         </button>
       </div>
 
-      <h1 style={{ margin: "0 0 14px", fontSize: 22, fontWeight: 700 }}>
+      <h1
+        style={{
+          margin: `0 0 ${space.lg}px`,
+          fontSize: type.title1,
+          fontWeight: 700,
+          letterSpacing: -0.6,
+          color: palette.ink,
+        }}
+      >
         {editingName ? `Edit "${editingName}"` : "New template"}
       </h1>
 
       {err && (
-        <div
-          style={{
-            border: `1px solid ${palette.critical}`,
-            background: "#fde8ec",
-            color: palette.critical,
-            padding: "8px 10px",
-            fontSize: 13,
-            marginBottom: 12,
-          }}
-        >
+        <Banner tone="error" onDismiss={() => setErr(null)}>
           {err}
-        </div>
+        </Banner>
       )}
 
-      <label style={labelStyle}>Name</label>
-      <input
-        style={inputStyle}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="SBAR Handoff"
-      />
-
-      <label style={labelStyle}>Description</label>
-      <textarea
-        style={textareaStyle}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Short summary"
-      />
-
-      <label style={labelStyle}>Specialty</label>
-      <input
-        style={inputStyle}
-        value={specialty}
-        onChange={(e) => setSpecialty(e.target.value)}
-        placeholder="Emergency Medicine"
-      />
-
-      <label
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          margin: "4px 0 18px",
-          fontSize: 14,
-        }}
-      >
+      <Card style={{ marginBottom: space.md }}>
+        <label style={labelStyle}>Name</label>
         <input
-          type="checkbox"
-          checked={isDefault}
-          onChange={(e) => setIsDefault(e.target.checked)}
-          style={{ width: 18, height: 18 }}
+          style={inputStyle}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="SBAR Handoff"
         />
-        Use as my default template
-      </label>
 
-      <h2 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700 }}>Sections</h2>
+        <label style={labelStyle}>Description</label>
+        <textarea
+          style={textareaStyle}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Short summary"
+        />
 
-      <div style={{ display: "grid", gap: 10 }}>
+        <label style={labelStyle}>Specialty</label>
+        <input
+          style={{ ...inputStyle, marginBottom: space.md }}
+          value={specialty}
+          onChange={(e) => setSpecialty(e.target.value)}
+          placeholder="Emergency Medicine"
+        />
+
+        <ToggleRow
+          checked={isDefault}
+          onChange={setIsDefault}
+          label="Default template"
+          hint="Pre-selected when starting a new handoff."
+        />
+      </Card>
+
+      <SectionHeader
+        title="Sections"
+        action={
+          <span style={{ fontSize: 12, color: palette.subtle, fontWeight: 600 }}>
+            {sections.length}
+          </span>
+        }
+      />
+
+      <div style={{ display: "grid", gap: 12 }}>
         {sections.map((s, idx) => (
-          <div
-            key={s.id}
-            style={{
-              border: `1px solid ${palette.border}`,
-              background: palette.surface,
-              padding: 12,
-            }}
-          >
+          <Card key={s.id} padded={false} style={{ padding: space.md }}>
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: 6,
+                marginBottom: space.sm,
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 700, color: palette.muted }}>
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minWidth: 26,
+                  height: 26,
+                  padding: "0 8px",
+                  borderRadius: radii.pill,
+                  background: palette.surfaceAlt,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  color: palette.muted,
+                }}
+              >
                 #{idx + 1}
               </span>
               <div style={{ display: "flex", gap: 6 }}>
                 <button
                   type="button"
-                  style={{ ...buttonBase, minHeight: 32, padding: "0 8px", fontSize: 13 }}
+                  className="mobile-tap"
+                  style={{
+                    ...ghostButton,
+                    minHeight: 34,
+                    padding: "0 10px",
+                    fontSize: 14,
+                  }}
                   onClick={() => moveSection(s.id, -1)}
                   disabled={idx === 0}
+                  aria-label="Move up"
                 >
                   ↑
                 </button>
                 <button
                   type="button"
-                  style={{ ...buttonBase, minHeight: 32, padding: "0 8px", fontSize: 13 }}
+                  className="mobile-tap"
+                  style={{
+                    ...ghostButton,
+                    minHeight: 34,
+                    padding: "0 10px",
+                    fontSize: 14,
+                  }}
                   onClick={() => moveSection(s.id, 1)}
                   disabled={idx === sections.length - 1}
+                  aria-label="Move down"
                 >
                   ↓
                 </button>
                 <button
                   type="button"
+                  className="mobile-tap"
                   style={{
-                    ...buttonBase,
-                    minHeight: 32,
-                    padding: "0 8px",
+                    ...ghostButton,
+                    minHeight: 34,
+                    padding: "0 10px",
                     fontSize: 13,
                     color: palette.critical,
+                    borderColor: "rgba(215,38,61,0.25)",
                   }}
                   onClick={() => removeSection(s.id)}
                   disabled={sections.length <= 1}
@@ -582,34 +916,31 @@ function TemplateEditor({
             />
             <label style={labelStyle}>Placeholder</label>
             <textarea
-              style={textareaStyle}
+              style={{ ...textareaStyle, marginBottom: space.sm }}
               value={s.placeholder ?? ""}
               onChange={(e) => updateSection(s.id, { placeholder: e.target.value })}
             />
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontSize: 14,
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={!!s.required}
-                onChange={(e) => updateSection(s.id, { required: e.target.checked })}
-                style={{ width: 18, height: 18 }}
-              />
-              Required
-            </label>
-          </div>
+            <ToggleRow
+              checked={!!s.required}
+              onChange={(v) => updateSection(s.id, { required: v })}
+              label="Required"
+              hint="Cannot be skipped when filling in a handoff."
+            />
+          </Card>
         ))}
       </div>
 
       <button
         type="button"
         onClick={addSection}
-        style={{ ...buttonBase, width: "100%", marginTop: 12 }}
+        className="mobile-tap"
+        style={{
+          ...ghostButton,
+          width: "100%",
+          marginTop: space.md,
+          marginBottom: space.xl,
+          borderStyle: "dashed",
+        }}
       >
         + Add section
       </button>
