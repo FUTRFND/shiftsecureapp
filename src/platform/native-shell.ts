@@ -2,13 +2,15 @@
  * Native shell bootstrap — runs once on app startup inside the Capacitor
  * container. On web this is a no-op.
  *
- * Responsibilities (added incrementally across phases):
+ * Responsibilities:
  *   - Hide splash screen after first paint.
  *   - Set status-bar style to match the app theme.
  *   - Forward Android hardware-back to TanStack Router history.
- *   - Listen for deep links (custom scheme + Universal/App Links) and
- *     dispatch them to the router. The Supabase auth callback handler
- *     is wired in Phase 3.
+ *
+ * Deep links are owned by `@/platform/deep-links` and the auth-specific
+ * handler in `@/lib/auth-deep-link`, both wired up by `AuthProvider`. This
+ * shell intentionally does NOT listen for `appUrlOpen` so we don't double-fire
+ * with the deep-link router.
  *
  * Call `initNativeShell({ router })` from `src/router.tsx` after the router
  * is constructed.
@@ -30,7 +32,7 @@ export async function initNativeShell({ router }: NativeShellOptions): Promise<v
       import("@capacitor/app"),
     ]);
 
-    // Match the app's dark surface (oklch token approximated in capacitor.config.ts).
+    // Match the app's dark surface.
     await StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
 
     // Android hardware back → router history; exit on root.
@@ -39,19 +41,6 @@ export async function initNativeShell({ router }: NativeShellOptions): Promise<v
         router.history.back();
       } else {
         void App.exitApp();
-      }
-    });
-
-    // Deep links — Phase 3 will parse the Supabase auth callback here.
-    App.addListener("appUrlOpen", (event) => {
-      try {
-        const url = new URL(event.url);
-        // Handle handoffhero://auth/callback#access_token=... in Phase 3.
-        if (url.host === "auth" && url.pathname.startsWith("/callback")) {
-          router.navigate({ to: "/", search: () => ({}) });
-        }
-      } catch {
-        /* malformed url — ignore */
       }
     });
 
