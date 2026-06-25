@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth";
 import { Toaster } from "../components/ui/sonner";
+import { isNative } from "../platform/runtime";
 
 function NotFoundComponent() {
   return (
@@ -148,6 +149,8 @@ function RootComponent() {
   // tear down the tree on first interaction inside the iOS WebView
   // (inputs only accepted one keystroke, clicks stopped firing).
   useEffect(() => {
+    if (isNative()) return;
+
     void (async () => {
       try {
         const { initNativeShell } = await import("../platform/native-shell");
@@ -157,7 +160,6 @@ function RootComponent() {
       }
     })();
   }, [router]);
-
 
   return (
     <QueryClientProvider client={queryClient}>

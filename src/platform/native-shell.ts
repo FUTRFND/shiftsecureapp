@@ -64,6 +64,8 @@ function syncThemeColor(): void {
 }
 
 export async function initNativeShell({ router }: NativeShellOptions): Promise<void> {
+  if (isNative()) return;
+
   tagHtml();
   syncThemeColor();
 
@@ -73,8 +75,6 @@ export async function initNativeShell({ router }: NativeShellOptions): Promise<v
     const obs = new MutationObserver(() => syncThemeColor());
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
   }
-
-  if (!isNative()) return;
 
   // Register a dynamic importer that defeats Vite's static analysis. Native-
   // only optional plugins (RevenueCat, etc.) route through this so the web
