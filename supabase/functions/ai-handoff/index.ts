@@ -1,4 +1,4 @@
-// AI handoff edge function. (deploy-touch: 2026-06-25)
+// AI handoff edge function. (deploy-touch: 2026-06-25T2)
 //
 // Single entry point for all client AI calls. Owns:
 //   - JWT validation (verify_jwt = true in config.toml)
