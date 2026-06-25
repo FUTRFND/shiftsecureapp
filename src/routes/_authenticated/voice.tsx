@@ -771,6 +771,10 @@ function VoicePage() {
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" /> Generating…
                 </>
+              ) : !canUseAI ? (
+                <>
+                  <Lock className="h-4 w-4" /> Unlock AI summaries
+                </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4" /> {hasSummary ? "Regenerate summary" : "Generate summary"}
