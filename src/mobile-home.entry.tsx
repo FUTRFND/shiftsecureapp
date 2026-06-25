@@ -168,6 +168,10 @@ function MobileHome({
     screen = <TasksScreen sb={sb} userId={userId} onBack={goAlerts} />;
   } else if (activeTab === "Voice") {
     screen = <VoiceScreen sb={sb} userId={userId} onBack={goAlerts} />;
+  } else if (activeTab === "Account") {
+    screen = (
+      <AccountScreen sb={sb} userId={userId} email={email} onSignOut={onSignOut} />
+    );
   }
 
   return (
