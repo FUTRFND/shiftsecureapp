@@ -45,7 +45,7 @@ import { OfflineBanner } from "@/components/offline-banner";
 function VoiceErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-6">
+    <div className="min-h-dvh flex items-center justify-center bg-background px-6">
       <div className="max-w-md w-full text-center space-y-5">
         <div className="mx-auto h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
           <svg className="h-6 w-6 text-destructive" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -530,7 +530,7 @@ function VoicePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-3">

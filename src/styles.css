@@ -111,16 +111,36 @@
   html {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    /* Lock dynamic font scaling to a sensible ceiling on iOS so layouts
+       survive the largest accessibility sizes without breaking. */
+    -webkit-text-size-adjust: 100%;
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-feature-settings: "cv11", "ss01";
+    /* Prevent rubber-band scroll bleed-through on iOS standalone. */
+    overscroll-behavior-y: none;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
   }
+}
+
+/* ---- Safe-area + keyboard support (native) -----------------------------
+ * On web these utilities resolve to 0 — zero impact on the browser layout.
+ * On native iOS/Android the StatusBar overlays the WebView, so every
+ * top-level page shell MUST claim the inset with `safe-top` (or `safe-y`).
+ * Fixed footers should add `safe-bottom` AND `kb-bottom` to lift over the
+ * keyboard when it opens.
+ */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --keyboard-height: 0px;
 }
 
 @layer utilities {
@@ -136,6 +156,26 @@
     background-clip: text;
     color: transparent;
   }
+
+  .safe-top    { padding-top:    var(--safe-top); }
+  .safe-bottom { padding-bottom: var(--safe-bottom); }
+  .safe-left   { padding-left:   var(--safe-left); }
+  .safe-right  { padding-right:  var(--safe-right); }
+  .safe-x      { padding-left:   var(--safe-left); padding-right: var(--safe-right); }
+  .safe-y      { padding-top:    var(--safe-top); padding-bottom: var(--safe-bottom); }
+  .min-h-dvh   { min-height: 100dvh; }
+
+  /* Lifts fixed elements above the on-screen keyboard. Falls back to
+     just safe-bottom on web (--keyboard-height stays 0). */
+  .kb-bottom {
+    padding-bottom: calc(var(--safe-bottom) + var(--keyboard-height));
+  }
+}
+
+/* Ensure the in-app viewport never sits under the status bar on native.
+   Web is unaffected — html.native is only added inside Capacitor. */
+html.native body {
+  min-height: 100dvh;
 }
 
 @keyframes pulse-ring {

@@ -11,7 +11,7 @@ function AuthenticatedLayout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-background">
+      <div className="min-h-dvh grid place-items-center bg-background safe-y safe-x">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
@@ -19,5 +19,11 @@ function AuthenticatedLayout() {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  return <Outlet />;
+  // safe-x covers landscape notches on iPhone Pro; safe-top reserves room
+  // for the translucent status bar on native. On web all paddings are 0.
+  return (
+    <div className="min-h-dvh bg-background safe-top safe-x">
+      <Outlet />
+    </div>
+  );
 }
