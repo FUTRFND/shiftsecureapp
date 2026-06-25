@@ -74,7 +74,7 @@ function statusOf(state: SubscriptionState): {
 
 export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
   useKeyboardScrollIntoView();
-  const confirm = useConfirm();
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   // ---------- Profile ----------
   const [profile, setProfile] = useState<Profile | null>(null);
