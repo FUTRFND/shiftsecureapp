@@ -511,11 +511,11 @@ export function VoiceScreen({
         <div style={cardStyle}>
           <h2 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700 }}>Saved drafts</h2>
           {loadingDrafts ? (
-            <p style={{ fontSize: 13, color: palette.muted }}>Loading…</p>
+            <LoadingBlock label="Loading drafts…" />
           ) : draftsErr ? (
             <p style={{ fontSize: 13, color: palette.critical }}>{draftsErr}</p>
           ) : drafts.length === 0 ? (
-            <p style={{ fontSize: 13, color: palette.muted }}>No drafts yet.</p>
+            <EmptyState icon="✎" title="No drafts yet" body="Generate and save a summary to keep it here." />
           ) : (
             <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
               {drafts.map((d) => (
