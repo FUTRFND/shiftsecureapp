@@ -308,6 +308,7 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
   return (
     <main style={pageStyle}>
       <ScreenHeader title="Account" subtitle="Profile, plan, and billing" />
+      {confirmDialog}
 
       {/* Profile */}
       <SectionHeader title="Profile" />
