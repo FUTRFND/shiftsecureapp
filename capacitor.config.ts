@@ -7,6 +7,11 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * - `appId` is the reverse-DNS bundle identifier used by both stores.
  * - `server.androidScheme: "https"` makes the in-app origin `https://localhost`
  *   which Supabase Auth + Lovable AI Gateway accept as a same-origin caller.
+ * - `SplashScreen.launchAutoHide: false` — the splash is hidden by the
+ *   native-shell only after the React tree signals `appReady`, preventing
+ *   the white flash that auto-hide causes.
+ * - `Keyboard.resize: "body"` lets CSS env(safe-area-inset-bottom) and
+ *   --keyboard-height work together cleanly on both platforms.
  */
 const config: CapacitorConfig = {
   appId: "com.handoffhero.app",
@@ -17,16 +22,18 @@ const config: CapacitorConfig = {
     androidScheme: "https",
   },
   ios: {
-    contentInset: "always",
+    // `never` lets the WebView extend under the status bar so our CSS
+    // safe-area paddings own the inset — required for Dynamic Island devices.
+    contentInset: "never",
     limitsNavigationsToAppBoundDomains: false,
+    scrollEnabled: true,
   },
   android: {
     allowMixedContent: false,
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 1200,
-      launchAutoHide: true,
+      launchAutoHide: false,
       backgroundColor: "#0b1220",
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP",
@@ -35,8 +42,13 @@ const config: CapacitorConfig = {
       splashImmersive: true,
     },
     Keyboard: {
-      resize: "native",
+      resize: "body",
       resizeOnFullScreen: true,
+    },
+    StatusBar: {
+      // Translucent so CSS env(safe-area-inset-top) controls layout.
+      overlaysWebView: true,
+      style: "DEFAULT",
     },
   },
 };
