@@ -70,7 +70,7 @@ export const pageStyle: React.CSSProperties = {
 
 export const buttonBase: React.CSSProperties = {
   minHeight: 44,
-  border: `1px solid ${palette.border}`,
+  border: `1px solid ${palette.hairline}`,
   background: palette.surface,
   color: palette.ink,
   fontSize: 15,
@@ -83,13 +83,21 @@ export const buttonBase: React.CSSProperties = {
   touchAction: "manipulation",
   WebkitAppearance: "none",
   WebkitTapHighlightColor: "transparent",
-  transition: "opacity 120ms ease, transform 120ms ease",
+  transition: "opacity 120ms ease, transform 120ms ease, background 120ms ease",
 };
 
 export const primaryButton: React.CSSProperties = {
   ...buttonBase,
   background: palette.ink,
+  borderColor: palette.ink,
   color: palette.surface,
+};
+
+export const accentButton: React.CSSProperties = {
+  ...buttonBase,
+  background: palette.accent,
+  borderColor: palette.accent,
+  color: "#ffffff",
 };
 
 export const dangerButton: React.CSSProperties = {
@@ -110,9 +118,9 @@ export const inputStyle: React.CSSProperties = {
   width: "100%",
   boxSizing: "border-box",
   minHeight: 44,
-  padding: "10px 12px",
+  padding: "10px 14px",
   fontSize: 16, // ≥16px = no iOS zoom on focus
-  border: `1px solid ${palette.border}`,
+  border: `1px solid ${palette.hairline}`,
   borderRadius: radii.md,
   background: palette.surface,
   color: palette.ink,
@@ -120,13 +128,15 @@ export const inputStyle: React.CSSProperties = {
   fontFamily: SYS_FONT,
   marginBottom: space.sm,
   scrollMarginBottom: 120,
+  outline: "none",
 };
 
 export const textareaStyle: React.CSSProperties = {
   ...inputStyle,
-  minHeight: 84,
-  paddingTop: 10,
+  minHeight: 96,
+  paddingTop: 12,
   resize: "vertical",
+  lineHeight: 1.4,
 };
 
 export const selectStyle: React.CSSProperties = {
@@ -134,7 +144,7 @@ export const selectStyle: React.CSSProperties = {
   WebkitAppearance: "none",
   appearance: "none",
   backgroundImage:
-    "linear-gradient(45deg, transparent 50%, #121212 50%), linear-gradient(135deg, #121212 50%, transparent 50%)",
+    "linear-gradient(45deg, transparent 50%, #1c1c1e 50%), linear-gradient(135deg, #1c1c1e 50%, transparent 50%)",
   backgroundPosition:
     "calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px)",
   backgroundSize: "6px 6px, 6px 6px",
@@ -147,7 +157,7 @@ export const labelStyle: React.CSSProperties = {
   fontSize: 12,
   fontWeight: 700,
   textTransform: "uppercase",
-  letterSpacing: 0.5,
+  letterSpacing: 0.6,
   color: palette.muted,
   marginBottom: space.xs,
 };
@@ -157,7 +167,9 @@ export const cardStyle: React.CSSProperties = {
   border: `1px solid ${palette.hairline}`,
   borderRadius: radii.lg,
   padding: space.lg,
+  boxShadow: shadow.card,
 };
+
 
 // ---- One-shot global stylesheet (animations, focus polish) ---------------
 
