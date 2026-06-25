@@ -6,6 +6,7 @@
 // envelope shape, retry semantics, and user-facing error messages.
 
 import { supabase } from "@/integrations/supabase/client";
+import { telemetry } from "@/platform/telemetry";
 
 export type AIErrorCode =
   | "unauthorized"
