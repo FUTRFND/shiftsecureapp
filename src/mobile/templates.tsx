@@ -358,6 +358,8 @@ function TemplateEditor({
   const [sections, setSections] = useState<Section[]>(initial.sections);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  useKeyboardScrollIntoView();
+
 
   const canSave = useMemo(
     () =>
@@ -461,12 +463,17 @@ function TemplateEditor({
             handleSubmit();
           }}
           aria-disabled={saving}
+          className="mobile-tap"
           style={{
             ...primaryButton,
             ...tapFix,
-            opacity: saving ? 0.6 : 1,
+            opacity: saving ? 0.7 : 1,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
           }}
         >
+          {saving && <Spinner size={14} color={palette.surface} />}
           {saving ? "Saving…" : "Save"}
         </button>
       </div>
