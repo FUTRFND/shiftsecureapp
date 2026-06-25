@@ -231,50 +231,43 @@ export function TasksScreen({
   return (
     <main style={pageStyle}>
       {indicator}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: space.md,
-        }}
-      >
-        <button type="button" onClick={onBack} style={buttonBase} className="mobile-tap">
-          ← Back
-        </button>
-        <span
-          style={{
-            fontSize: 12,
-            color: connected ? palette.ok : palette.muted,
-            fontWeight: 600,
-          }}
-        >
-          {connected ? "● Live" : "○ Offline"}
-        </span>
-      </div>
-
-      <h1 style={{ margin: "0 0 4px", fontSize: 26, fontWeight: 700 }}>
-        Shift Tasks
-      </h1>
-      <p style={{ margin: `0 0 ${space.lg}px`, fontSize: 13, color: palette.muted }}>
-        Assign action items. Updates sync live across the shift.
-      </p>
+      <ScreenHeader
+        title="Tasks"
+        subtitle="Assign action items. Updates sync live across the shift."
+        right={
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 11,
+              color: connected ? palette.ok : palette.subtle,
+              fontWeight: 600,
+              padding: "4px 10px",
+              borderRadius: 999,
+              background: connected ? "rgba(10,122,59,0.08)" : palette.surfaceAlt,
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: connected ? palette.ok : palette.subtle,
+              }}
+            />
+            {connected ? "Live" : "Offline"}
+          </span>
+        }
+      />
 
       {error && (
-        <div
-          style={{
-            border: `1px solid ${palette.critical}`,
-            background: "#fde8ec",
-            color: palette.critical,
-            padding: "8px 10px",
-            fontSize: 13,
-            borderRadius: 10,
-            marginBottom: space.md,
-          }}
-        >
+        <Banner tone="error" onDismiss={() => setError(null)}>
           {error}
-        </div>
+        </Banner>
       )}
+
 
       <div
         style={{
