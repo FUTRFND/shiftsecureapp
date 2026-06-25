@@ -9,6 +9,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "build:mobile": "node scripts/build-mobile.mjs",
+    "verify:mobile-diagnostic": "node scripts/verify-mobile-diagnostic.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.prebuild.json",
     "lint": "eslint . --max-warnings 0",
