@@ -10,6 +10,7 @@ import { telemetry } from "@/platform/telemetry";
 
 export type AIErrorCode =
   | "unauthorized"
+  | "entitlement_required"
   | "rate_limited"
   | "credits_exhausted"
   | "timeout"
@@ -49,6 +50,7 @@ const RETRYABLE_SERVER_CODES = new Set<string>([
 function mapServerError(code: string): AIErrorCode {
   switch (code) {
     case "unauthorized":
+    case "entitlement_required":
     case "rate_limited":
     case "credits_exhausted":
     case "timeout":

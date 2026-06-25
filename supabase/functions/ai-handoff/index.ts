@@ -12,6 +12,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { type AIProvider, pickProvider, ProviderError } from "./providers.ts";
+import { entitlementsGrant, getEntitlementsForUser } from "../_shared/revenuecat.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -176,6 +177,25 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error(`[ai-handoff:${requestId}] auth check failed`, err);
     return clientError("unauthorized", "Sign in to use AI features.", 401);
+  }
+
+  // Authz: AI summarization is a Pro capability. The client UI hides this
+  // for free users, but we re-verify here against RevenueCat so a tampered
+  // client can't bypass the paywall. Failing closed on RC outage is
+  // intentional — see `_shared/revenuecat.ts`.
+  try {
+    const check = await getEntitlementsForUser(userId!);
+    if (!entitlementsGrant(check, "ai.summarize")) {
+      console.log(`[ai-handoff:${requestId}] entitlement denied user=${userId}`);
+      return clientError(
+        "entitlement_required",
+        "AI summaries are a Pro feature. Upgrade to continue.",
+        402,
+      );
+    }
+  } catch (err) {
+    console.error(`[ai-handoff:${requestId}] entitlement check failed`, err);
+    return clientError("ai_unavailable", "AI service is temporarily unavailable.", 503);
   }
 
   let body: RequestBody;
