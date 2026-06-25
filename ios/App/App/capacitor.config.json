@@ -1,0 +1,18 @@
+{
+	"appId": "com.badexy.shiftsecure",
+	"appName": "Shift Secure",
+	"webDir": "dist/spa",
+	"bundledWebRuntime": false,
+	"includePlugins": [],
+	"loggingBehavior": "debug",
+	"backgroundColor": "#f7f7f2",
+	"initialFocus": true,
+	"ios": {
+		"includePlugins": [],
+		"webContentsDebuggingEnabled": true
+	},
+	"android": {
+		"includePlugins": []
+	},
+	"packageClassList": []
+}
