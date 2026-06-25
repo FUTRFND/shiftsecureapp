@@ -159,6 +159,7 @@ function MobileHome({
   );
 }
 
+function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
