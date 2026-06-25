@@ -4,16 +4,27 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   Banner,
+  Card,
+  Chip,
   EmptyState,
-  LoadingBlock,
+  FAB,
+  Pill,
   ScreenHeader,
+  SkeletonCard,
   Spinner,
+  accentButton,
   buttonBase,
+  dangerButton,
+  ghostButton,
   inputStyle,
   pageStyle,
   palette,
   primaryButton,
+  radii,
+  shadow,
   space,
+  textareaStyle,
+  type,
   useConfirm,
   useKeyboardScrollIntoView,
   usePullToRefresh,
@@ -44,6 +55,12 @@ const SEVERITY_COLOR: Record<Severity, string> = {
   info: palette.info,
 };
 
+const SEVERITY_SOFT: Record<Severity, string> = {
+  critical: palette.criticalSoft,
+  warning: palette.warningSoft,
+  info: palette.infoSoft,
+};
+
 const SEVERITY_LABEL: Record<Severity, string> = {
   critical: "Critical",
   warning: "Warning",
@@ -56,11 +73,34 @@ const STATUS_LABEL: Record<Status, string> = {
   resolved: "Resolved",
 };
 
+const STATUS_TONE: Record<
+  Status,
+  "critical" | "warning" | "success"
+> = {
+  active: "critical",
+  acknowledged: "warning",
+  resolved: "success",
+};
+
+function relativeTime(iso: string) {
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return "";
+  const diff = Date.now() - t;
+  const s = Math.round(diff / 1000);
+  if (s < 60) return "just now";
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.round(h / 24);
+  if (d < 7) return `${d}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
 
 export function AlertsScreen({
   sb,
   userId,
-  onBack,
+  onBack: _onBack,
 }: {
   sb: SupabaseClient;
   userId: string;
@@ -136,6 +176,12 @@ export function AlertsScreen({
     [alerts, filter],
   );
 
+  const counts = useMemo(() => {
+    const c = { all: alerts.length, active: 0, acknowledged: 0, resolved: 0 };
+    for (const a of alerts) c[a.status] += 1;
+    return c;
+  }, [alerts]);
+
   const activeCritical = useMemo(
     () =>
       alerts.filter((a) => a.status === "active" && a.severity === "critical")
@@ -197,6 +243,13 @@ export function AlertsScreen({
     if (e) setError(e.message);
   }
 
+  const FILTERS: Array<{ key: "all" | Status; label: string }> = [
+    { key: "active", label: "Active" },
+    { key: "acknowledged", label: "Acknowledged" },
+    { key: "resolved", label: "Resolved" },
+    { key: "all", label: "All" },
+  ];
+
   return (
     <main style={pageStyle}>
       {indicator}
@@ -210,20 +263,22 @@ export function AlertsScreen({
               alignItems: "center",
               gap: 6,
               fontSize: 11,
-              color: connected ? palette.ok : palette.subtle,
-              fontWeight: 600,
-              padding: "4px 10px",
-              borderRadius: 999,
-              background: connected ? "rgba(10,122,59,0.08)" : palette.surfaceAlt,
+              color: connected ? palette.accentDeep : palette.subtle,
+              fontWeight: 700,
+              padding: "5px 10px",
+              borderRadius: radii.pill,
+              background: connected ? palette.accentSoft : palette.surfaceAlt,
+              border: `1px solid ${connected ? "rgba(15,122,55,0.18)" : palette.hairline}`,
             }}
           >
             <span
               aria-hidden="true"
               style={{
-                width: 6,
-                height: 6,
+                width: 7,
+                height: 7,
                 borderRadius: "50%",
-                background: connected ? palette.ok : palette.subtle,
+                background: connected ? palette.accent : palette.subtle,
+                boxShadow: connected ? `0 0 0 3px ${palette.accentSoft}` : undefined,
               }}
             />
             {connected ? "Live" : "Offline"}
@@ -244,43 +299,38 @@ export function AlertsScreen({
         </Banner>
       )}
 
-
+      {/* Filter chips — horizontal scroll */}
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 6,
+          display: "flex",
+          gap: 8,
+          overflowX: "auto",
+          paddingBottom: 4,
           marginBottom: space.md,
+          WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none",
         }}
       >
-        {(["active", "acknowledged", "resolved", "all"] as const).map((f) => (
-          <button
-            key={f}
-            type="button"
-            onClick={() => setFilter(f)}
-            className="mobile-tap"
-            style={{
-              ...buttonBase,
-              minHeight: 36,
-              padding: "0 4px",
-              fontSize: 12,
-              background: filter === f ? palette.ink : palette.surface,
-              color: filter === f ? palette.surface : palette.ink,
-            }}
+        {FILTERS.map((f) => (
+          <Chip
+            key={f.key}
+            active={filter === f.key}
+            onClick={() => setFilter(f.key)}
           >
-            {f === "all" ? "All" : STATUS_LABEL[f]}
-          </button>
+            {f.label}
+            <span
+              style={{
+                marginLeft: 8,
+                fontSize: 11,
+                opacity: 0.75,
+                fontWeight: 700,
+              }}
+            >
+              {counts[f.key]}
+            </span>
+          </Chip>
         ))}
       </div>
-
-      <button
-        type="button"
-        onClick={() => setComposerOpen((v) => !v)}
-        className="mobile-tap"
-        style={{ ...primaryButton, width: "100%", marginBottom: space.md }}
-      >
-        {composerOpen ? "Cancel new alert" : "+ New alert"}
-      </button>
 
       {composerOpen && (
         <NewAlertComposer
@@ -292,15 +342,31 @@ export function AlertsScreen({
       )}
 
       {loading && !refreshing ? (
-        <LoadingBlock label="Loading alerts…" />
+        <div style={{ display: "grid", gap: 10 }}>
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       ) : visible.length === 0 ? (
         <EmptyState
           icon="◎"
           title={`No ${filter === "all" ? "" : STATUS_LABEL[filter].toLowerCase() + " "}alerts`}
-          body="Pull down to refresh, or broadcast a new alert above."
+          body="Pull down to refresh, or tap the button to broadcast a new alert."
+          action={
+            !composerOpen && (
+              <button
+                type="button"
+                className="mobile-tap"
+                style={{ ...primaryButton, padding: "0 18px" }}
+                onClick={() => setComposerOpen(true)}
+              >
+                New alert
+              </button>
+            )
+          }
         />
       ) : (
-        <div style={{ display: "grid", gap: 10 }}>
+        <div style={{ display: "grid", gap: 12 }}>
           {visible.map((a) => (
             <AlertCard
               key={a.id}
@@ -319,11 +385,14 @@ export function AlertsScreen({
           ))}
         </div>
       )}
+
+      {!composerOpen && (
+        <FAB label="New alert" onClick={() => setComposerOpen(true)} />
+      )}
       {confirmDialog}
     </main>
   );
 }
-
 
 function AlertCard({
   row,
@@ -343,83 +412,153 @@ function AlertCard({
   onDelete: () => void;
 }) {
   const tone = SEVERITY_COLOR[row.severity];
+  const tint = SEVERITY_SOFT[row.severity];
   return (
     <article
       style={{
         background: palette.surface,
         border: `1px solid ${palette.hairline}`,
-        borderLeft: `4px solid ${tone}`,
-        borderRadius: 12,
-        padding: 14,
+        borderRadius: radii.xl,
+        padding: space.lg,
+        boxShadow: shadow.card,
+        position: "relative",
+        overflow: "hidden",
       }}
     >
+      {/* Accent bar */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 4,
+          background: tone,
+        }}
+      />
+
       <div
         style={{
           display: "flex",
-          flexWrap: "wrap",
-          gap: 8,
-          alignItems: "center",
-          marginBottom: 6,
+          alignItems: "flex-start",
+          gap: space.md,
+          marginBottom: space.sm,
         }}
       >
         <span
+          aria-hidden="true"
           style={{
-            background: tone,
-            color: "#fff",
-            fontSize: 11,
-            fontWeight: 700,
-            padding: "2px 8px",
-            textTransform: "uppercase",
-            letterSpacing: 0.4,
+            flex: "0 0 auto",
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            background: tint,
+            color: tone,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 20,
+            fontWeight: 800,
+            lineHeight: 1,
           }}
         >
-          {SEVERITY_LABEL[row.severity]}
+          !
         </span>
-        <span
-          style={{
-            border: `1px solid ${palette.border}`,
-            fontSize: 11,
-            fontWeight: 600,
-            padding: "2px 8px",
-            textTransform: "uppercase",
-            letterSpacing: 0.4,
-          }}
-        >
-          {STATUS_LABEL[row.status]}
-        </span>
-        <span style={{ fontFamily: "ui-monospace, Menlo, monospace", fontWeight: 700, fontSize: 14 }}>
-          {row.patient_ref}
-        </span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+              marginBottom: 4,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "ui-monospace, Menlo, monospace",
+                fontWeight: 700,
+                fontSize: type.headline,
+                color: palette.ink,
+                letterSpacing: -0.2,
+              }}
+            >
+              {row.patient_ref}
+            </span>
+            <Pill tone={STATUS_TONE[row.status]} dot>
+              {STATUS_LABEL[row.status]}
+            </Pill>
+          </div>
+          <div
+            style={{
+              fontSize: 11,
+              color: palette.muted,
+              fontWeight: 600,
+              letterSpacing: 0.3,
+              textTransform: "uppercase",
+            }}
+          >
+            {SEVERITY_LABEL[row.severity]} · {relativeTime(row.created_at)}
+          </div>
+        </div>
       </div>
+
       <p
         style={{
-          margin: "4px 0 8px",
-          fontSize: 15,
+          margin: `${space.sm}px 0 ${space.md}px`,
+          fontSize: type.body,
           whiteSpace: "pre-wrap",
-          lineHeight: 1.35,
+          lineHeight: 1.4,
+          color: palette.ink,
         }}
       >
         {row.summary}
       </p>
-      <p style={{ margin: "0 0 10px", fontSize: 11, color: palette.muted }}>
-        {new Date(row.created_at).toLocaleString()} · by {authorName}
+
+      <p
+        style={{
+          margin: `0 0 ${space.md}px`,
+          fontSize: 12,
+          color: palette.subtle,
+          lineHeight: 1.4,
+        }}
+      >
+        by {authorName}
         {ackName && ` · ack by ${ackName}`}
       </p>
+
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {row.status === "active" && (
-          <button type="button" style={buttonBase} onClick={onAcknowledge}>
+          <button
+            type="button"
+            className="mobile-tap"
+            style={ghostButton}
+            onClick={onAcknowledge}
+          >
             Acknowledge
           </button>
         )}
         {row.status !== "resolved" && (
-          <button type="button" style={primaryButton} onClick={onResolve}>
+          <button
+            type="button"
+            className="mobile-tap"
+            style={accentButton}
+            onClick={onResolve}
+          >
             Resolve
           </button>
         )}
         {isMine && (
           <button
             type="button"
-            style={{ ...buttonBase, color: palette.critical }}
+            className="mobile-tap"
+            style={{
+              ...ghostButton,
+              color: palette.critical,
+              borderColor: "rgba(215,38,61,0.25)",
+              marginLeft: "auto",
+            }}
             onClick={onDelete}
             aria-label="Delete alert"
           >
@@ -471,18 +610,19 @@ function NewAlertComposer({
   }
 
   return (
-    <section
-      style={{
-        background: palette.surface,
-        border: `1px solid ${palette.hairline}`,
-        borderRadius: 12,
-        padding: 14,
-        marginBottom: 14,
-      }}
-    >
-      <h2 style={{ margin: "0 0 10px", fontSize: 16, fontWeight: 700 }}>
+    <Card style={{ marginBottom: space.md }}>
+      <h2
+        style={{
+          margin: `0 0 ${space.md}px`,
+          fontSize: type.title3,
+          fontWeight: 700,
+          letterSpacing: -0.3,
+          color: palette.ink,
+        }}
+      >
         New patient alert
       </h2>
+
       <input
         type="text"
         placeholder="Patient reference (e.g. Bed 12 / MRN 8472)"
@@ -490,57 +630,84 @@ function NewAlertComposer({
         onChange={(e) => setPatientRef(e.target.value)}
         style={inputStyle}
       />
+
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gap: 6,
-          marginBottom: 10,
+          margin: `${space.sm}px 0 ${space.md}px`,
         }}
       >
-        {(["critical", "warning", "info"] as Severity[]).map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => setSeverity(s)}
-            style={{
-              ...buttonBase,
-              minHeight: 40,
-              fontSize: 13,
-              background: severity === s ? SEVERITY_COLOR[s] : palette.surface,
-              color: severity === s ? "#fff" : palette.ink,
-              borderColor: severity === s ? SEVERITY_COLOR[s] : palette.border,
-            }}
-          >
-            {SEVERITY_LABEL[s]}
-          </button>
-        ))}
+        {(["critical", "warning", "info"] as Severity[]).map((s) => {
+          const isActive = severity === s;
+          return (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setSeverity(s)}
+              className="mobile-tap"
+              style={{
+                ...buttonBase,
+                minHeight: 42,
+                fontSize: 13,
+                background: isActive ? SEVERITY_COLOR[s] : SEVERITY_SOFT[s],
+                color: isActive ? "#fff" : SEVERITY_COLOR[s],
+                borderColor: isActive ? SEVERITY_COLOR[s] : "transparent",
+                fontWeight: 700,
+              }}
+            >
+              {SEVERITY_LABEL[s]}
+            </button>
+          );
+        })}
       </div>
+
       <textarea
         rows={4}
         placeholder="What's happening, what's needed, time-sensitive details…"
         value={summary}
         onChange={(e) => setSummary(e.target.value)}
-        style={{ ...inputStyle, minHeight: 96, paddingTop: 10 }}
+        style={textareaStyle}
       />
-      <button
-        type="button"
-        onClick={save}
-        disabled={saving}
-        className="mobile-tap"
+
+      <div
         style={{
-          ...primaryButton,
-          width: "100%",
-          opacity: saving ? 0.6 : 1,
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: space.sm,
+          marginTop: space.sm,
         }}
       >
-        {saving && <Spinner size={14} color={palette.surface} />}
-        {saving ? "Broadcasting…" : "Broadcast alert"}
-      </button>
-    </section>
+        <button
+          type="button"
+          className="mobile-tap"
+          style={ghostButton}
+          onClick={onDone}
+          disabled={saving}
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={save}
+          disabled={saving}
+          className="mobile-tap"
+          style={{
+            ...primaryButton,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+          }}
+        >
+          {saving && <Spinner size={14} color={palette.surface} />}
+          {saving ? "Broadcasting…" : "Broadcast alert"}
+        </button>
+      </div>
+    </Card>
   );
 }
+
+// Re-export to satisfy unused-import linters if any
+export const __unused = { dangerButton };
