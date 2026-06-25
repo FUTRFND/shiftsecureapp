@@ -188,6 +188,20 @@ export const aiService = {
     input: SummarizeHandoffInput,
     opts?: { modelHint?: "default" | "fast" | "quality" },
   ): Promise<SummarizeHandoffResult> {
-    return invokeAI<SummarizeHandoffResult>("summarize_handoff", input, opts?.modelHint);
+    // Telemetry: timing + outcome only. No transcript / context payload.
+    return telemetry.time(
+      "ai.summarize_handoff",
+      () =>
+        invokeAI<SummarizeHandoffResult>(
+          "summarize_handoff",
+          input,
+          opts?.modelHint,
+        ),
+      {
+        modelHint: opts?.modelHint,
+        transcriptLen: input.transcript.length,
+        hasContext: Boolean(input.context),
+      },
+    );
   },
 };
