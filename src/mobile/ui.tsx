@@ -797,3 +797,237 @@ export function ScreenFade({
     </div>
   );
 }
+
+// ---- Card ---------------------------------------------------------------
+
+export function Card({
+  children,
+  padded = true,
+  style,
+  onClick,
+  as: As = "div",
+}: {
+  children: React.ReactNode;
+  padded?: boolean;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+  as?: "div" | "section" | "article";
+}) {
+  return (
+    <As
+      onClick={onClick}
+      style={{
+        ...cardStyle,
+        padding: padded ? space.lg : 0,
+        cursor: onClick ? "pointer" : undefined,
+        ...style,
+      }}
+    >
+      {children}
+    </As>
+  );
+}
+
+// ---- Section header (within a screen) ------------------------------------
+
+export function SectionHeader({
+  title,
+  action,
+}: {
+  title: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "baseline",
+        justifyContent: "space-between",
+        margin: `${space.lg}px 4px ${space.sm}px`,
+      }}
+    >
+      <h2
+        style={{
+          margin: 0,
+          fontSize: 13,
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: 0.8,
+          color: palette.muted,
+        }}
+      >
+        {title}
+      </h2>
+      {action}
+    </div>
+  );
+}
+
+// ---- Pill / Chip / StatusBadge -------------------------------------------
+
+export function Pill({
+  tone = "neutral",
+  children,
+  dot,
+}: {
+  tone?: "neutral" | "success" | "warning" | "critical" | "info" | "accent";
+  children: React.ReactNode;
+  dot?: boolean;
+}) {
+  const tones: Record<string, { bg: string; fg: string }> = {
+    neutral:  { bg: palette.surfaceAlt,   fg: palette.muted },
+    success:  { bg: palette.accentSoft,   fg: palette.accentDeep },
+    accent:   { bg: palette.accentSoft,   fg: palette.accentDeep },
+    warning:  { bg: palette.warningSoft,  fg: palette.warning },
+    critical: { bg: palette.criticalSoft, fg: palette.critical },
+    info:     { bg: palette.infoSoft,     fg: palette.info },
+  };
+  const t = tones[tone];
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        background: t.bg,
+        color: t.fg,
+        borderRadius: radii.pill,
+        padding: "4px 10px",
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: 0.3,
+        textTransform: "uppercase",
+        lineHeight: 1,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {dot && (
+        <span
+          aria-hidden="true"
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: t.fg,
+            display: "inline-block",
+          }}
+        />
+      )}
+      {children}
+    </span>
+  );
+}
+
+export function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active?: boolean;
+  onClick?: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mobile-tap"
+      style={{
+        height: 34,
+        padding: "0 14px",
+        borderRadius: radii.pill,
+        border: `1px solid ${active ? palette.accent : palette.hairline}`,
+        background: active ? palette.accentSoft : palette.surface,
+        color: active ? palette.accentDeep : palette.ink,
+        fontSize: 13,
+        fontWeight: active ? 700 : 500,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        WebkitAppearance: "none",
+        touchAction: "manipulation",
+        transition: "background 140ms ease, color 140ms ease, border-color 140ms ease",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ---- Skeleton loaders ----------------------------------------------------
+
+export function Skeleton({
+  width = "100%",
+  height = 14,
+  style,
+}: {
+  width?: number | string;
+  height?: number | string;
+  style?: React.CSSProperties;
+}) {
+  ensureGlobalStyles();
+  return (
+    <div
+      className="mobile-skeleton"
+      aria-hidden="true"
+      style={{ width, height, ...style }}
+    />
+  );
+}
+
+export function SkeletonCard() {
+  return (
+    <div style={{ ...cardStyle, marginBottom: space.md }}>
+      <Skeleton width={120} height={12} style={{ marginBottom: 12 }} />
+      <Skeleton width="80%" height={16} style={{ marginBottom: 8 }} />
+      <Skeleton width="60%" height={14} />
+    </div>
+  );
+}
+
+// ---- Floating Action Button ----------------------------------------------
+
+export function FAB({
+  onClick,
+  label,
+  icon = "+",
+}: {
+  onClick: () => void;
+  label: string;
+  icon?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="mobile-tap"
+      style={{
+        position: "fixed",
+        right: 18,
+        bottom: `calc(env(safe-area-inset-bottom, 0px) + 84px)`,
+        height: 56,
+        minWidth: 56,
+        padding: "0 20px",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
+        background: gradient.primary,
+        color: "#fff",
+        border: "none",
+        borderRadius: radii.pill,
+        fontSize: 15,
+        fontWeight: 700,
+        boxShadow: shadow.primary,
+        cursor: "pointer",
+        zIndex: 25,
+        fontFamily: "inherit",
+        touchAction: "manipulation",
+      }}
+    >
+      <span aria-hidden="true" style={{ fontSize: 22, lineHeight: 1, marginTop: -2 }}>
+        {icon}
+      </span>
+      <span>{label}</span>
+    </button>
+  );
+}
