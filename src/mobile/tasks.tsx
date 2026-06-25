@@ -78,6 +78,12 @@ export function TasksScreen({
   const [editing, setEditing] = useState<
     { mode: "create" } | { mode: "edit"; row: TaskRow } | null
   >(null);
+  useKeyboardScrollIntoView();
+  const { confirm, dialog: confirmDialog } = useConfirm();
+  const { refreshing, indicator } = usePullToRefresh(load, {
+    enabled: !editing,
+  });
+
 
   const profilesById = useMemo(() => {
     const m = new Map<string, ProfileLite>();
@@ -163,13 +169,20 @@ export function TasksScreen({
   }
 
   async function remove(row: TaskRow) {
-    if (!confirm(`Delete "${row.title}"?`)) return;
+    const ok = await confirm({
+      title: `Delete "${row.title}"?`,
+      body: "This task will be removed for everyone on the shift.",
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (!ok) return;
     const { error: e } = await sb.from("tasks").delete().eq("id", row.id);
     if (e) {
       console.error("[tasks] delete failed", e);
       setError(e.message);
     }
   }
+
 
   async function handleSave(input: TaskInput, editingRow: TaskRow | null) {
     if (editingRow) {
