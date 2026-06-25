@@ -13,25 +13,27 @@ import React, {
 // ---- Design tokens -------------------------------------------------------
 
 export const palette = {
-  bg: "#f7f7f2",
-  ink: "#121212",
-  muted: "#454545",
-  subtle: "#8a8a8a",
-  border: "#121212",
-  hairline: "#e2e2dc",
+  bg: "#f2f2f7",          // iOS system grouped background
+  ink: "#1c1c1e",
+  muted: "#5b5b60",
+  subtle: "#8e8e93",
+  border: "#1c1c1e",
+  hairline: "#d8d8de",
   surface: "#ffffff",
-  surfaceAlt: "#f0f0ea",
-  critical: "#b00020",
+  surfaceAlt: "#ebebf0",
+  accent: "#0a84ff",       // iOS system blue
+  critical: "#d70015",
   warning: "#b15c00",
   info: "#1b4d8f",
   ok: "#0a7a3b",
-  overlay: "rgba(18,18,18,0.45)",
+  overlay: "rgba(20,20,22,0.45)",
 };
 
 export const radii = {
   sm: 8,
   md: 10,
   lg: 14,
+  xl: 18,
 };
 
 export const space = {
@@ -43,18 +45,25 @@ export const space = {
   xxl: 32,
 };
 
+export const shadow = {
+  card: "0 1px 2px rgba(20,20,22,0.05), 0 1px 1px rgba(20,20,22,0.04)",
+  raised: "0 8px 24px rgba(20,20,22,0.12)",
+};
+
 const SYS_FONT =
-  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif';
+  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif';
 
 export const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   boxSizing: "border-box",
-  padding: `${space.lg}px ${space.lg}px 96px`,
+  padding: `calc(env(safe-area-inset-top, 0px) + ${space.lg}px) ${space.lg}px 96px`,
   background: palette.bg,
   color: palette.ink,
   fontFamily: SYS_FONT,
   WebkitFontSmoothing: "antialiased",
+  letterSpacing: -0.01,
 };
+
 
 // iOS-style controls: 44pt min height, 10pt radius, system font, 16pt input
 // text so iOS does not zoom on focus.
