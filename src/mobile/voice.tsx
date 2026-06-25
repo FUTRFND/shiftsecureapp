@@ -290,7 +290,8 @@ export function VoiceScreen({
   }, []);
 
   const generate = useCallback(async () => {
-    console.log("[voice] generate tapped");
+    const FN = "ai-handoff";
+    console.log("[voice] generate tapped → function:", FN);
     setGenerateErr(null);
     if (transcript.trim().length < 10) {
       setGenerateErr("Dictate or type at least a sentence first.");
@@ -298,17 +299,86 @@ export function VoiceScreen({
     }
     setGenerating(true);
     try {
-      const { data, error } = await sb.functions.invoke("ai-handoff", {
-        body: {
-          task: "summarize_handoff",
-          input: { transcript, context: context || undefined },
-        },
+      // Resolve session + URL up front so we can log auth presence.
+      const { data: sessionData, error: sessionErr } = await sb.auth.getSession();
+      if (sessionErr) console.error(`[voice] ${FN} session error`, sessionErr);
+      const session = sessionData?.session ?? null;
+      const accessToken = session?.access_token ?? null;
+      console.log(`[voice] ${FN} session present:`, !!session, "user:", session?.user?.id ?? null);
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+      console.log(`[voice] ${FN} env present:`, {
+        VITE_SUPABASE_URL: !!supabaseUrl,
+        VITE_SUPABASE_PUBLISHABLE_KEY: !!anonKey,
       });
-      if (error) {
-        console.error("[voice] ai-handoff error", error);
-        throw new Error(error.message ?? "AI request failed");
+      if (!supabaseUrl || !anonKey) {
+        throw new Error("App is missing Supabase configuration (URL or publishable key).");
       }
-      const env = data as {
+      if (!accessToken) {
+        throw new Error("You're signed out. Please sign in again to generate a summary.");
+      }
+
+      const url = `${supabaseUrl}/functions/v1/${FN}`;
+      const payload = {
+        task: "summarize_handoff" as const,
+        input: { transcript, context: context || undefined },
+      };
+      console.log(`[voice] ${FN} POST`, url);
+
+      let resp: Response;
+      try {
+        resp = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+            apikey: anonKey,
+          },
+          body: JSON.stringify(payload),
+        });
+      } catch (netErr) {
+        console.error(`[voice] ${FN} network failure`, netErr);
+        throw new Error(
+          `Couldn't reach the AI service (network error: ${
+            netErr instanceof Error ? netErr.message : String(netErr)
+          }). Check your connection and try again.`,
+        );
+      }
+
+      console.log(`[voice] ${FN} response status:`, resp.status, resp.statusText);
+
+      const rawText = await resp.text();
+      let parsed: unknown = null;
+      try {
+        parsed = rawText ? JSON.parse(rawText) : null;
+      } catch (parseErr) {
+        console.error(`[voice] ${FN} non-JSON response body:`, rawText);
+        console.error(`[voice] ${FN} JSON parse error`, parseErr);
+      }
+      console.log(`[voice] ${FN} response body:`, parsed ?? rawText);
+
+      if (!resp.ok) {
+        const env = parsed as
+          | { error?: { code?: string; message?: string }; message?: string; code?: string }
+          | null;
+        const code = env?.error?.code ?? env?.code;
+        const msg = env?.error?.message ?? env?.message;
+        if (resp.status === 404) {
+          throw new Error(
+            `AI function "${FN}" is not deployed. Open the Supabase project and deploy the ai-handoff edge function, then try again.`,
+          );
+        }
+        if (resp.status === 401) {
+          throw new Error(msg ?? "You're signed out. Please sign in again.");
+        }
+        if (code === "entitlement_required") {
+          throw new Error("AI summaries require an active subscription.");
+        }
+        throw new Error(msg ?? `AI request failed (HTTP ${resp.status} ${resp.statusText}).`);
+      }
+
+      const env = parsed as {
         data?: { summary?: string };
         error?: { code?: string; message?: string };
       } | null;
