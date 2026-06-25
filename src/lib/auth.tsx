@@ -7,6 +7,7 @@ import { clearAuthStorage, hydrateAuthStorage } from "@/platform/storage";
 import { startDeepLinkListener } from "@/platform/deep-links";
 import { registerAuthDeepLinkHandler } from "@/lib/auth-deep-link";
 import { SIGN_IN_ROUTE } from "@/config/auth";
+import { subscriptionService } from "@/services/subscription";
 
 interface AuthContextValue {
   user: User | null;
@@ -65,6 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         if (event === "TOKEN_REFRESHED") {
           // Persisted by the storage adapter automatically; nothing else to do.
+        }
+        // Identity sync: keep the subscription SDK aligned with the
+        // Supabase user. The service is the only thing screens read from.
+        if (event === "SIGNED_IN" && newSession?.user) {
+          void subscriptionService.login(newSession.user.id);
+        } else if (event === "SIGNED_OUT") {
+          void subscriptionService.logout();
         }
       });
       unsubAuth = () => subData.subscription.unsubscribe();

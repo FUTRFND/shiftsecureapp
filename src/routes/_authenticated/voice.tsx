@@ -41,6 +41,9 @@ import { platformHaptics } from "@/platform/haptics";
 import { platformPermissions } from "@/platform/permissions";
 import { useNetworkStatus } from "@/hooks/use-network-status";
 import { OfflineBanner } from "@/components/offline-banner";
+import { useCapability } from "@/hooks/use-subscription";
+import { Paywall } from "@/components/paywall";
+import { Lock } from "lucide-react";
 
 function VoiceErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -194,6 +197,8 @@ function VoicePage() {
   const finalRef = useRef("");
   const recordingRef = useRef(false);
   const generationIdRef = useRef(0);
+  const canUseAI = useCapability("ai.summarize");
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   // Probe support once on mount through the platform layer (web Speech API or
   // native plugin) — no Web Speech API access in the component itself.
@@ -279,6 +284,13 @@ function VoicePage() {
       toast.error("You're offline. AI summary needs a connection.");
       return;
     }
+    // Capability check: hidden gate. The server re-verifies independently
+    // via RevenueCat — this is just UX so free users see the paywall instead
+    // of a 402 error toast.
+    if (!canUseAI) {
+      setPaywallOpen(true);
+      return;
+    }
     // De-dupe overlapping requests: only the latest call writes to state.
     const requestId = ++generationIdRef.current;
     setGenerating(true);
@@ -293,6 +305,12 @@ function VoicePage() {
       void platformHaptics.notificationSuccess();
     } catch (err) {
       if (requestId !== generationIdRef.current) return;
+      // Server enforced the paywall — open the upgrade flow instead of toasting.
+      if (err instanceof AIError && err.code === "entitlement_required") {
+        setPaywallOpen(true);
+        void platformHaptics.notificationError();
+        return;
+      }
       const msg =
         err instanceof AIError
           ? err.message
@@ -753,6 +771,10 @@ function VoicePage() {
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" /> Generating…
                 </>
+              ) : !canUseAI ? (
+                <>
+                  <Lock className="h-4 w-4" /> Unlock AI summaries
+                </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4" /> {hasSummary ? "Regenerate summary" : "Generate summary"}
@@ -886,6 +908,14 @@ function VoicePage() {
           </Card>
         )}
       </main>
+      <Paywall
+        open={paywallOpen}
+        onOpenChange={setPaywallOpen}
+        capability="ai.summarize"
+        featureTitle="AI summaries are a Pro feature"
+        featureDescription="Subscribe to generate structured SBAR handoffs from your dictation."
+        onUnlocked={() => void generate()}
+      />
     </div>
   );
 }
