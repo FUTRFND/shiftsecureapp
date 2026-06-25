@@ -7,20 +7,11 @@
  */
 import { isNative, getPlatform } from "@/platform";
 
-// Resolved when the React tree has rendered enough to hide the splash safely.
-let appReadyResolve: (() => void) | undefined;
-const appReadyPromise = new Promise<void>((resolve) => {
-  appReadyResolve = resolve;
-});
-
 /**
  * Signal that the app is ready to be shown. Called by the root component
  * after first paint. Idempotent.
  */
-export function signalAppReady(): void {
-  appReadyResolve?.();
-  appReadyResolve = undefined;
-}
+export function signalAppReady(): void {}
 
 function tagHtml(): void {
   if (typeof document === "undefined") return;
