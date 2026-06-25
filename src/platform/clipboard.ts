@@ -27,17 +27,11 @@ const webClipboard: PlatformClipboard = {
 
 const nativeClipboard: PlatformClipboard = {
   async write(text) {
-    // Wired to @capacitor/clipboard in Phase 5.
-    const { Clipboard } = await import("@capacitor/clipboard").catch(() => ({ Clipboard: null as never }));
-    if (!Clipboard) {
-      await webClipboard.write(text);
-      return;
-    }
+    const { Clipboard } = await import("@capacitor/clipboard");
     await Clipboard.write({ string: text });
   },
   async read() {
-    const { Clipboard } = await import("@capacitor/clipboard").catch(() => ({ Clipboard: null as never }));
-    if (!Clipboard) return webClipboard.read();
+    const { Clipboard } = await import("@capacitor/clipboard");
     const { value } = await Clipboard.read();
     return value;
   },
