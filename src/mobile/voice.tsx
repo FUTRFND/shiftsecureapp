@@ -4,66 +4,36 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const palette = {
-  bg: "#f7f7f2",
-  ink: "#121212",
-  muted: "#454545",
-  border: "#121212",
-  surface: "#ffffff",
-  critical: "#b00020",
-  accent: "#1b4d8f",
-  ok: "#0a7a3b",
-};
+import {
+  EmptyState,
+  LoadingBlock,
+  Spinner,
+  buttonBase,
+  cardStyle as baseCardStyle,
+  inputStyle as baseInputStyle,
+  pageStyle,
+  palette as basePalette,
+  primaryButton,
+  space,
+  textareaStyle as baseTextareaStyle,
+  useConfirm,
+  useKeyboardScrollIntoView,
+} from "./ui";
 
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  boxSizing: "border-box",
-  padding: "20px 16px 80px",
-  background: palette.bg,
-  color: palette.ink,
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-};
+const palette = { ...basePalette, accent: "#1b4d8f" };
 
-const buttonBase: React.CSSProperties = {
-  minHeight: 44,
-  border: `1px solid ${palette.border}`,
-  background: palette.surface,
-  color: palette.ink,
-  fontSize: 15,
-  fontWeight: 600,
-  padding: "0 14px",
-  cursor: "pointer",
-  touchAction: "manipulation",
-  WebkitTapHighlightColor: "transparent",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  minHeight: 44,
-  padding: "10px 12px",
-  fontSize: 15,
-  border: `1px solid ${palette.border}`,
-  borderRadius: 0,
-  background: palette.surface,
-  color: palette.ink,
-};
-
+const inputStyle = baseInputStyle;
 const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  minHeight: 120,
+  ...baseTextareaStyle,
   fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
   fontSize: 14,
   lineHeight: 1.4,
-  resize: "vertical",
+};
+const cardStyle: React.CSSProperties = {
+  ...baseCardStyle,
+  marginBottom: space.lg,
 };
 
-const cardStyle: React.CSSProperties = {
-  border: `1px solid ${palette.border}`,
-  background: palette.surface,
-  padding: 16,
-  marginBottom: 16,
-};
 
 type Sbar = {
   patient: string;
