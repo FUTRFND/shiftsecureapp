@@ -1,1 +1,4 @@
 project_id = "vfijozndxlhihhzxbsrp"
+
+[functions.ai-handoff]
+verify_jwt = true
