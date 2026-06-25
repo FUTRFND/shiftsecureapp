@@ -168,9 +168,23 @@ type RcPurchasesModule = {
 
 async function loadRc(): Promise<RcPurchasesModule | null> {
   if (nativeUnavailable) return null;
+  if (!isNative()) {
+    nativeUnavailable = true;
+    return null;
+  }
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mod = (await import(/* @vite-ignore */ "@revenuecat/purchases-capacitor" as string)) as unknown as RcPurchasesModule;
+    // Defeat Vite/Rollup static analysis: the RevenueCat Capacitor SDK is a
+    // native-only optional dependency and must NEVER be resolved by the web
+    // build. We construct the module specifier at runtime and route through
+    // a globally-injected dynamic importer that the native shell registers.
+    const g = globalThis as { __lovableNativeImport?: (s: string) => Promise<unknown> };
+    const importer = g.__lovableNativeImport;
+    if (!importer) {
+      nativeUnavailable = true;
+      return null;
+    }
+    const spec = ["@revenuecat", "purchases-capacitor"].join("/");
+    const mod = (await importer(spec)) as RcPurchasesModule;
     return mod;
   } catch (err) {
     console.warn("[payments] RevenueCat plugin unavailable", err);
