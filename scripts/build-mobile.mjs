@@ -16,12 +16,10 @@ execSync("vite build --config scripts/vite.mobile-diagnostic.config.mjs", {
 
 renameSync(indexMobileHtml, indexHtml);
 
-if (existsSync(iosPublic)) {
-  rmSync(iosPublic, { recursive: true, force: true });
-  mkdirSync(iosPublic, { recursive: true });
-  cpSync(distSpa, iosPublic, { recursive: true });
-  console.log("[build:mobile] copied diagnostic assets to ios/App/App/public.");
-}
+rmSync(iosPublic, { recursive: true, force: true });
+mkdirSync(iosPublic, { recursive: true });
+cpSync(distSpa, iosPublic, { recursive: true });
+console.log("[build:mobile] copied diagnostic assets to ios/App/App/public.");
 
 const size = readFileSync(indexHtml).byteLength;
 console.log(`[build:mobile] diagnostic dist/spa ready (index.html ${size} bytes).`);
