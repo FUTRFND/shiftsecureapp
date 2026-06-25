@@ -12,12 +12,11 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth";
-import { SubscriptionProvider } from "@/hooks/use-subscription";
 import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
@@ -45,7 +44,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
@@ -79,21 +78,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      {
-        name: "viewport",
-        content:
-          "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5",
-      },
-      { name: "theme-color", content: "#0b1220" },
-      { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "format-detection", content: "telephone=no" },
-      { title: "Handoff Hero" },
-      { name: "description", content: "SBAR clinical handoffs, dictated in seconds." },
-      { property: "og:title", content: "Handoff Hero" },
-      { property: "og:description", content: "SBAR clinical handoffs, dictated in seconds." },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "Lovable App" },
+      { name: "description", content: "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality." },
+      { name: "author", content: "Lovable" },
+      { property: "og:title", content: "Lovable App" },
+      { property: "og:description", content: "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Lovable App" },
+      { name: "twitter:description", content: "Converts existing web applications into production-ready React Native mobile apps, preserving all functionality." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4f96efc9-6d27-46ae-8f68-4c68f9e6a444/id-preview-a5995a9d--d89211fc-539e-4a16-b4b6-9ae9d6517c95.lovable.app-1782399914960.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4f96efc9-6d27-46ae-8f68-4c68f9e6a444/id-preview-a5995a9d--d89211fc-539e-4a16-b4b6-9ae9d6517c95.lovable.app-1782399914960.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -128,20 +125,12 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
-  // Tell the native shell the React tree is mounted so it can hide the
-  // splash without leaving a white flash. No-op on web.
-  useEffect(() => {
-    void import("@/platform/native-shell").then(({ signalAppReady }) => signalAppReady());
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <SubscriptionProvider>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-          <Toaster richColors position="top-right" />
-        </SubscriptionProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+        <Toaster richColors position="top-right" />
       </AuthProvider>
     </QueryClientProvider>
   );
