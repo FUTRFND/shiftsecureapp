@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import {
+  Banner,
   EmptyState,
   LoadingBlock,
   ScreenHeader,
