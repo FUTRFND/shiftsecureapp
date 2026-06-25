@@ -183,8 +183,20 @@ function ensureGlobalStyles() {
   from { opacity: 0; transform: translateY(6px) }
   to   { opacity: 1; transform: translateY(0) }
 }
-.mobile-screen-fade { animation: mobile-fade-in 180ms ease-out both; }
-.mobile-tap:active { opacity: 0.75; transform: scale(0.98); }
+@keyframes mobile-banner-in {
+  from { opacity: 0; transform: translateY(-4px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+.mobile-screen-fade { animation: mobile-fade-in 200ms ease-out both; }
+.mobile-tap:active:not(:disabled) { opacity: 0.7; transform: scale(0.98); }
+.mobile-tap:disabled { opacity: 0.45; cursor: default; }
+button:disabled { cursor: default; }
+input:focus, textarea:focus, select:focus {
+  border-color: #0a84ff !important;
+  box-shadow: 0 0 0 3px rgba(10,132,255,0.18);
+}
+* { -webkit-tap-highlight-color: transparent; }
+html, body { background: ${palette.bg}; overscroll-behavior-y: contain; }
 `;
   const el = document.createElement("style");
   el.setAttribute("data-mobile-ui", "true");
