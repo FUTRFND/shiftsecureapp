@@ -8,6 +8,7 @@ import { TemplatesScreen } from "./mobile/templates";
 import { TasksScreen } from "./mobile/tasks";
 import { VoiceScreen } from "./mobile/voice";
 import { HomeScreen } from "./mobile/home";
+import { AccountScreen } from "./mobile/account";
 import {
   Banner,
   ScreenFade,
@@ -64,7 +65,7 @@ const sb = createClient(SUPABASE_URL ?? "", SUPABASE_PUBLISHABLE_KEY ?? "", {
   },
 });
 
-const screens = ["Home", "Alerts", "Templates", "Tasks", "Voice"] as const;
+const screens = ["Home", "Alerts", "Templates", "Tasks", "Voice", "Account"] as const;
 type Screen = (typeof screens)[number];
 
 // Inline SVG icons matched to SF Symbols feel.
@@ -117,6 +118,13 @@ function TabIcon({ name, active }: { name: Screen; active: boolean }) {
           <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
         </svg>
       );
+    case "Account":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8.5" r="3.5" fill={active ? palette.accentSoft : "none"} />
+          <path d="M4.5 20c1.6-3.5 4.4-5 7.5-5s5.9 1.5 7.5 5" />
+        </svg>
+      );
   }
   // exhaustive
   const _: never = name;
@@ -160,6 +168,10 @@ function MobileHome({
     screen = <TasksScreen sb={sb} userId={userId} onBack={goAlerts} />;
   } else if (activeTab === "Voice") {
     screen = <VoiceScreen sb={sb} userId={userId} onBack={goAlerts} />;
+  } else if (activeTab === "Account") {
+    screen = (
+      <AccountScreen sb={sb} userId={userId} email={email} onSignOut={onSignOut} />
+    );
   }
 
   return (
@@ -168,35 +180,9 @@ function MobileHome({
         <ScreenFade k={activeTab}>{screen}</ScreenFade>
       </div>
 
-      <button
-        type="button"
-        onClick={onSignOut}
-        aria-label={`Sign out ${email}`}
-        title={`Sign out ${email}`}
-        className="mobile-tap"
-        style={{
-          position: "fixed",
-          top: "calc(env(safe-area-inset-top, 0px) + 10px)",
-          right: 12,
-          height: 32,
-          padding: "0 12px",
-          border: `1px solid ${palette.hairline}`,
-          background: "rgba(255,255,255,0.82)",
-          backdropFilter: "saturate(180%) blur(14px)",
-          WebkitBackdropFilter: "saturate(180%) blur(14px)",
-          color: palette.ink,
-          fontSize: 12,
-          fontWeight: 600,
-          borderRadius: 999,
-          cursor: "pointer",
-          touchAction: "manipulation",
-          WebkitTapHighlightColor: "transparent",
-          zIndex: 20,
-          boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
-        }}
-      >
-        Sign out
-      </button>
+      {/* Sign out moved to Account tab */}
+
+
 
       {/* Floating translucent tab bar */}
       <nav

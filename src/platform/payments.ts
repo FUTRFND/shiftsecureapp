@@ -363,7 +363,8 @@ const nativePayments: PlatformPayments = {
 };
 
 function nativePaymentsEnabled(): boolean {
-  return false;
+  // Engage the RevenueCat adapter on iOS/Android only. Web stays no-op.
+  return isNative();
 }
 
 export const platformPayments: PlatformPayments =
