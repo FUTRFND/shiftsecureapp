@@ -167,8 +167,8 @@ App Links verification: host `https://handoffhero.app/.well-known/assetlinks.jso
 
 | Item                | Value                                                                                                                          |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| iOS app             | bundle id `com.badexy.shiftsecure`, App Store Connect shared secret configured                                                    |
-| Android app         | package `com.badexy.shiftsecure`, Play service-account JSON uploaded                                                              |
+| iOS app             | bundle id `com.badexy.shiftsecure`, App Store Connect shared secret configured                                                 |
+| Android app         | package `com.badexy.shiftsecure`, Play service-account JSON uploaded                                                           |
 | Entitlement         | id `pro` (matches `ENTITLEMENT_IDS.pro` in `src/config/subscription.ts`)                                                       |
 | Products attached   | `handoffhero_pro_monthly`, `handoffhero_pro_annual`                                                                            |
 | Offering            | one default offering containing both packages                                                                                  |
