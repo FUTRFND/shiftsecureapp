@@ -11,12 +11,14 @@ import {
   Banner,
   ScreenFade,
   Spinner,
+  gradient,
   inputStyle,
   labelStyle,
   pageStyle,
   palette,
   primaryButton,
   radii,
+  shadow,
   space,
 } from "./mobile/ui";
 import "./styles.css";
