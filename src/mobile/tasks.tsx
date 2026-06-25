@@ -565,6 +565,9 @@ function TaskEditor({
   const [dueLocal, setDueLocal] = useState(isoToLocalInput(initial.due_at));
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  useKeyboardScrollIntoView();
+
+
 
   const canSave = title.trim().length > 0 && ownerId.length > 0;
 
