@@ -35,6 +35,12 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { aiService, AIError } from "@/services/ai";
+import { platformSpeech, SpeechError } from "@/platform/speech";
+import { platformClipboard, ClipboardError } from "@/platform/clipboard";
+import { platformHaptics } from "@/platform/haptics";
+import { platformPermissions } from "@/platform/permissions";
+import { useNetworkStatus } from "@/hooks/use-network-status";
+import { OfflineBanner } from "@/components/offline-banner";
 
 function VoiceErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -81,26 +87,6 @@ export const Route = createFileRoute("/_authenticated/voice")({
   component: VoicePage,
   errorComponent: VoiceErrorBoundary,
 });
-
-// Minimal types for Web Speech API
-type SR = {
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: ((e: any) => void) | null;
-  onerror: ((e: any) => void) | null;
-  onend: (() => void) | null;
-};
-
-function getSpeechRecognition(): (new () => SR) | null {
-  if (typeof window === "undefined") return null;
-  return (
-    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition || null
-  );
-}
 
 
 type Sbar = {
@@ -188,8 +174,8 @@ function formatSbar(s: Sbar): string {
 }
 
 function VoicePage() {
-  const SRClass = getSpeechRecognition();
-  const supported = !!SRClass;
+  const network = useNetworkStatus();
+  const [supported, setSupported] = useState(true);
 
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -205,62 +191,108 @@ function VoicePage() {
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [draftsOpen, setDraftsOpen] = useState(false);
-  const recRef = useRef<SR | null>(null);
   const finalRef = useRef("");
+  const recordingRef = useRef(false);
+  const generationIdRef = useRef(0);
 
-  const stop = useCallback(() => {
-    recRef.current?.stop();
+  // Probe support once on mount through the platform layer (web Speech API or
+  // native plugin) — no Web Speech API access in the component itself.
+  useEffect(() => {
+    let cancelled = false;
+    void platformSpeech.isSupported().then((s) => {
+      if (!cancelled) setSupported(s);
+    });
+    return () => {
+      cancelled = true;
+      // Hard guarantee: never leave a session running across navigation.
+      void platformSpeech.cancel();
+    };
   }, []);
 
-  const start = useCallback(() => {
-    if (!SRClass) {
-      toast.error("Voice capture isn't supported in this browser. Try Chrome or Edge.");
+  const stop = useCallback(() => {
+    if (!recordingRef.current) return;
+    void platformSpeech.stop();
+  }, []);
+
+  const start = useCallback(async () => {
+    if (recordingRef.current) return; // de-dupe rapid clicks
+
+    if (!supported) {
+      toast.error("Voice capture isn't available on this device. You can paste a transcript below.");
       return;
     }
-    const rec = new SRClass();
-    rec.continuous = true;
-    rec.interimResults = true;
-    rec.lang = navigator.language || "en-US";
-    finalRef.current = transcript ? transcript + " " : "";
-    rec.onresult = (e: any) => {
-      let interimText = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const r = e.results[i];
-        if (r.isFinal) finalRef.current += r[0].transcript + " ";
-        else interimText += r[0].transcript;
-      }
-      setTranscript(finalRef.current.trim());
-      setInterim(interimText);
-    };
-    rec.onerror = (e: any) => {
-      if (e.error === "no-speech" || e.error === "aborted") return;
-      toast.error(`Mic error: ${e.error}`);
-    };
-    rec.onend = () => {
-      setRecording(false);
-      setInterim("");
-    };
-    recRef.current = rec;
-    rec.start();
-    setRecording(true);
-  }, [SRClass, transcript]);
 
-  useEffect(() => () => recRef.current?.abort(), []);
+    // Centralized permission flow — same shape on web and native.
+    const granted = await platformPermissions.ensure("microphone");
+    if (!granted) {
+      toast.error("Microphone access is required. Enable it in your device settings.");
+      return;
+    }
+
+    finalRef.current = transcript ? transcript + " " : "";
+    recordingRef.current = true;
+    setRecording(true);
+    setInterim("");
+    void platformHaptics.impact("light");
+
+    let lastInterim = "";
+    await platformSpeech.start({
+      lang: typeof navigator !== "undefined" ? navigator.language || "en-US" : "en-US",
+      silenceTimeoutMs: 4000,
+      partialResults: true,
+      onResult: ({ transcript: text, isFinal }) => {
+        if (isFinal) {
+          finalRef.current += text + " ";
+          setTranscript(finalRef.current.trim());
+          setInterim("");
+          lastInterim = "";
+        } else {
+          setInterim(text);
+          lastInterim = text;
+        }
+      },
+      onError: (err: SpeechError) => {
+        if (err.code === "aborted" || err.code === "no_speech") return;
+        toast.error(err.message);
+      },
+      onEnd: () => {
+        // Commit any trailing partial that never got finalized (common on
+        // native, where the session ends without a final-callback).
+        if (lastInterim) {
+          finalRef.current += lastInterim + " ";
+          setTranscript(finalRef.current.trim());
+        }
+        recordingRef.current = false;
+        setRecording(false);
+        setInterim("");
+        void platformHaptics.impact("light");
+      },
+    });
+  }, [supported, transcript]);
 
   async function generate() {
     if (transcript.trim().length < 10) {
       toast.error("Dictate at least a sentence or two first.");
       return;
     }
+    if (!network.connected) {
+      toast.error("You're offline. AI summary needs a connection.");
+      return;
+    }
+    // De-dupe overlapping requests: only the latest call writes to state.
+    const requestId = ++generationIdRef.current;
     setGenerating(true);
     try {
       const { summary } = await aiService.summarizeHandoff({
         transcript,
         context: context || undefined,
       });
+      if (requestId !== generationIdRef.current) return; // superseded
       setSbar(parseSummary(summary));
       setHasSummary(true);
+      void platformHaptics.notificationSuccess();
     } catch (err) {
+      if (requestId !== generationIdRef.current) return;
       const msg =
         err instanceof AIError
           ? err.message
@@ -268,14 +300,21 @@ function VoicePage() {
             ? err.message
             : "Couldn't generate summary";
       toast.error(msg);
+      void platformHaptics.notificationError();
     } finally {
-      setGenerating(false);
+      if (requestId === generationIdRef.current) setGenerating(false);
     }
   }
 
   async function copy(text: string) {
-    await navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard");
+    try {
+      await platformClipboard.write(text);
+      toast.success("Copied to clipboard");
+      void platformHaptics.impact("light");
+    } catch (err) {
+      const msg = err instanceof ClipboardError ? err.message : "Couldn't copy to the clipboard.";
+      toast.error(msg);
+    }
   }
 
   function reset() {
@@ -320,6 +359,7 @@ function VoicePage() {
           .eq("id", draftId);
         if (error) throw error;
         toast.success("Draft updated");
+        void platformHaptics.notificationSuccess();
       } else {
         const { data, error } = await supabase
           .from("handoff_drafts")
@@ -329,6 +369,7 @@ function VoicePage() {
         if (error) throw error;
         setDraftId(data.id);
         toast.success("Draft saved");
+        void platformHaptics.notificationSuccess();
       }
       setDraftTitle(title);
     } catch (err: any) {
@@ -618,6 +659,7 @@ function VoicePage() {
       </header>
 
       <main className="container mx-auto px-6 py-8 space-y-6">
+        <OfflineBanner message="You're offline. Recording works, but generating the AI summary needs a connection." />
         <div>
           <p className="text-sm uppercase tracking-wider text-muted-foreground">Dictate &amp; structure</p>
           <h1 className="font-display text-3xl font-bold tracking-tight">Voice-to-text handoff summary</h1>

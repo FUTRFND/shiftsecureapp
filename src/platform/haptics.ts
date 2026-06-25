@@ -1,6 +1,9 @@
 /**
- * PlatformHaptics — tactile feedback (no-op on web).
- * Native: `@capacitor/haptics`.
+ * PlatformHaptics — tactile feedback.
+ *
+ * Use sparingly — only on meaningful events (recording start/stop, save
+ * confirmation, AI completion, error). All web methods are best-effort
+ * no-ops where the API is missing.
  */
 import { isNative } from "./runtime";
 
@@ -12,35 +15,54 @@ export interface PlatformHaptics {
   notificationError(): Promise<void>;
 }
 
+function webVibrate(pattern: number | number[]): void {
+  if (typeof navigator === "undefined") return;
+  const nav = navigator as Navigator & { vibrate?: (p: number | number[]) => boolean };
+  try {
+    nav.vibrate?.(pattern);
+  } catch {
+    /* ignored */
+  }
+}
+
 const webHaptics: PlatformHaptics = {
-  async impact() {
-    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-      (navigator as Navigator & { vibrate: (p: number) => void }).vibrate(10);
-    }
+  async impact(style = "light") {
+    const map: Record<ImpactStyle, number> = { light: 10, medium: 20, heavy: 35 };
+    webVibrate(map[style]);
   },
   async notificationSuccess() {
-    /* no-op */
+    webVibrate([10, 30, 10]);
   },
   async notificationError() {
-    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-      (navigator as Navigator & { vibrate: (p: number[]) => void }).vibrate([20, 40, 20]);
-    }
+    webVibrate([30, 60, 30]);
   },
 };
 
 const nativeHaptics: PlatformHaptics = {
   async impact(style = "light") {
-    const { Haptics, ImpactStyle } = await import("@capacitor/haptics");
-    const map = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy } as const;
-    await Haptics.impact({ style: map[style] });
+    try {
+      const { Haptics, ImpactStyle } = await import("@capacitor/haptics");
+      const map = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy } as const;
+      await Haptics.impact({ style: map[style] });
+    } catch {
+      /* haptics are best-effort */
+    }
   },
   async notificationSuccess() {
-    const { Haptics, NotificationType } = await import("@capacitor/haptics");
-    await Haptics.notification({ type: NotificationType.Success });
+    try {
+      const { Haptics, NotificationType } = await import("@capacitor/haptics");
+      await Haptics.notification({ type: NotificationType.Success });
+    } catch {
+      /* noop */
+    }
   },
   async notificationError() {
-    const { Haptics, NotificationType } = await import("@capacitor/haptics");
-    await Haptics.notification({ type: NotificationType.Error });
+    try {
+      const { Haptics, NotificationType } = await import("@capacitor/haptics");
+      await Haptics.notification({ type: NotificationType.Error });
+    } catch {
+      /* noop */
+    }
   },
 };
 

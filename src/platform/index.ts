@@ -17,7 +17,16 @@ export {
   hydratePlatformStorageSync,
   type PlatformStorage,
 } from "./storage";
-export { platformSpeech, type PlatformSpeech, type SpeechResult } from "./speech";
+export {
+  platformSpeech,
+  SpeechError,
+  type PlatformSpeech,
+  type SpeechResult,
+  type SpeechErrorCode,
+  type StartSpeechOptions,
+} from "./speech";
+export { platformPermissions, type PlatformPermissions, type PermissionName, type PermissionStatus } from "./permissions";
+export { ClipboardError } from "./clipboard";
 export { platformClipboard, type PlatformClipboard } from "./clipboard";
 export { platformNetwork, type PlatformNetwork, type NetworkStatus } from "./network";
 export { platformHaptics, type PlatformHaptics, type ImpactStyle } from "./haptics";
