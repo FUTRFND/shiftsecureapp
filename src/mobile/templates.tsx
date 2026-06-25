@@ -112,10 +112,14 @@ export function TemplatesScreen({
 
   async function handleSave(input: TemplateInput, editingRow: TemplateRow | null) {
     if (input.is_default) {
-      await sb
+      const { error: clearErr } = await sb
         .from("handoff_templates")
         .update({ is_default: false })
         .eq("user_id", userId);
+      if (clearErr) {
+        console.error("[templates] clear default failed", clearErr);
+        throw new Error(clearErr.message);
+      }
     }
     if (editingRow) {
       const { error: e } = await sb
@@ -123,16 +127,16 @@ export function TemplatesScreen({
         .update({ ...input })
         .eq("id", editingRow.id);
       if (e) {
-        setError(e.message);
-        return;
+        console.error("[templates] update failed", e);
+        throw new Error(e.message);
       }
     } else {
       const { error: e } = await sb
         .from("handoff_templates")
         .insert({ ...input, user_id: userId });
       if (e) {
-        setError(e.message);
-        return;
+        console.error("[templates] insert failed", e);
+        throw new Error(e.message);
       }
     }
     setEditing(null);
@@ -423,8 +427,9 @@ function TemplateEditor({
   }
 
   async function handleSubmit() {
+    if (saving) return;
     if (!canSave) {
-      setErr("Name and every section title are required.");
+      setErr("Name (min 2 chars) and every section title are required.");
       return;
     }
     setSaving(true);
@@ -443,11 +448,20 @@ function TemplateEditor({
         })),
       });
     } catch (e) {
+      console.error("[templates] save failed", e);
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
       setSaving(false);
     }
   }
+
+  // iOS WebView: ensure taps register reliably on these top-bar buttons.
+  const tapFix: React.CSSProperties = {
+    cursor: "pointer",
+    touchAction: "manipulation",
+    WebkitAppearance: "none",
+    WebkitTapHighlightColor: "rgba(0,0,0,0.1)",
+  };
 
   return (
     <main style={pageStyle}>
@@ -456,17 +470,32 @@ function TemplateEditor({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 8,
           marginBottom: 12,
         }}
       >
-        <button type="button" onClick={onCancel} style={buttonBase}>
+        <button
+          type="button"
+          onClick={() => {
+            console.log("[templates] cancel tapped");
+            onCancel();
+          }}
+          style={{ ...buttonBase, ...tapFix }}
+        >
           ← Cancel
         </button>
         <button
           type="button"
-          onClick={handleSubmit}
-          disabled={saving || !canSave}
-          style={{ ...primaryButton, opacity: saving || !canSave ? 0.5 : 1 }}
+          onClick={() => {
+            console.log("[templates] save tapped", { canSave, saving });
+            handleSubmit();
+          }}
+          aria-disabled={saving}
+          style={{
+            ...primaryButton,
+            ...tapFix,
+            opacity: saving ? 0.6 : 1,
+          }}
         >
           {saving ? "Saving…" : "Save"}
         </button>
