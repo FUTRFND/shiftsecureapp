@@ -223,7 +223,7 @@ function makeNativeSpeech(): PlatformSpeech {
     async checkPermission() {
       try {
         const { SpeechRecognition } = await import("@capacitor-community/speech-recognition");
-        const { permission } = await SpeechRecognition.checkPermissions();
+        const { speechRecognition: permission } = await SpeechRecognition.checkPermissions();
         if (permission === "granted") return "granted";
         if (permission === "denied") return "denied";
         return "prompt";
@@ -234,7 +234,7 @@ function makeNativeSpeech(): PlatformSpeech {
     async requestPermission() {
       try {
         const { SpeechRecognition } = await import("@capacitor-community/speech-recognition");
-        const { permission } = await SpeechRecognition.requestPermissions();
+        const { speechRecognition: permission } = await SpeechRecognition.requestPermissions();
         return permission === "granted";
       } catch {
         return false;
@@ -270,9 +270,9 @@ function makeNativeSpeech(): PlatformSpeech {
 
       // Ensure permission before starting.
       try {
-        const { permission } = await SpeechRecognition.checkPermissions();
+        const { speechRecognition: permission } = await SpeechRecognition.checkPermissions();
         if (permission !== "granted") {
-          const { permission: next } = await SpeechRecognition.requestPermissions();
+          const { speechRecognition: next } = await SpeechRecognition.requestPermissions();
           if (next !== "granted") {
             onError?.(new SpeechError("permission_denied", friendlyMessage("permission_denied")));
             onEnd?.();
