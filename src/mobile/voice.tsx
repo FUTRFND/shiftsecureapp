@@ -652,9 +652,12 @@ export function VoiceScreen({
           {generating ? "Generating…" : hasSummary ? "Regenerate summary" : "Generate summary"}
         </button>
         {generateErr && (
-          <p style={{ fontSize: 13, color: palette.critical, margin: "10px 0 0" }}>{generateErr}</p>
+          <div style={{ marginTop: 10 }}>
+            <Banner tone="error">{generateErr}</Banner>
+          </div>
         )}
       </div>
+
 
       {hasSummary && (
         <div style={cardStyle}>
