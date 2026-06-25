@@ -305,6 +305,12 @@ function VoicePage() {
       void platformHaptics.notificationSuccess();
     } catch (err) {
       if (requestId !== generationIdRef.current) return;
+      // Server enforced the paywall — open the upgrade flow instead of toasting.
+      if (err instanceof AIError && err.code === "entitlement_required") {
+        setPaywallOpen(true);
+        void platformHaptics.notificationError();
+        return;
+      }
       const msg =
         err instanceof AIError
           ? err.message
