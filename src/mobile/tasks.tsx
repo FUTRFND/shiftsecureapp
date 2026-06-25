@@ -7,18 +7,23 @@ import {
   type TaskRow,
   type TaskStatus,
 } from "../lib/tasks";
-
-const palette = {
-  bg: "#f7f7f2",
-  ink: "#121212",
-  muted: "#454545",
-  border: "#121212",
-  surface: "#ffffff",
-  critical: "#b00020",
-  warning: "#b15c00",
-  info: "#1b4d8f",
-  ok: "#0a7a3b",
-};
+import {
+  EmptyState,
+  LoadingBlock,
+  Spinner,
+  buttonBase,
+  inputStyle,
+  labelStyle,
+  pageStyle,
+  palette,
+  primaryButton,
+  selectStyle,
+  space,
+  textareaStyle,
+  useConfirm,
+  useKeyboardScrollIntoView,
+  usePullToRefresh,
+} from "./ui";
 
 const PRIORITY_LABEL: Record<TaskPriority, string> = {
   low: "Low",
@@ -43,72 +48,7 @@ const STATUS_LABEL: Record<TaskStatus, string> = {
 
 const STATUS_ORDER: TaskStatus[] = ["todo", "in_progress", "done", "cancelled"];
 
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  boxSizing: "border-box",
-  padding: "20px 16px 80px",
-  background: palette.bg,
-  color: palette.ink,
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-};
 
-const buttonBase: React.CSSProperties = {
-  minHeight: 44,
-  border: `1px solid ${palette.border}`,
-  background: palette.surface,
-  color: palette.ink,
-  fontSize: 15,
-  fontWeight: 600,
-  padding: "0 14px",
-  borderRadius: 0,
-  font: "inherit",
-  cursor: "pointer",
-  touchAction: "manipulation",
-  WebkitAppearance: "none",
-  WebkitTapHighlightColor: "rgba(0,0,0,0.1)",
-};
-
-const primaryButton: React.CSSProperties = {
-  ...buttonBase,
-  background: palette.ink,
-  color: palette.surface,
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  minHeight: 44,
-  padding: "10px 12px",
-  fontSize: 16,
-  border: `1px solid ${palette.border}`,
-  borderRadius: 0,
-  background: palette.surface,
-  color: palette.ink,
-  marginBottom: 10,
-  font: "inherit",
-};
-
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  minHeight: 70,
-  resize: "vertical",
-};
-
-const selectStyle: React.CSSProperties = {
-  ...inputStyle,
-  WebkitAppearance: "none",
-  appearance: "none",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: 12,
-  fontWeight: 700,
-  textTransform: "uppercase",
-  letterSpacing: 0.5,
-  color: palette.muted,
-  marginBottom: 4,
-};
 
 type TaskInput = {
   title: string;
