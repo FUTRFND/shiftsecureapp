@@ -12,28 +12,46 @@ import React, {
 
 // ---- Design tokens -------------------------------------------------------
 
+// Shift Secure brand: calm green primary, off-white green background.
+// Tuned for an Apple-style grouped feel (Reminders / Notes / Health).
 export const palette = {
-  bg: "#f2f2f7",          // iOS system grouped background
-  ink: "#1c1c1e",
-  muted: "#5b5b60",
-  subtle: "#8e8e93",
-  border: "#1c1c1e",
-  hairline: "#d8d8de",
+  bg: "#f4f8f5",           // very light green / off-white
+  bgAlt: "#eef3ef",
+  ink: "#1c2024",          // never harsh black
+  muted: "#5b6168",
+  subtle: "#8a9099",
+  border: "#1c2024",
+  hairline: "#e3e8e4",     // very light gray-green
   surface: "#ffffff",
-  surfaceAlt: "#ebebf0",
-  accent: "#0a84ff",       // iOS system blue
-  critical: "#d70015",
-  warning: "#b15c00",
-  info: "#1b4d8f",
-  ok: "#0a7a3b",
-  overlay: "rgba(20,20,22,0.45)",
+  surfaceAlt: "#f1f5f2",
+  accent: "#16a34a",       // brand green
+  accentSoft: "#dcf2e3",
+  accentDeep: "#0f7a37",
+  accentGlow: "#22c55e",
+  critical: "#d7263d",
+  criticalSoft: "#fde7ea",
+  warning: "#b46a00",
+  warningSoft: "#fdeecf",
+  info: "#1d5bbf",
+  infoSoft: "#e2ecff",
+  ok: "#0f7a37",
+  overlay: "rgba(20,24,28,0.45)",
+};
+
+// Brand gradient used on primary CTAs and key surfaces.
+export const gradient = {
+  primary: `linear-gradient(135deg, ${palette.accent} 0%, ${palette.accentGlow} 100%)`,
+  primaryDeep: `linear-gradient(135deg, ${palette.accentDeep} 0%, ${palette.accent} 100%)`,
+  page: `linear-gradient(180deg, ${palette.bg} 0%, ${palette.bgAlt} 100%)`,
 };
 
 export const radii = {
   sm: 8,
-  md: 10,
-  lg: 14,
-  xl: 18,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  pill: 999,
 };
 
 export const space = {
@@ -46,8 +64,24 @@ export const space = {
 };
 
 export const shadow = {
-  card: "0 1px 2px rgba(20,20,22,0.05), 0 1px 1px rgba(20,20,22,0.04)",
-  raised: "0 8px 24px rgba(20,20,22,0.12)",
+  hairline: "0 0 0 1px rgba(20,24,28,0.04)",
+  card: "0 1px 2px rgba(20,24,28,0.04), 0 4px 14px rgba(20,24,28,0.05)",
+  raised: "0 10px 30px rgba(20,24,28,0.12)",
+  primary: "0 6px 18px rgba(22,163,74,0.32)",
+};
+
+// Apple typography scale (in px). Match HIG: Large Title 34, Title1 28, etc.
+export const type = {
+  largeTitle: 34,
+  title1: 28,
+  title2: 22,
+  title3: 20,
+  headline: 17,
+  body: 16,
+  callout: 15,
+  subhead: 14,
+  footnote: 13,
+  caption: 12,
 };
 
 const SYS_FONT =
@@ -57,7 +91,7 @@ export const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   boxSizing: "border-box",
   padding: `calc(env(safe-area-inset-top, 0px) + ${space.lg}px) ${space.lg}px 96px`,
-  background: palette.bg,
+  background: gradient.page,
   color: palette.ink,
   fontFamily: SYS_FONT,
   WebkitFontSmoothing: "antialiased",
@@ -65,7 +99,7 @@ export const pageStyle: React.CSSProperties = {
 };
 
 
-// iOS-style controls: 44pt min height, 10pt radius, system font, 16pt input
+// iOS-style controls: 44pt min height, 12pt radius, system font, 16pt input
 // text so iOS does not zoom on focus.
 
 export const buttonBase: React.CSSProperties = {
@@ -83,14 +117,17 @@ export const buttonBase: React.CSSProperties = {
   touchAction: "manipulation",
   WebkitAppearance: "none",
   WebkitTapHighlightColor: "transparent",
-  transition: "opacity 120ms ease, transform 120ms ease, background 120ms ease",
+  transition: "opacity 120ms ease, transform 120ms ease, background 120ms ease, box-shadow 160ms ease",
 };
 
+// Brand-gradient primary CTA (Sign in, Save, Publish).
 export const primaryButton: React.CSSProperties = {
   ...buttonBase,
-  background: palette.ink,
-  borderColor: palette.ink,
-  color: palette.surface,
+  background: gradient.primary,
+  borderColor: "transparent",
+  color: "#ffffff",
+  boxShadow: shadow.primary,
+  fontWeight: 700,
 };
 
 export const accentButton: React.CSSProperties = {
@@ -109,7 +146,7 @@ export const dangerButton: React.CSSProperties = {
 
 export const ghostButton: React.CSSProperties = {
   ...buttonBase,
-  background: "transparent",
+  background: palette.surface,
   border: `1px solid ${palette.hairline}`,
   color: palette.ink,
 };
@@ -117,9 +154,9 @@ export const ghostButton: React.CSSProperties = {
 export const inputStyle: React.CSSProperties = {
   width: "100%",
   boxSizing: "border-box",
-  minHeight: 44,
-  padding: "10px 14px",
-  fontSize: 16, // ≥16px = no iOS zoom on focus
+  minHeight: 48,
+  padding: "12px 14px",
+  fontSize: 16,
   border: `1px solid ${palette.hairline}`,
   borderRadius: radii.md,
   background: palette.surface,
@@ -129,6 +166,7 @@ export const inputStyle: React.CSSProperties = {
   marginBottom: space.sm,
   scrollMarginBottom: 120,
   outline: "none",
+  transition: "border-color 140ms ease, box-shadow 140ms ease",
 };
 
 export const textareaStyle: React.CSSProperties = {
@@ -144,7 +182,7 @@ export const selectStyle: React.CSSProperties = {
   WebkitAppearance: "none",
   appearance: "none",
   backgroundImage:
-    "linear-gradient(45deg, transparent 50%, #1c1c1e 50%), linear-gradient(135deg, #1c1c1e 50%, transparent 50%)",
+    "linear-gradient(45deg, transparent 50%, #1c2024 50%), linear-gradient(135deg, #1c2024 50%, transparent 50%)",
   backgroundPosition:
     "calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px)",
   backgroundSize: "6px 6px, 6px 6px",
@@ -165,7 +203,7 @@ export const labelStyle: React.CSSProperties = {
 export const cardStyle: React.CSSProperties = {
   background: palette.surface,
   border: `1px solid ${palette.hairline}`,
-  borderRadius: radii.lg,
+  borderRadius: radii.xl,
   padding: space.lg,
   boxShadow: shadow.card,
 };
@@ -187,16 +225,26 @@ function ensureGlobalStyles() {
   from { opacity: 0; transform: translateY(-4px) }
   to   { opacity: 1; transform: translateY(0) }
 }
-.mobile-screen-fade { animation: mobile-fade-in 200ms ease-out both; }
-.mobile-tap:active:not(:disabled) { opacity: 0.7; transform: scale(0.98); }
+@keyframes mobile-shimmer {
+  0%   { background-position: -400px 0 }
+  100% { background-position: 400px 0 }
+}
+.mobile-screen-fade { animation: mobile-fade-in 220ms ease-out both; }
+.mobile-tap:active:not(:disabled) { opacity: 0.85; transform: scale(0.985); }
 .mobile-tap:disabled { opacity: 0.45; cursor: default; }
 button:disabled { cursor: default; }
 input:focus, textarea:focus, select:focus {
-  border-color: #0a84ff !important;
-  box-shadow: 0 0 0 3px rgba(10,132,255,0.18);
+  border-color: ${palette.accent} !important;
+  box-shadow: 0 0 0 4px ${palette.accentSoft};
 }
 * { -webkit-tap-highlight-color: transparent; }
 html, body { background: ${palette.bg}; overscroll-behavior-y: contain; }
+.mobile-skeleton {
+  background: linear-gradient(90deg, ${palette.surfaceAlt} 0%, #ffffff 50%, ${palette.surfaceAlt} 100%);
+  background-size: 800px 100%;
+  animation: mobile-shimmer 1.4s linear infinite;
+  border-radius: 8px;
+}
 `;
   const el = document.createElement("style");
   el.setAttribute("data-mobile-ui", "true");
@@ -747,5 +795,239 @@ export function ScreenFade({
     <div key={k} className="mobile-screen-fade">
       {children}
     </div>
+  );
+}
+
+// ---- Card ---------------------------------------------------------------
+
+export function Card({
+  children,
+  padded = true,
+  style,
+  onClick,
+  as: As = "div",
+}: {
+  children: React.ReactNode;
+  padded?: boolean;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+  as?: "div" | "section" | "article";
+}) {
+  return (
+    <As
+      onClick={onClick}
+      style={{
+        ...cardStyle,
+        padding: padded ? space.lg : 0,
+        cursor: onClick ? "pointer" : undefined,
+        ...style,
+      }}
+    >
+      {children}
+    </As>
+  );
+}
+
+// ---- Section header (within a screen) ------------------------------------
+
+export function SectionHeader({
+  title,
+  action,
+}: {
+  title: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "baseline",
+        justifyContent: "space-between",
+        margin: `${space.lg}px 4px ${space.sm}px`,
+      }}
+    >
+      <h2
+        style={{
+          margin: 0,
+          fontSize: 13,
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: 0.8,
+          color: palette.muted,
+        }}
+      >
+        {title}
+      </h2>
+      {action}
+    </div>
+  );
+}
+
+// ---- Pill / Chip / StatusBadge -------------------------------------------
+
+export function Pill({
+  tone = "neutral",
+  children,
+  dot,
+}: {
+  tone?: "neutral" | "success" | "warning" | "critical" | "info" | "accent";
+  children: React.ReactNode;
+  dot?: boolean;
+}) {
+  const tones: Record<string, { bg: string; fg: string }> = {
+    neutral:  { bg: palette.surfaceAlt,   fg: palette.muted },
+    success:  { bg: palette.accentSoft,   fg: palette.accentDeep },
+    accent:   { bg: palette.accentSoft,   fg: palette.accentDeep },
+    warning:  { bg: palette.warningSoft,  fg: palette.warning },
+    critical: { bg: palette.criticalSoft, fg: palette.critical },
+    info:     { bg: palette.infoSoft,     fg: palette.info },
+  };
+  const t = tones[tone];
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        background: t.bg,
+        color: t.fg,
+        borderRadius: radii.pill,
+        padding: "4px 10px",
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: 0.3,
+        textTransform: "uppercase",
+        lineHeight: 1,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {dot && (
+        <span
+          aria-hidden="true"
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: t.fg,
+            display: "inline-block",
+          }}
+        />
+      )}
+      {children}
+    </span>
+  );
+}
+
+export function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active?: boolean;
+  onClick?: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mobile-tap"
+      style={{
+        height: 34,
+        padding: "0 14px",
+        borderRadius: radii.pill,
+        border: `1px solid ${active ? palette.accent : palette.hairline}`,
+        background: active ? palette.accentSoft : palette.surface,
+        color: active ? palette.accentDeep : palette.ink,
+        fontSize: 13,
+        fontWeight: active ? 700 : 500,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        WebkitAppearance: "none",
+        touchAction: "manipulation",
+        transition: "background 140ms ease, color 140ms ease, border-color 140ms ease",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ---- Skeleton loaders ----------------------------------------------------
+
+export function Skeleton({
+  width = "100%",
+  height = 14,
+  style,
+}: {
+  width?: number | string;
+  height?: number | string;
+  style?: React.CSSProperties;
+}) {
+  ensureGlobalStyles();
+  return (
+    <div
+      className="mobile-skeleton"
+      aria-hidden="true"
+      style={{ width, height, ...style }}
+    />
+  );
+}
+
+export function SkeletonCard() {
+  return (
+    <div style={{ ...cardStyle, marginBottom: space.md }}>
+      <Skeleton width={120} height={12} style={{ marginBottom: 12 }} />
+      <Skeleton width="80%" height={16} style={{ marginBottom: 8 }} />
+      <Skeleton width="60%" height={14} />
+    </div>
+  );
+}
+
+// ---- Floating Action Button ----------------------------------------------
+
+export function FAB({
+  onClick,
+  label,
+  icon = "+",
+}: {
+  onClick: () => void;
+  label: string;
+  icon?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="mobile-tap"
+      style={{
+        position: "fixed",
+        right: 18,
+        bottom: `calc(env(safe-area-inset-bottom, 0px) + 84px)`,
+        height: 56,
+        minWidth: 56,
+        padding: "0 20px",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
+        background: gradient.primary,
+        color: "#fff",
+        border: "none",
+        borderRadius: radii.pill,
+        fontSize: 15,
+        fontWeight: 700,
+        boxShadow: shadow.primary,
+        cursor: "pointer",
+        zIndex: 25,
+        fontFamily: "inherit",
+        touchAction: "manipulation",
+      }}
+    >
+      <span aria-hidden="true" style={{ fontSize: 22, lineHeight: 1, marginTop: -2 }}>
+        {icon}
+      </span>
+      <span>{label}</span>
+    </button>
   );
 }
