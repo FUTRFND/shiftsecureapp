@@ -15,7 +15,7 @@
  * build step. If it isn't installed yet, the adapter degrades to web
  * behaviour so the bundle still loads.
  */
-import { getPlatform, isNative } from "./runtime";
+import { isNative } from "./runtime";
 import { getRevenueCatApiKey } from "@/config/subscription";
 
 export interface SubscriptionPackage {
