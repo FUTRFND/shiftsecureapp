@@ -317,6 +317,144 @@ export function EmptyState({
   );
 }
 
+// ---- Banner (inline error / success / info) -----------------------------
+
+export type BannerTone = "error" | "success" | "warning" | "info";
+
+const BANNER_TONES: Record<
+  BannerTone,
+  { bg: string; fg: string; border: string; icon: string }
+> = {
+  error:   { bg: "#fdecee", fg: palette.critical, border: "#f6c6cc", icon: "!" },
+  success: { bg: "#e8f5ec", fg: palette.ok,       border: "#bfe1c8", icon: "✓" },
+  warning: { bg: "#fff4e0", fg: palette.warning,  border: "#f1d8a8", icon: "△" },
+  info:    { bg: "#e6efff", fg: palette.info,     border: "#c2d3f0", icon: "i" },
+};
+
+export function Banner({
+  tone = "info",
+  children,
+  onDismiss,
+}: {
+  tone?: BannerTone;
+  children: React.ReactNode;
+  onDismiss?: () => void;
+}) {
+  ensureGlobalStyles();
+  const t = BANNER_TONES[tone];
+  return (
+    <div
+      role={tone === "error" ? "alert" : "status"}
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 10,
+        border: `1px solid ${t.border}`,
+        background: t.bg,
+        color: t.fg,
+        padding: "10px 12px",
+        borderRadius: radii.md,
+        fontSize: 13,
+        lineHeight: 1.35,
+        marginBottom: space.md,
+        animation: "mobile-banner-in 180ms ease-out both",
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          flex: "0 0 auto",
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          background: t.fg,
+          color: "#fff",
+          fontSize: 11,
+          fontWeight: 800,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: 1,
+        }}
+      >
+        {t.icon}
+      </span>
+      <div style={{ flex: 1, fontWeight: 500 }}>{children}</div>
+      {onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="Dismiss"
+          className="mobile-tap"
+          style={{
+            border: "none",
+            background: "transparent",
+            color: t.fg,
+            fontSize: 16,
+            lineHeight: 1,
+            padding: 4,
+            cursor: "pointer",
+          }}
+        >
+          ×
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ---- Screen header -------------------------------------------------------
+
+export function ScreenHeader({
+  title,
+  subtitle,
+  right,
+}: {
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+}) {
+  return (
+    <header
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        gap: space.md,
+        marginBottom: space.lg,
+      }}
+    >
+      <div style={{ minWidth: 0 }}>
+        <h1
+          style={{
+            margin: 0,
+            fontSize: 28,
+            fontWeight: 700,
+            letterSpacing: -0.6,
+            color: palette.ink,
+            lineHeight: 1.1,
+          }}
+        >
+          {title}
+        </h1>
+        {subtitle && (
+          <p
+            style={{
+              margin: "4px 0 0",
+              fontSize: 13,
+              color: palette.muted,
+              lineHeight: 1.4,
+            }}
+          >
+            {subtitle}
+          </p>
+        )}
+      </div>
+      {right && <div style={{ flex: "0 0 auto" }}>{right}</div>}
+    </header>
+  );
+}
+
 // ---- Confirm dialog ------------------------------------------------------
 
 type ConfirmOptions = {
