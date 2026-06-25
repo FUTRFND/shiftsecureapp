@@ -193,8 +193,7 @@ const TAB_GLYPH: Record<Screen, string> = {
   Tasks: "✓",
   Voice: "🎙",
 };
-  );
-}
+
 
 function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
   const [email, setEmail] = useState("");
