@@ -7,7 +7,7 @@ import {
   type Section,
   type TemplateInput,
   type TemplateRow,
-} from "@/lib/templates";
+} from "../lib/templates";
 
 const palette = {
   bg: "#f7f7f2",
