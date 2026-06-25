@@ -9,7 +9,9 @@ import {
   type TemplateRow,
 } from "../lib/templates";
 import {
+  Banner,
   EmptyState,
+  ScreenHeader,
   LoadingBlock,
   Spinner,
   buttonBase,
@@ -138,40 +140,15 @@ export function TemplatesScreen({
   return (
     <main style={pageStyle}>
       {indicator}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: space.md,
-        }}
-      >
-        <button type="button" onClick={onBack} style={buttonBase} className="mobile-tap">
-          ← Back
-        </button>
-      </div>
-
-      <h1 style={{ margin: "0 0 4px", fontSize: 26, fontWeight: 700 }}>
-        Handoff Templates
-      </h1>
-      <p style={{ margin: `0 0 ${space.lg}px`, fontSize: 13, color: palette.muted }}>
-        Structured templates ensure nothing critical is missed.
-      </p>
+      <ScreenHeader
+        title="Templates"
+        subtitle="Structured templates ensure nothing critical is missed."
+      />
 
       {error && (
-        <div
-          style={{
-            border: `1px solid ${palette.critical}`,
-            background: "#fde8ec",
-            color: palette.critical,
-            padding: "8px 10px",
-            fontSize: 13,
-            borderRadius: 10,
-            marginBottom: space.md,
-          }}
-        >
+        <Banner tone="error" onDismiss={() => setError(null)}>
           {error}
-        </div>
+        </Banner>
       )}
 
       <button
@@ -182,6 +159,7 @@ export function TemplatesScreen({
       >
         + New template
       </button>
+
 
       {loading && !refreshing ? (
         <LoadingBlock label="Loading templates…" />

@@ -3,8 +3,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
+  Banner,
   EmptyState,
   LoadingBlock,
+  ScreenHeader,
   Spinner,
   buttonBase,
   inputStyle,
@@ -198,68 +200,50 @@ export function AlertsScreen({
   return (
     <main style={pageStyle}>
       {indicator}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: space.md,
-        }}
-      >
-        <button type="button" onClick={onBack} style={buttonBase} className="mobile-tap">
-          ← Back
-        </button>
-        <span
-          style={{
-            fontSize: 12,
-            color: connected ? palette.ok : palette.muted,
-            fontWeight: 600,
-          }}
-        >
-          {connected ? "● Live" : "○ Offline"}
-        </span>
-      </div>
-
-      <h1 style={{ margin: "0 0 4px", fontSize: 26, fontWeight: 700 }}>
-        Critical Alerts
-      </h1>
-      <p style={{ margin: `0 0 ${space.lg}px`, fontSize: 13, color: palette.muted }}>
-        Broadcast high-priority patient concerns to the whole shift.
-      </p>
+      <ScreenHeader
+        title="Alerts"
+        subtitle="Broadcast high-priority patient concerns to the whole shift."
+        right={
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 11,
+              color: connected ? palette.ok : palette.subtle,
+              fontWeight: 600,
+              padding: "4px 10px",
+              borderRadius: 999,
+              background: connected ? "rgba(10,122,59,0.08)" : palette.surfaceAlt,
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: connected ? palette.ok : palette.subtle,
+              }}
+            />
+            {connected ? "Live" : "Offline"}
+          </span>
+        }
+      />
 
       {activeCritical > 0 && (
-        <div
-          style={{
-            border: `1px solid ${palette.critical}`,
-            background: "#fde8ec",
-            color: palette.critical,
-            padding: "10px 12px",
-            fontSize: 14,
-            fontWeight: 600,
-            borderRadius: 10,
-            marginBottom: space.md,
-          }}
-        >
+        <Banner tone="error">
           {activeCritical} active critical{" "}
           {activeCritical === 1 ? "alert" : "alerts"} requiring attention.
-        </div>
+        </Banner>
       )}
 
       {error && (
-        <div
-          style={{
-            border: `1px solid ${palette.critical}`,
-            background: "#fde8ec",
-            color: palette.critical,
-            padding: "8px 10px",
-            fontSize: 13,
-            borderRadius: 10,
-            marginBottom: space.md,
-          }}
-        >
+        <Banner tone="error" onDismiss={() => setError(null)}>
           {error}
-        </div>
+        </Banner>
       )}
+
 
       <div
         style={{

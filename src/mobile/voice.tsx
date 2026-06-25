@@ -5,8 +5,10 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import {
+  Banner,
   EmptyState,
   LoadingBlock,
+  ScreenHeader,
   Spinner,
   buttonBase,
   cardStyle as baseCardStyle,
@@ -485,27 +487,25 @@ export function VoiceScreen({
 
   return (
     <main style={pageStyle}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <button type="button" onClick={onBack} style={{ ...buttonBase, minHeight: 36, padding: "0 12px" }}>
-          ← Back
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            const next = !draftsOpen;
-            setDraftsOpen(next);
-            if (next) void loadDrafts();
-          }}
-          style={{ ...buttonBase, minHeight: 36, padding: "0 12px" }}
-        >
-          {draftsOpen ? "Close drafts" : "My drafts"}
-        </button>
-      </div>
+      <ScreenHeader
+        title="Voice handoff"
+        subtitle="Dictate or type, then generate an SBAR summary."
+        right={
+          <button
+            type="button"
+            onClick={() => {
+              const next = !draftsOpen;
+              setDraftsOpen(next);
+              if (next) void loadDrafts();
+            }}
+            className="mobile-tap"
+            style={{ ...buttonBase, minHeight: 36, padding: "0 12px", fontSize: 13 }}
+          >
+            {draftsOpen ? "Close drafts" : "My drafts"}
+          </button>
+        }
+      />
 
-      <h1 style={{ margin: "0 0 4px", fontSize: 24, fontWeight: 700 }}>Voice handoff</h1>
-      <p style={{ margin: "0 0 16px", fontSize: 13, color: palette.muted }}>
-        Dictate or type, then generate an SBAR summary.
-      </p>
 
       {draftsOpen && (
         <div style={cardStyle}>
@@ -653,9 +653,12 @@ export function VoiceScreen({
           {generating ? "Generating…" : hasSummary ? "Regenerate summary" : "Generate summary"}
         </button>
         {generateErr && (
-          <p style={{ fontSize: 13, color: palette.critical, margin: "10px 0 0" }}>{generateErr}</p>
+          <div style={{ marginTop: 10 }}>
+            <Banner tone="error">{generateErr}</Banner>
+          </div>
         )}
       </div>
+
 
       {hasSummary && (
         <div style={cardStyle}>
@@ -760,8 +763,11 @@ export function VoiceScreen({
               {savingDraft ? "Saving…" : draftId ? "Update draft" : "Save draft"}
             </button>
             {saveErr && (
-              <p style={{ fontSize: 13, color: palette.critical, margin: "10px 0 0" }}>{saveErr}</p>
+              <div style={{ marginTop: 10, width: "100%" }}>
+                <Banner tone="error">{saveErr}</Banner>
+              </div>
             )}
+
           </div>
         </div>
       )}

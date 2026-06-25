@@ -13,25 +13,27 @@ import React, {
 // ---- Design tokens -------------------------------------------------------
 
 export const palette = {
-  bg: "#f7f7f2",
-  ink: "#121212",
-  muted: "#454545",
-  subtle: "#8a8a8a",
-  border: "#121212",
-  hairline: "#e2e2dc",
+  bg: "#f2f2f7",          // iOS system grouped background
+  ink: "#1c1c1e",
+  muted: "#5b5b60",
+  subtle: "#8e8e93",
+  border: "#1c1c1e",
+  hairline: "#d8d8de",
   surface: "#ffffff",
-  surfaceAlt: "#f0f0ea",
-  critical: "#b00020",
+  surfaceAlt: "#ebebf0",
+  accent: "#0a84ff",       // iOS system blue
+  critical: "#d70015",
   warning: "#b15c00",
   info: "#1b4d8f",
   ok: "#0a7a3b",
-  overlay: "rgba(18,18,18,0.45)",
+  overlay: "rgba(20,20,22,0.45)",
 };
 
 export const radii = {
   sm: 8,
   md: 10,
   lg: 14,
+  xl: 18,
 };
 
 export const space = {
@@ -43,25 +45,32 @@ export const space = {
   xxl: 32,
 };
 
+export const shadow = {
+  card: "0 1px 2px rgba(20,20,22,0.05), 0 1px 1px rgba(20,20,22,0.04)",
+  raised: "0 8px 24px rgba(20,20,22,0.12)",
+};
+
 const SYS_FONT =
-  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif';
+  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif';
 
 export const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   boxSizing: "border-box",
-  padding: `${space.lg}px ${space.lg}px 96px`,
+  padding: `calc(env(safe-area-inset-top, 0px) + ${space.lg}px) ${space.lg}px 96px`,
   background: palette.bg,
   color: palette.ink,
   fontFamily: SYS_FONT,
   WebkitFontSmoothing: "antialiased",
+  letterSpacing: -0.01,
 };
+
 
 // iOS-style controls: 44pt min height, 10pt radius, system font, 16pt input
 // text so iOS does not zoom on focus.
 
 export const buttonBase: React.CSSProperties = {
   minHeight: 44,
-  border: `1px solid ${palette.border}`,
+  border: `1px solid ${palette.hairline}`,
   background: palette.surface,
   color: palette.ink,
   fontSize: 15,
@@ -74,13 +83,21 @@ export const buttonBase: React.CSSProperties = {
   touchAction: "manipulation",
   WebkitAppearance: "none",
   WebkitTapHighlightColor: "transparent",
-  transition: "opacity 120ms ease, transform 120ms ease",
+  transition: "opacity 120ms ease, transform 120ms ease, background 120ms ease",
 };
 
 export const primaryButton: React.CSSProperties = {
   ...buttonBase,
   background: palette.ink,
+  borderColor: palette.ink,
   color: palette.surface,
+};
+
+export const accentButton: React.CSSProperties = {
+  ...buttonBase,
+  background: palette.accent,
+  borderColor: palette.accent,
+  color: "#ffffff",
 };
 
 export const dangerButton: React.CSSProperties = {
@@ -101,9 +118,9 @@ export const inputStyle: React.CSSProperties = {
   width: "100%",
   boxSizing: "border-box",
   minHeight: 44,
-  padding: "10px 12px",
+  padding: "10px 14px",
   fontSize: 16, // ≥16px = no iOS zoom on focus
-  border: `1px solid ${palette.border}`,
+  border: `1px solid ${palette.hairline}`,
   borderRadius: radii.md,
   background: palette.surface,
   color: palette.ink,
@@ -111,13 +128,15 @@ export const inputStyle: React.CSSProperties = {
   fontFamily: SYS_FONT,
   marginBottom: space.sm,
   scrollMarginBottom: 120,
+  outline: "none",
 };
 
 export const textareaStyle: React.CSSProperties = {
   ...inputStyle,
-  minHeight: 84,
-  paddingTop: 10,
+  minHeight: 96,
+  paddingTop: 12,
   resize: "vertical",
+  lineHeight: 1.4,
 };
 
 export const selectStyle: React.CSSProperties = {
@@ -125,7 +144,7 @@ export const selectStyle: React.CSSProperties = {
   WebkitAppearance: "none",
   appearance: "none",
   backgroundImage:
-    "linear-gradient(45deg, transparent 50%, #121212 50%), linear-gradient(135deg, #121212 50%, transparent 50%)",
+    "linear-gradient(45deg, transparent 50%, #1c1c1e 50%), linear-gradient(135deg, #1c1c1e 50%, transparent 50%)",
   backgroundPosition:
     "calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px)",
   backgroundSize: "6px 6px, 6px 6px",
@@ -138,7 +157,7 @@ export const labelStyle: React.CSSProperties = {
   fontSize: 12,
   fontWeight: 700,
   textTransform: "uppercase",
-  letterSpacing: 0.5,
+  letterSpacing: 0.6,
   color: palette.muted,
   marginBottom: space.xs,
 };
@@ -148,7 +167,9 @@ export const cardStyle: React.CSSProperties = {
   border: `1px solid ${palette.hairline}`,
   borderRadius: radii.lg,
   padding: space.lg,
+  boxShadow: shadow.card,
 };
+
 
 // ---- One-shot global stylesheet (animations, focus polish) ---------------
 
@@ -162,8 +183,20 @@ function ensureGlobalStyles() {
   from { opacity: 0; transform: translateY(6px) }
   to   { opacity: 1; transform: translateY(0) }
 }
-.mobile-screen-fade { animation: mobile-fade-in 180ms ease-out both; }
-.mobile-tap:active { opacity: 0.75; transform: scale(0.98); }
+@keyframes mobile-banner-in {
+  from { opacity: 0; transform: translateY(-4px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+.mobile-screen-fade { animation: mobile-fade-in 200ms ease-out both; }
+.mobile-tap:active:not(:disabled) { opacity: 0.7; transform: scale(0.98); }
+.mobile-tap:disabled { opacity: 0.45; cursor: default; }
+button:disabled { cursor: default; }
+input:focus, textarea:focus, select:focus {
+  border-color: #0a84ff !important;
+  box-shadow: 0 0 0 3px rgba(10,132,255,0.18);
+}
+* { -webkit-tap-highlight-color: transparent; }
+html, body { background: ${palette.bg}; overscroll-behavior-y: contain; }
 `;
   const el = document.createElement("style");
   el.setAttribute("data-mobile-ui", "true");
@@ -281,6 +314,144 @@ export function EmptyState({
         </div>
       )}
     </div>
+  );
+}
+
+// ---- Banner (inline error / success / info) -----------------------------
+
+export type BannerTone = "error" | "success" | "warning" | "info";
+
+const BANNER_TONES: Record<
+  BannerTone,
+  { bg: string; fg: string; border: string; icon: string }
+> = {
+  error:   { bg: "#fdecee", fg: palette.critical, border: "#f6c6cc", icon: "!" },
+  success: { bg: "#e8f5ec", fg: palette.ok,       border: "#bfe1c8", icon: "✓" },
+  warning: { bg: "#fff4e0", fg: palette.warning,  border: "#f1d8a8", icon: "△" },
+  info:    { bg: "#e6efff", fg: palette.info,     border: "#c2d3f0", icon: "i" },
+};
+
+export function Banner({
+  tone = "info",
+  children,
+  onDismiss,
+}: {
+  tone?: BannerTone;
+  children: React.ReactNode;
+  onDismiss?: () => void;
+}) {
+  ensureGlobalStyles();
+  const t = BANNER_TONES[tone];
+  return (
+    <div
+      role={tone === "error" ? "alert" : "status"}
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 10,
+        border: `1px solid ${t.border}`,
+        background: t.bg,
+        color: t.fg,
+        padding: "10px 12px",
+        borderRadius: radii.md,
+        fontSize: 13,
+        lineHeight: 1.35,
+        marginBottom: space.md,
+        animation: "mobile-banner-in 180ms ease-out both",
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          flex: "0 0 auto",
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          background: t.fg,
+          color: "#fff",
+          fontSize: 11,
+          fontWeight: 800,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: 1,
+        }}
+      >
+        {t.icon}
+      </span>
+      <div style={{ flex: 1, fontWeight: 500 }}>{children}</div>
+      {onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="Dismiss"
+          className="mobile-tap"
+          style={{
+            border: "none",
+            background: "transparent",
+            color: t.fg,
+            fontSize: 16,
+            lineHeight: 1,
+            padding: 4,
+            cursor: "pointer",
+          }}
+        >
+          ×
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ---- Screen header -------------------------------------------------------
+
+export function ScreenHeader({
+  title,
+  subtitle,
+  right,
+}: {
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+}) {
+  return (
+    <header
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        gap: space.md,
+        marginBottom: space.lg,
+      }}
+    >
+      <div style={{ minWidth: 0 }}>
+        <h1
+          style={{
+            margin: 0,
+            fontSize: 28,
+            fontWeight: 700,
+            letterSpacing: -0.6,
+            color: palette.ink,
+            lineHeight: 1.1,
+          }}
+        >
+          {title}
+        </h1>
+        {subtitle && (
+          <p
+            style={{
+              margin: "4px 0 0",
+              fontSize: 13,
+              color: palette.muted,
+              lineHeight: 1.4,
+            }}
+          >
+            {subtitle}
+          </p>
+        )}
+      </div>
+      {right && <div style={{ flex: "0 0 auto" }}>{right}</div>}
+    </header>
   );
 }
 
