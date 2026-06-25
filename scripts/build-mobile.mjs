@@ -16,7 +16,11 @@ import { join, resolve } from "node:path";
 
 const root = resolve(process.cwd());
 const SPA_DIR = join(root, "dist", "spa");
-const NITRO_PUBLIC = join(root, ".output", "public");
+// Nitro's preset emits client assets under `dist/client` for this template.
+// If the layout changes again, update this single path.
+const NITRO_PUBLIC = existsSync(join(root, ".output", "public"))
+  ? join(root, ".output", "public")
+  : join(root, "dist", "client");
 
 console.log("[build:mobile] running vite build");
 execSync("vite build", { stdio: "inherit", env: { ...process.env, MOBILE_BUILD: "1" } });
