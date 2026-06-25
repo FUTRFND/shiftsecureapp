@@ -77,8 +77,8 @@ export async function startDeepLinkListener(): Promise<() => Promise<void>> {
 
   // On cold start the URL that launched the app is delivered separately.
   try {
-    const { url } = await App.getLaunchUrl();
-    if (url) void dispatchDeepLink(url);
+    const launch = await App.getLaunchUrl();
+    if (launch?.url) void dispatchDeepLink(launch.url);
   } catch {
     /* getLaunchUrl is best-effort */
   }
