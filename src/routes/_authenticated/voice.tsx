@@ -359,6 +359,7 @@ function VoicePage() {
           .eq("id", draftId);
         if (error) throw error;
         toast.success("Draft updated");
+        void platformHaptics.notificationSuccess();
       } else {
         const { data, error } = await supabase
           .from("handoff_drafts")
@@ -368,6 +369,7 @@ function VoicePage() {
         if (error) throw error;
         setDraftId(data.id);
         toast.success("Draft saved");
+        void platformHaptics.notificationSuccess();
       }
       setDraftTitle(title);
     } catch (err: any) {
@@ -657,6 +659,7 @@ function VoicePage() {
       </header>
 
       <main className="container mx-auto px-6 py-8 space-y-6">
+        <OfflineBanner message="You're offline. Recording works, but generating the AI summary needs a connection." />
         <div>
           <p className="text-sm uppercase tracking-wider text-muted-foreground">Dictate &amp; structure</p>
           <h1 className="font-display text-3xl font-bold tracking-tight">Voice-to-text handoff summary</h1>
