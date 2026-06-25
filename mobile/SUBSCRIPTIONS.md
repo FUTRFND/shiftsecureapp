@@ -44,7 +44,7 @@ adapter degrades to "web" behaviour so the web build still loads.
 
 ## RevenueCat dashboard setup
 
-1. **App:** create iOS + Android apps. Bundle id `com.handoffhero.app`.
+1. **App:** create iOS + Android apps. Bundle id `com.badexy.shiftsecure`.
 2. **Products:** `handoffhero_pro_monthly`, `handoffhero_pro_annual`
    (mirror these in App Store Connect and Google Play Console).
 3. **Entitlement:** create one entitlement with identifier **`pro`** and

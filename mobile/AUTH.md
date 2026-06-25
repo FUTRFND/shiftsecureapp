@@ -51,7 +51,7 @@ the Universal/App Link host in each native project.
 <array>
   <dict>
     <key>CFBundleURLName</key>
-    <string>com.handoffhero.app</string>
+    <string>com.badexy.shiftsecure</string>
     <key>CFBundleURLSchemes</key>
     <array><string>handoffhero</string></array>
   </dict>

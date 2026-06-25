@@ -14,7 +14,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
  *   --keyboard-height work together cleanly on both platforms.
  */
 const config: CapacitorConfig = {
-  appId: "com.handoffhero.app",
+  appId: "com.badexy.shiftsecure",
   appName: "Shift Secure",
   webDir: "dist/spa",
   bundledWebRuntime: false,
