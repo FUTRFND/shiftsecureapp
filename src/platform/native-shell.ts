@@ -78,6 +78,21 @@ export async function initNativeShell({ router }: NativeShellOptions): Promise<v
 
   if (!isNative()) return;
 
+  // Register a dynamic importer that defeats Vite's static analysis. Native-
+  // only optional plugins (RevenueCat, etc.) route through this so the web
+  // build never tries to resolve them. Uses `new Function` because a literal
+  // `import(spec)` call would still be analyzed by Rollup.
+  try {
+    const g = globalThis as { __lovableNativeImport?: (s: string) => Promise<unknown> };
+    if (!g.__lovableNativeImport) {
+      g.__lovableNativeImport = new Function("s", "return import(s)") as (
+        s: string,
+      ) => Promise<unknown>;
+    }
+  } catch {
+    /* CSP may forbid Function(); native plugins will simply degrade. */
+  }
+
   try {
     const [
       { SplashScreen },
