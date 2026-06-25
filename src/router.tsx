@@ -1,7 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
-import { initNativeShell } from "@/platform/native-shell";
 
 export const getRouter = () => {
   const queryClient = new QueryClient();
@@ -13,10 +12,12 @@ export const getRouter = () => {
     defaultPreloadStaleTime: 0,
   });
 
-  // Native shell boots only inside Capacitor (no-op on web/SSR).
-  if (typeof window !== "undefined") {
-    void initNativeShell({ router: router as never });
-  }
-
+  // NOTE: native-shell init is intentionally NOT called here. Mutating
+  // <html> classes synchronously at router-create time (before React
+  // hydration) caused a hydration mismatch on the root element, which made
+  // React throw away the tree on first interaction — inputs lost focus
+  // after one keystroke and click handlers stopped firing inside the
+  // Capacitor WebView. The shell is now booted from <RootComponent> in a
+  // useEffect, after hydration completes.
   return router;
 };

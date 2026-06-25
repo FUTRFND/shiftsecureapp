@@ -140,6 +140,24 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  // Boot the native shell AFTER hydration. Tagging <html> classes or
+  // attaching Capacitor listeners synchronously during router creation
+  // caused a hydration mismatch on the root element, which made React
+  // tear down the tree on first interaction inside the iOS WebView
+  // (inputs only accepted one keystroke, clicks stopped firing).
+  useEffect(() => {
+    void (async () => {
+      try {
+        const { initNativeShell } = await import("../platform/native-shell");
+        await initNativeShell({ router: router as never });
+      } catch (err) {
+        console.warn("[root] native shell init failed", err);
+      }
+    })();
+  }, [router]);
+
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -151,3 +169,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
