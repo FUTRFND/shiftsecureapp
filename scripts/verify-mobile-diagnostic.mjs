@@ -76,9 +76,7 @@ for (const assetRoot of roots) {
 
 if (existsSync(iosPublic)) {
   try {
-    const pattern = forbidden
-      .map((m) => m.replace(/[.\/]/g, (c) => `\\${c}`))
-      .join("|");
+    const pattern = forbidden.map((m) => m.replace(/\./g, "\\.")).join("|");
     const matches = execFileSync(
       "grep",
       ["-R", "-n", "-E", pattern, iosPublic],
