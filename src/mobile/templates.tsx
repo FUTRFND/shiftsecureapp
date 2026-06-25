@@ -56,6 +56,12 @@ export function TemplatesScreen({
     setLoading(false);
   }, [sb]);
 
+  useKeyboardScrollIntoView();
+  const { confirm, dialog: confirmDialog } = useConfirm();
+  const { refreshing, indicator } = usePullToRefresh(load, {
+    enabled: !editing,
+  });
+
   useEffect(() => {
     load();
   }, [load]);
@@ -94,7 +100,13 @@ export function TemplatesScreen({
   }
 
   async function handleDelete(row: TemplateRow) {
-    if (!confirm(`Delete "${row.name}"?`)) return;
+    const ok = await confirm({
+      title: `Delete "${row.name}"?`,
+      body: "This template will be removed from your library.",
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (!ok) return;
     const { error: e } = await sb
       .from("handoff_templates")
       .delete()
@@ -125,15 +137,16 @@ export function TemplatesScreen({
 
   return (
     <main style={pageStyle}>
+      {indicator}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 12,
+          marginBottom: space.md,
         }}
       >
-        <button type="button" onClick={onBack} style={buttonBase}>
+        <button type="button" onClick={onBack} style={buttonBase} className="mobile-tap">
           ← Back
         </button>
       </div>
@@ -141,7 +154,7 @@ export function TemplatesScreen({
       <h1 style={{ margin: "0 0 4px", fontSize: 26, fontWeight: 700 }}>
         Handoff Templates
       </h1>
-      <p style={{ margin: "0 0 16px", fontSize: 13, color: palette.muted }}>
+      <p style={{ margin: `0 0 ${space.lg}px`, fontSize: 13, color: palette.muted }}>
         Structured templates ensure nothing critical is missed.
       </p>
 
@@ -153,7 +166,8 @@ export function TemplatesScreen({
             color: palette.critical,
             padding: "8px 10px",
             fontSize: 13,
-            marginBottom: 12,
+            borderRadius: 10,
+            marginBottom: space.md,
           }}
         >
           {error}
@@ -163,40 +177,37 @@ export function TemplatesScreen({
       <button
         type="button"
         onClick={() => setEditing({ mode: "create", initial: null })}
-        style={{ ...primaryButton, width: "100%", marginBottom: 14 }}
+        className="mobile-tap"
+        style={{ ...primaryButton, width: "100%", marginBottom: space.md }}
       >
         + New template
       </button>
 
-      {loading ? (
-        <p style={{ fontSize: 14, color: palette.muted }}>Loading templates…</p>
+      {loading && !refreshing ? (
+        <LoadingBlock label="Loading templates…" />
       ) : templates.length === 0 ? (
-        <div
-          style={{
-            border: `1px dashed ${palette.border}`,
-            padding: 18,
-            color: palette.muted,
-            fontSize: 14,
-          }}
-        >
-          <p style={{ margin: "0 0 12px" }}>
-            No templates yet. Start from a preset:
-          </p>
-          <div style={{ display: "grid", gap: 8 }}>
-            {PRESETS.filter((p) => p.label !== "Blank").map((p) => (
-              <button
-                key={p.label}
-                type="button"
-                style={buttonBase}
-                onClick={() =>
-                  setEditing({ mode: "create", initial: p.template })
-                }
-              >
-                Start from {p.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <EmptyState
+          icon="▤"
+          title="No templates yet"
+          body="Start from a preset to build your first handoff template."
+          action={
+            <div style={{ display: "grid", gap: 8, minWidth: 240 }}>
+              {PRESETS.filter((p) => p.label !== "Blank").map((p) => (
+                <button
+                  key={p.label}
+                  type="button"
+                  className="mobile-tap"
+                  style={buttonBase}
+                  onClick={() =>
+                    setEditing({ mode: "create", initial: p.template })
+                  }
+                >
+                  Start from {p.label}
+                </button>
+              ))}
+            </div>
+          }
+        />
       ) : (
         <div style={{ display: "grid", gap: 10 }}>
           {templates.map((t) => (
@@ -209,9 +220,11 @@ export function TemplatesScreen({
           ))}
         </div>
       )}
+      {confirmDialog}
     </main>
   );
 }
+
 
 function TemplateCard({
   row,
