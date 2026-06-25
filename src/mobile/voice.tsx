@@ -156,8 +156,11 @@ export function VoiceScreen({
   const [draftsOpen, setDraftsOpen] = useState(false);
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [draftsErr, setDraftsErr] = useState<string | null>(null);
+  useKeyboardScrollIntoView();
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   const recognitionRef = useRef<InstanceType<WebSpeechCtor> | null>(null);
+
   const finalRef = useRef("");
 
   // Hard guarantee: never leave a session running across unmount.
@@ -454,7 +457,14 @@ export function VoiceScreen({
   );
 
   const deleteDraft = useCallback(
-    async (id: string) => {
+    async (id: string, title: string) => {
+      const ok = await confirm({
+        title: `Delete "${title || "this draft"}"?`,
+        body: "This handoff draft will be removed from your account.",
+        confirmLabel: "Delete",
+        destructive: true,
+      });
+      if (!ok) return;
       console.log("[voice] delete draft", id);
       try {
         const { error } = await sb.from("handoff_drafts").delete().eq("id", id);
@@ -469,8 +479,9 @@ export function VoiceScreen({
         setDraftsErr(err instanceof Error ? err.message : "Couldn't delete draft.");
       }
     },
-    [draftId, sb],
+    [confirm, draftId, sb],
   );
+
 
   return (
     <main style={pageStyle}>
