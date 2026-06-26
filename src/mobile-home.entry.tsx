@@ -616,7 +616,7 @@ function App() {
         userId: next?.user?.id ?? null,
       });
       console.log("[auth] state change", event, next ? "session" : "null");
-      setCurrentAuthEvent(event);
+      
       if (event === "SIGNED_OUT") {
         applySession(null);
         return;
