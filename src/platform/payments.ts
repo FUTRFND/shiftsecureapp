@@ -179,7 +179,7 @@ async function loadRc(): Promise<RcPurchasesModule | null> {
     // still allows Vite to resolve & ship it for the iOS/Android shell.
     const mod = (await import(
       /* @vite-ignore */ "@revenuecat/purchases-capacitor"
-    )) as RcPurchasesModule;
+    )) as unknown as RcPurchasesModule;
     return mod;
   } catch (err) {
     console.warn("[payments] RevenueCat plugin unavailable", err);
