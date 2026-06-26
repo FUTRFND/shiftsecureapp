@@ -43,7 +43,8 @@ const reportBoot = (label: string, payload: unknown) => {
   window.__bootstrapError?.(label, msg);
 };
 
-const buildStamp = "MOBILE_HOME_AUTH_LOCAL_STATE";
+const buildStamp = "RC1_SIGNUP_DEFAULT_2024_12_A";
+console.log("[shift-secure] mobile build:", buildStamp);
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env
