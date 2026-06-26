@@ -105,26 +105,8 @@ function parseSummary(text: string): Sbar {
   };
 }
 
-type WebSpeechCtor = new () => {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  onresult: ((ev: unknown) => void) | null;
-  onerror: ((ev: unknown) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-};
-
-function getSpeechCtor(): WebSpeechCtor | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as {
-    SpeechRecognition?: WebSpeechCtor;
-    webkitSpeechRecognition?: WebSpeechCtor;
-  };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
-}
+// Speech is provided by platformSpeech (native or web). The screen tracks
+// `baseTranscript` (committed text) and `interim` (live partial) separately.
 
 function StepBadge({ n }: { n: number }) {
   return (
