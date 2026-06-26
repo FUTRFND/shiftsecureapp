@@ -293,16 +293,35 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
     }
   }, []);
 
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutErr, setSignOutErr] = useState<string | null>(null);
+
   const onSignOutPressed = useCallback(async () => {
     const ok = await confirm({
       title: "Sign out?",
       body: "You'll need to sign in again to view alerts, tasks, and dictate handoffs.",
       confirmLabel: "Sign out",
+      cancelLabel: "Cancel",
       destructive: true,
     });
     if (!ok) return;
-    onSignOut();
-  }, [confirm, onSignOut]);
+    setSigningOut(true);
+    setSignOutErr(null);
+    try {
+      const { error } = await sb.auth.signOut();
+      if (error) throw error;
+      // Parent's onAuthStateChange will clear the session; also notify parent
+      // directly so the login screen renders immediately.
+      onSignOut();
+    } catch (error) {
+      console.error("[account] sign out failed", error);
+      setSignOutErr(
+        error instanceof Error ? error.message : "Failed to sign out. Please try again.",
+      );
+    } finally {
+      setSigningOut(false);
+    }
+  }, [confirm, onSignOut, sb]);
 
   // ---------- Render ----------
   return (
