@@ -660,7 +660,7 @@ function App() {
           setSession,
           setUser,
           setSignedIn,
-          onLogoutStep: setLastLogoutStep,
+          onLogoutStep: (step: string) => console.log("[logout] step:", step),
         })
       }
     />
