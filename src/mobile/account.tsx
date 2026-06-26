@@ -28,19 +28,12 @@ import {
 } from "@/services/subscription";
 import { isNative } from "@/platform/runtime";
 import { PaymentsError, type SubscriptionPackage } from "@/platform/payments";
+import { PRODUCT_IDS } from "@/config/subscription";
 
 type Props = {
   sb: SupabaseClient;
   userId: string;
   email: string;
-  authDebug: {
-    signedIn: boolean;
-    session: boolean;
-    userId: string | null;
-    rootState: "signed in" | "signed out";
-    currentAuthEvent: string;
-    lastLogoutStep: string;
-  };
   onSignOut: () => Promise<void>;
 };
 
@@ -78,7 +71,7 @@ function statusOf(state: SubscriptionState): {
   return { label: "Canceled (active until expiry)", tone: "warning" };
 }
 
-export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props) {
+export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
   useKeyboardScrollIntoView();
 
   // ---------- Profile ----------
@@ -166,19 +159,42 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
     return () => unsub();
   }, [userId]);
 
+  const [offeringsLoading, setOfferingsLoading] = useState(false);
+
   const loadOfferings = useCallback(async () => {
     setOfferingsErr(null);
+    setOfferingsLoading(true);
     try {
+      console.log("[account/rc] requesting offerings…", {
+        native: isNative(),
+        userId,
+      });
       const pkgs = await subscriptionService.getOfferings();
+      console.log(
+        `[account/rc] received ${pkgs.length} package(s)`,
+        pkgs.map((p) => ({
+          packageId: p.identifier,
+          productId: p.productId,
+          period: p.period,
+          priceString: p.priceString,
+        })),
+      );
       setOfferings(pkgs);
+      if (pkgs.length === 0) {
+        setOfferingsErr(
+          "No subscription plans were returned by the store. Make sure your Sandbox Apple ID is signed in.",
+        );
+      }
     } catch (err) {
-      console.error("[account] offerings failed", err);
+      console.error("[account/rc] offerings failed", err);
       setOfferingsErr(
         err instanceof Error ? err.message : "Couldn't load plans.",
       );
       setOfferings([]);
+    } finally {
+      setOfferingsLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     if (isNative()) void loadOfferings();
@@ -211,13 +227,17 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
   const isPro = subState.customerInfo.activeEntitlements.length > 0;
   const status = statusOf(subState);
   const expiry = formatExpiry(subState.customerInfo.expirationDate);
-  const monthlyPkg = useMemo(
-    () =>
-      (offerings ?? []).find((p) => p.period === "monthly") ??
-      (offerings ?? [])[0] ??
-      null,
-    [offerings],
-  );
+  // Match by store product identifier first — package ids on RevenueCat
+  // ($rc_monthly etc.) can vary; product ids are stable across configs.
+  const monthlyPkg = useMemo(() => {
+    const list = offerings ?? [];
+    return (
+      list.find((p) => p.productId === PRODUCT_IDS.monthly) ??
+      list.find((p) => p.period === "monthly") ??
+      list[0] ??
+      null
+    );
+  }, [offerings]);
 
   // ---------- Actions ----------
   const onPurchase = useCallback(async () => {
@@ -327,27 +347,6 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
   return (
     <main style={pageStyle}>
       <ScreenHeader title="Account" subtitle="Profile, plan, and billing" />
-      <div
-        aria-label="Auth debug"
-        style={{
-          margin: `-${space.xs}px 0 ${space.md}px`,
-          padding: "8px 10px",
-          borderRadius: radii.md,
-          background: palette.bgAlt,
-          border: `1px solid ${palette.hairline}`,
-          color: palette.subtle,
-          fontSize: 11,
-          lineHeight: 1.4,
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
-        }}
-      >
-        <div>signedIn: {authDebug.signedIn ? "true" : "false"}</div>
-        <div>session present: {authDebug.session ? "yes" : "no"}</div>
-        <div>user id: {authDebug.userId ?? "none"}</div>
-        <div>current auth event: {authDebug.currentAuthEvent}</div>
-        <div>last logout step reached: {authDebug.lastLogoutStep}</div>
-        <div>auth root state: {authDebug.rootState}</div>
-      </div>
 
       {/* Profile */}
       <SectionHeader title="Profile" />
@@ -544,7 +543,22 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
       <Card>
         {actionErr && <Banner tone="error">{actionErr}</Banner>}
         {actionOk && <Banner tone="success">{actionOk}</Banner>}
-        {offeringsErr && <Banner tone="warning">{offeringsErr}</Banner>}
+        {offeringsErr && (
+          <div style={{ marginBottom: 10 }}>
+            <Banner tone="warning">{offeringsErr}</Banner>
+            {isNative() && (
+              <button
+                type="button"
+                className="mobile-tap"
+                onClick={() => void loadOfferings()}
+                disabled={offeringsLoading}
+                style={{ ...ghostButton, width: "100%", marginTop: 8 }}
+              >
+                {offeringsLoading ? "Retrying…" : "Retry"}
+              </button>
+            )}
+          </div>
+        )}
         {!isNative() && (
           <Banner tone="info">
             Subscriptions are managed inside the iOS or Android app. Open Shift Secure on your device to upgrade or restore.
@@ -565,17 +579,22 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
           <button
             type="button"
             className="mobile-tap"
-            disabled={busyAction !== null || (isNative() && offerings === null)}
+            disabled={
+              busyAction !== null ||
+              (isNative() && (offeringsLoading || offerings === null))
+            }
             onClick={onPurchase}
             style={{ ...primaryButton, width: "100%", marginTop: 4 }}
           >
             {busyAction === "purchase"
               ? "Starting…"
-              : monthlyPkg
-                ? `Start 14-day trial · ${monthlyPkg.priceString || "Team"}`
-                : isNative()
-                  ? "Upgrade to Team"
-                  : "Upgrade in the app"}
+              : isNative() && offeringsLoading
+                ? "Checking plans…"
+                : monthlyPkg
+                  ? `Start 14-day trial · ${monthlyPkg.priceString || "Team"}`
+                  : isNative()
+                    ? "Upgrade to Team"
+                    : "Upgrade in the app"}
           </button>
         )}
 

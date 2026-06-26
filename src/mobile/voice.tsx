@@ -1,6 +1,6 @@
 // Native Voice screen — local state, plain HTML, no router/UI libs.
-// Uses Web Speech API when available (iOS WKWebView lacks it — falls back
-// to manual transcript entry). Calls the ai-handoff edge function directly.
+// Uses platformSpeech (Capacitor SpeechRecognition on iOS/Android, Web Speech
+// API on web with manual fallback). Calls the ai-handoff edge function.
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -26,6 +26,7 @@ import {
   useConfirm,
   useKeyboardScrollIntoView,
 } from "./ui";
+import { platformSpeech, SpeechError } from "@/platform/speech";
 
 const monoTextareaStyle: React.CSSProperties = {
   ...baseTextareaStyle,
@@ -104,26 +105,8 @@ function parseSummary(text: string): Sbar {
   };
 }
 
-type WebSpeechCtor = new () => {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  onresult: ((ev: unknown) => void) | null;
-  onerror: ((ev: unknown) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-};
-
-function getSpeechCtor(): WebSpeechCtor | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as {
-    SpeechRecognition?: WebSpeechCtor;
-    webkitSpeechRecognition?: WebSpeechCtor;
-  };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
-}
+// Speech is provided by platformSpeech (native or web). The screen tracks
+// `baseTranscript` (committed text) and `interim` (live partial) separately.
 
 function StepBadge({ n }: { n: number }) {
   return (
@@ -157,8 +140,7 @@ export function VoiceScreen({
   userId: string;
   onBack: () => void;
 }) {
-  const speechCtor = getSpeechCtor();
-  const speechSupported = speechCtor !== null;
+  const [speechSupported, setSpeechSupported] = useState<boolean>(false);
 
   const [context, setContext] = useState("");
   const [transcript, setTranscript] = useState("");
@@ -182,8 +164,30 @@ export function VoiceScreen({
   useKeyboardScrollIntoView();
   const { confirm, dialog: confirmDialog } = useConfirm();
 
-  const recognitionRef = useRef<InstanceType<WebSpeechCtor> | null>(null);
-  const finalRef = useRef("");
+  // Refs for the active speech session.
+  // baseTranscriptRef = text that existed before this session started.
+  // finalBufferRef    = text committed by isFinal events during this session.
+  // interimRef        = latest interim text for this session.
+  const baseTranscriptRef = useRef("");
+  const finalBufferRef = useRef("");
+  const interimRef = useRef("");
+  const sessionActiveRef = useRef(false);
+
+  // Probe speech support once on mount.
+  useEffect(() => {
+    let cancelled = false;
+    void platformSpeech
+      .isSupported()
+      .then((ok) => {
+        if (!cancelled) setSpeechSupported(ok);
+      })
+      .catch(() => {
+        if (!cancelled) setSpeechSupported(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Inject the recording-pulse keyframes once.
   useEffect(() => {
@@ -205,85 +209,113 @@ export function VoiceScreen({
   // Hard guarantee: never leave a session running across unmount.
   useEffect(() => {
     return () => {
-      try {
-        recognitionRef.current?.abort();
-      } catch {
-        // ignore
+      if (sessionActiveRef.current) {
+        void platformSpeech.cancel().catch(() => {});
+        sessionActiveRef.current = false;
       }
     };
   }, []);
 
-  const startRecording = useCallback(() => {
+  const commitSession = useCallback(() => {
+    const interimNow = interimRef.current.trim();
+    const combined = [
+      baseTranscriptRef.current.trim(),
+      finalBufferRef.current.trim(),
+      interimNow,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+    setTranscript(combined);
+    setInterim("");
+    interimRef.current = "";
+    finalBufferRef.current = "";
+    baseTranscriptRef.current = combined;
+  }, []);
+
+  const startRecording = useCallback(async () => {
     console.log("[voice] start tapped");
-    if (!speechCtor) {
-      setGenerateErr(
-        "Voice capture isn't available in this WebView. Type or paste a transcript below.",
-      );
-      return;
-    }
     if (recording) return;
+    setGenerateErr(null);
+
+    // Permissions: request first so iOS surfaces the system prompts.
     try {
-      const rec = new speechCtor();
-      rec.lang =
-        (typeof navigator !== "undefined" && navigator.language) || "en-US";
-      rec.continuous = true;
-      rec.interimResults = true;
-      finalRef.current = transcript ? transcript + " " : "";
-      let lastInterim = "";
-      rec.onresult = (ev: unknown) => {
-        const e = ev as {
-          resultIndex: number;
-          results: ArrayLike<
-            ArrayLike<{ transcript: string }> & { isFinal: boolean }
-          >;
-        };
-        let interimText = "";
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const res = e.results[i];
-          const text = res[0].transcript;
-          if (res.isFinal) {
-            finalRef.current += text + " ";
-          } else {
-            interimText += text;
-          }
+      const perm = await platformSpeech.checkPermission();
+      if (perm !== "granted") {
+        const granted = await platformSpeech.requestPermission();
+        if (!granted) {
+          setGenerateErr(
+            "Microphone and Speech Recognition permissions are required to use Voice Handoff.",
+          );
+          return;
         }
-        lastInterim = interimText;
-        setTranscript(finalRef.current.trim());
-        setInterim(interimText);
-      };
-      rec.onerror = (ev: unknown) => {
-        const code = (ev as { error?: string })?.error ?? "unknown";
-        console.error("[voice] recognition error", code);
-        if (code !== "aborted" && code !== "no-speech") {
-          setGenerateErr(`Recognition error: ${code}`);
-        }
-      };
-      rec.onend = () => {
-        if (lastInterim) {
-          finalRef.current += lastInterim + " ";
-          setTranscript(finalRef.current.trim());
-        }
-        setInterim("");
-        setRecording(false);
-        recognitionRef.current = null;
-      };
-      recognitionRef.current = rec;
-      rec.start();
+      }
+    } catch (err) {
+      console.warn("[voice] permission probe failed", err);
+    }
+
+    baseTranscriptRef.current = transcript.trim();
+    finalBufferRef.current = "";
+    interimRef.current = "";
+
+    try {
+      sessionActiveRef.current = true;
       setRecording(true);
-      setGenerateErr(null);
+      await platformSpeech.start({
+        lang:
+          (typeof navigator !== "undefined" && navigator.language) || "en-US",
+        partialResults: true,
+        silenceTimeoutMs: 6000,
+        onResult: ({ transcript: t, isFinal }) => {
+          if (isFinal) {
+            finalBufferRef.current = (finalBufferRef.current + " " + t).trim();
+            interimRef.current = "";
+          } else {
+            interimRef.current = t;
+          }
+          const live = [
+            baseTranscriptRef.current,
+            finalBufferRef.current,
+            interimRef.current,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .replace(/\s+/g, " ")
+            .trim();
+          setTranscript(live);
+          setInterim(interimRef.current);
+        },
+        onError: (err: SpeechError) => {
+          console.error("[voice] recognition error", err.code, err.message);
+          if (err.code === "permission_denied") {
+            setGenerateErr(
+              "Microphone and Speech Recognition permissions are required to use Voice Handoff.",
+            );
+          } else if (err.code !== "aborted" && err.code !== "no_speech") {
+            setGenerateErr(err.message);
+          }
+        },
+        onEnd: () => {
+          commitSession();
+          sessionActiveRef.current = false;
+          setRecording(false);
+        },
+      });
     } catch (err) {
       console.error("[voice] failed to start recognition", err);
       setGenerateErr(
         err instanceof Error ? err.message : "Couldn't start recognition.",
       );
+      sessionActiveRef.current = false;
       setRecording(false);
     }
-  }, [recording, speechCtor, transcript]);
+  }, [commitSession, recording, transcript]);
 
-  const stopRecording = useCallback(() => {
+  const stopRecording = useCallback(async () => {
     console.log("[voice] stop tapped");
     try {
-      recognitionRef.current?.stop();
+      await platformSpeech.stop();
     } catch (err) {
       console.error("[voice] stop failed", err);
     }
@@ -419,7 +451,9 @@ export function VoiceScreen({
     setDraftTitle("");
     setSaveErr(null);
     setGenerateErr(null);
-    finalRef.current = "";
+    baseTranscriptRef.current = "";
+    finalBufferRef.current = "";
+    interimRef.current = "";
   }, [confirm, hasSummary, transcript]);
 
   const updateField = useCallback(
@@ -552,7 +586,9 @@ export function VoiceScreen({
         setContext(typeof d.context === "string" ? d.context : "");
         const t = typeof d.transcript === "string" ? d.transcript : "";
         setTranscript(t);
-        finalRef.current = t + " ";
+        baseTranscriptRef.current = t;
+        finalBufferRef.current = "";
+        interimRef.current = "";
         setSbar({
           patient: typeof d.patient === "string" ? d.patient : "",
           situation: typeof d.situation === "string" ? d.situation : "",
@@ -801,7 +837,9 @@ export function VoiceScreen({
           value={liveTranscript}
           onChange={(e) => {
             setTranscript(e.target.value);
-            finalRef.current = e.target.value + " ";
+            baseTranscriptRef.current = e.target.value;
+            finalBufferRef.current = "";
+            interimRef.current = "";
             setInterim("");
           }}
           placeholder={

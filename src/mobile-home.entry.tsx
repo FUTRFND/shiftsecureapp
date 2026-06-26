@@ -68,14 +68,6 @@ const sb = createClient(SUPABASE_URL ?? "", SUPABASE_PUBLISHABLE_KEY ?? "", {
 
 const screens = ["Home", "Alerts", "Templates", "Tasks", "Voice", "Account"] as const;
 type Screen = (typeof screens)[number];
-type AuthDebug = {
-  signedIn: boolean;
-  session: boolean;
-  userId: string | null;
-  rootState: "signed in" | "signed out";
-  currentAuthEvent: string;
-  lastLogoutStep: string;
-};
 
 // Inline SVG icons matched to SF Symbols feel.
 function TabIcon({ name, active }: { name: Screen; active: boolean }) {
@@ -143,12 +135,10 @@ function TabIcon({ name, active }: { name: Screen; active: boolean }) {
 function MobileHome({
   email,
   userId,
-  authDebug,
   onSignOut,
 }: {
   email: string;
   userId: string;
-  authDebug: AuthDebug;
   onSignOut: () => Promise<void>;
 }) {
   const [activeTab, setActiveTab] = useState<Screen>("Home");
@@ -185,7 +175,6 @@ function MobileHome({
         sb={sb}
         userId={userId}
         email={email}
-        authDebug={authDebug}
         onSignOut={onSignOut}
       />
     );
@@ -285,20 +274,36 @@ function MobileHome({
 
 
 
-function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
-  useEffect(() => {
-    console.log("[logout] Login screen rendered");
-  }, []);
+type AuthMode = "signin" | "signup";
 
+function AuthScreen({ onSession }: { onSession: (s: Session) => void }) {
+  const [mode, setMode] = useState<AuthMode>("signup");
+
+  useEffect(() => {
+    console.log("[auth] AuthScreen rendered, mode:", mode);
+  }, [mode]);
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const switchMode = (next: AuthMode) => {
+    setMode(next);
+    setError(null);
+    setInfo(null);
+    setPassword("");
+    setConfirm("");
+  };
+
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setInfo(null);
     const { data, error: signInError } = await sb.auth.signInWithPassword({
       email: email.trim(),
       password,
@@ -310,6 +315,46 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
     }
     if (data.session) onSession(data.session);
   };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setInfo(null);
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setBusy(true);
+    const { data, error: signUpError } = await sb.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        data: { full_name: name.trim() || null },
+      },
+    });
+    setBusy(false);
+    if (signUpError) {
+      setError(signUpError.message);
+      return;
+    }
+    if (data.session) {
+      onSession(data.session);
+      return;
+    }
+    setInfo(
+      "Account created. Check your email to confirm, then sign in.",
+    );
+    setMode("signin");
+  };
+
+  const isSignUp = mode === "signup";
+  const canSubmit = isSignUp
+    ? Boolean(email && password && confirm) && !busy
+    : Boolean(email && password) && !busy;
 
   return (
     <main
@@ -327,7 +372,6 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
         justifyContent: "center",
       }}
     >
-      {/* Brand wordmark */}
       <h1
         style={{
           margin: `0 0 6px`,
@@ -351,8 +395,6 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
         Clinical Handoff. Simplified.
       </p>
 
-
-      {/* Centered card */}
       <div
         style={{
           width: "100%",
@@ -364,12 +406,43 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
           boxShadow: "0 10px 30px rgba(20,24,28,0.08)",
         }}
       >
-        <form onSubmit={handleSubmit} noValidate>
-          <label style={labelStyle} htmlFor="login-email">
+        <h2
+          style={{
+            margin: `0 0 ${space.md}px`,
+            fontSize: 20,
+            fontWeight: 700,
+            letterSpacing: -0.3,
+            color: palette.ink,
+          }}
+        >
+          {isSignUp ? "Create your account" : "Welcome back"}
+        </h2>
+
+        <form
+          onSubmit={isSignUp ? handleSignUp : handleSignIn}
+          noValidate
+        >
+          {isSignUp && (
+            <>
+              <label style={labelStyle} htmlFor="auth-name">
+                Name
+              </label>
+              <input
+                id="auth-name"
+                type="text"
+                autoComplete="name"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={inputStyle}
+              />
+            </>
+          )}
+          <label style={labelStyle} htmlFor="auth-email">
             Email
           </label>
           <input
-            id="login-email"
+            id="auth-email"
             type="email"
             inputMode="email"
             autoComplete="email"
@@ -381,23 +454,44 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
             required
             style={inputStyle}
           />
-          <label style={labelStyle} htmlFor="login-password">
+          <label style={labelStyle} htmlFor="auth-password">
             Password
           </label>
           <input
-            id="login-password"
+            id="auth-password"
             type="password"
-            autoComplete="current-password"
-            placeholder="••••••••"
+            autoComplete={isSignUp ? "new-password" : "current-password"}
+            placeholder={isSignUp ? "At least 8 characters" : "••••••••"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ ...inputStyle, marginBottom: space.md }}
+            style={{
+              ...inputStyle,
+              marginBottom: isSignUp ? undefined : space.md,
+            }}
           />
+          {isSignUp && (
+            <>
+              <label style={labelStyle} htmlFor="auth-confirm">
+                Confirm password
+              </label>
+              <input
+                id="auth-confirm"
+                type="password"
+                autoComplete="new-password"
+                placeholder="Re-enter password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                required
+                style={{ ...inputStyle, marginBottom: space.md }}
+              />
+            </>
+          )}
           {error && <Banner tone="error">{error}</Banner>}
+          {info && <Banner tone="success">{info}</Banner>}
           <button
             type="submit"
-            disabled={busy || !email || !password}
+            disabled={!canSubmit}
             className="mobile-tap"
             style={{
               ...primaryButton,
@@ -415,10 +509,12 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
             {busy ? (
               <>
                 <Spinner size={16} color={palette.surface} />
-                <span>Signing in…</span>
+                <span>{isSignUp ? "Creating account…" : "Signing in…"}</span>
               </>
+            ) : isSignUp ? (
+              "Create Free Account"
             ) : (
-              "Sign in"
+              "Sign In"
             )}
           </button>
 
@@ -430,13 +526,31 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
               color: palette.muted,
             }}
           >
-            <a
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              style={{ color: palette.accentDeep, fontWeight: 600, textDecoration: "none" }}
-            >
-              Forgot password?
-            </a>
+            {isSignUp ? (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  className="mobile-tap"
+                  onClick={() => switchMode("signin")}
+                  style={linkButtonStyle}
+                >
+                  Sign In
+                </button>
+              </>
+            ) : (
+              <>
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  className="mobile-tap"
+                  onClick={() => switchMode("signup")}
+                  style={linkButtonStyle}
+                >
+                  Create Free Account
+                </button>
+              </>
+            )}
           </div>
         </form>
       </div>
@@ -457,13 +571,22 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
   );
 }
 
+const linkButtonStyle: React.CSSProperties = {
+  background: "transparent",
+  border: "none",
+  padding: 0,
+  color: palette.accentDeep,
+  fontWeight: 600,
+  fontSize: 13,
+  cursor: "pointer",
+  textDecoration: "none",
+};
+
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [signedIn, setSignedIn] = useState(false);
   const [ready, setReady] = useState(false);
-  const [currentAuthEvent, setCurrentAuthEvent] = useState("none");
-  const [lastLogoutStep, setLastLogoutStep] = useState("none");
 
   const applySession = (next: Session | null) => {
     setSession(next);
@@ -478,7 +601,7 @@ function App() {
       .then(({ data }) => {
         if (!mounted) return;
         console.log("[auth] session restored", data.session ? "present" : "none");
-        setCurrentAuthEvent("initial getSession");
+        console.log("[auth] initial getSession");
         applySession(data.session);
         setReady(true);
       })
@@ -493,7 +616,7 @@ function App() {
         userId: next?.user?.id ?? null,
       });
       console.log("[auth] state change", event, next ? "session" : "null");
-      setCurrentAuthEvent(event);
+      
       if (event === "SIGNED_OUT") {
         applySession(null);
         return;
@@ -524,28 +647,20 @@ function App() {
   }
 
   if (!session || !user || !signedIn) {
-    return <LoginForm onSession={applySession} />;
+    return <AuthScreen onSession={applySession} />;
   }
 
   return (
     <MobileHome
       email={user.email ?? "unknown"}
       userId={user.id}
-      authDebug={{
-        signedIn,
-        session: Boolean(session),
-        userId: user?.id ?? null,
-        rootState: signedIn ? "signed in" : "signed out",
-        currentAuthEvent,
-        lastLogoutStep,
-      }}
       onSignOut={() =>
         hardSignOut({
           supabase: sb,
           setSession,
           setUser,
           setSignedIn,
-          onLogoutStep: setLastLogoutStep,
+          onLogoutStep: (step: string) => console.log("[logout] step:", step),
         })
       }
     />
