@@ -543,7 +543,22 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
       <Card>
         {actionErr && <Banner tone="error">{actionErr}</Banner>}
         {actionOk && <Banner tone="success">{actionOk}</Banner>}
-        {offeringsErr && <Banner tone="warning">{offeringsErr}</Banner>}
+        {offeringsErr && (
+          <div style={{ marginBottom: 10 }}>
+            <Banner tone="warning">{offeringsErr}</Banner>
+            {isNative() && (
+              <button
+                type="button"
+                className="mobile-tap"
+                onClick={() => void loadOfferings()}
+                disabled={offeringsLoading}
+                style={{ ...ghostButton, width: "100%", marginTop: 8 }}
+              >
+                {offeringsLoading ? "Retrying…" : "Retry"}
+              </button>
+            )}
+          </div>
+        )}
         {!isNative() && (
           <Banner tone="info">
             Subscriptions are managed inside the iOS or Android app. Open Shift Secure on your device to upgrade or restore.
@@ -564,17 +579,22 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
           <button
             type="button"
             className="mobile-tap"
-            disabled={busyAction !== null || (isNative() && offerings === null)}
+            disabled={
+              busyAction !== null ||
+              (isNative() && (offeringsLoading || offerings === null))
+            }
             onClick={onPurchase}
             style={{ ...primaryButton, width: "100%", marginTop: 4 }}
           >
             {busyAction === "purchase"
               ? "Starting…"
-              : monthlyPkg
-                ? `Start 14-day trial · ${monthlyPkg.priceString || "Team"}`
-                : isNative()
-                  ? "Upgrade to Team"
-                  : "Upgrade in the app"}
+              : isNative() && offeringsLoading
+                ? "Checking plans…"
+                : monthlyPkg
+                  ? `Start 14-day trial · ${monthlyPkg.priceString || "Team"}`
+                  : isNative()
+                    ? "Upgrade to Team"
+                    : "Upgrade in the app"}
           </button>
         )}
 
