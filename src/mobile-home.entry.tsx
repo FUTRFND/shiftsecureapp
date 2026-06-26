@@ -43,7 +43,7 @@ const reportBoot = (label: string, payload: unknown) => {
   window.__bootstrapError?.(label, msg);
 };
 
-const buildStamp = "RC1_SIGNUP_DEFAULT_2024_12_A";
+const buildStamp = "RC1_SIGNUP_DEFAULT_2024_12_B";
 console.log("[shift-secure] mobile build:", buildStamp);
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
@@ -278,7 +278,11 @@ function MobileHome({
 type AuthMode = "signin" | "signup";
 
 function AuthScreen({ onSession }: { onSession: (s: Session) => void }) {
-  const [mode, setMode] = useState<AuthMode>("signup");
+  const [mode, setMode] = useState<AuthMode>(() => {
+    const initial: AuthMode = "signup";
+    console.log("[auth] initial mode", initial);
+    return initial;
+  });
 
   useEffect(() => {
     console.log("[auth] AuthScreen rendered, mode:", mode);
