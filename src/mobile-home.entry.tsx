@@ -649,7 +649,7 @@ function App() {
   }
 
   if (!session || !user || !signedIn) {
-    return <LoginForm onSession={applySession} />;
+    return <AuthScreen onSession={applySession} />;
   }
 
   return (
