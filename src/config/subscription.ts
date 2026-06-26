@@ -42,24 +42,31 @@ export const ENTITLEMENT_IDS = {
 
 /** Store product / package identifiers. */
 export const PRODUCT_IDS = {
-  monthly: "handoffhero_pro_monthly",
-  annual: "handoffhero_pro_annual",
+  monthly: "shiftsecure_pro_monthly",
+  annual: "shiftsecure_pro_yearly",
 } as const;
+
+/** RevenueCat offering identifier configured in the dashboard. */
+export const OFFERING_ID = "default";
 
 // --- API keys ---------------------------------------------------------------
 //
 // Public RevenueCat SDK keys are safe in the client bundle (they're
-// platform-scoped and rate-limited by RC). They are surfaced as VITE_* env
-// vars so they can differ per build environment without code changes.
+// platform-scoped and rate-limited by RC). VITE_* env vars override the
+// hardcoded defaults for staging/alternate builds.
 
 const env = (typeof import.meta !== "undefined" ? import.meta.env : {}) as Record<
   string,
   string | undefined
 >;
 
+// Public SDK keys — safe to ship in the client. Never put RC secret keys here.
+const DEFAULT_RC_IOS_KEY = "appl_CbcwdSHfClAxSHswzygoEtTIfGw";
+const DEFAULT_RC_ANDROID_KEY = "goog_MuQeufwKRqbvMupeHbwFJIDwUgA";
+
 export const REVENUECAT_API_KEYS = {
-  ios: env.VITE_REVENUECAT_IOS_KEY ?? "",
-  android: env.VITE_REVENUECAT_ANDROID_KEY ?? "",
+  ios: env.VITE_REVENUECAT_IOS_KEY ?? DEFAULT_RC_IOS_KEY,
+  android: env.VITE_REVENUECAT_ANDROID_KEY ?? DEFAULT_RC_ANDROID_KEY,
 } as const;
 
 export function getRevenueCatApiKey(): string {
@@ -68,6 +75,7 @@ export function getRevenueCatApiKey(): string {
   if (p === "android") return REVENUECAT_API_KEYS.android;
   return "";
 }
+
 
 /** How long a cached customer-info snapshot is considered fresh. */
 export const ENTITLEMENT_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
