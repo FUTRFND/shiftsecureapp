@@ -238,14 +238,6 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
       null
     );
   }, [offerings]);
-  const annualPkg = useMemo(() => {
-    const list = offerings ?? [];
-    return (
-      list.find((p) => p.productId === PRODUCT_IDS.annual) ??
-      list.find((p) => p.period === "annual") ??
-      null
-    );
-  }, [offerings]);
 
   // ---------- Actions ----------
   const onPurchase = useCallback(async () => {
