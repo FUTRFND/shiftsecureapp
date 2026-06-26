@@ -601,7 +601,7 @@ function App() {
       .then(({ data }) => {
         if (!mounted) return;
         console.log("[auth] session restored", data.session ? "present" : "none");
-        setCurrentAuthEvent("initial getSession");
+        console.log("[auth] initial getSession");
         applySession(data.session);
         setReady(true);
       })
