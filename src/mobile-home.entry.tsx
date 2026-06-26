@@ -465,6 +465,7 @@ function App() {
       .getSession()
       .then(({ data }) => {
         if (!mounted) return;
+        console.log("[auth] session restored", data.session ? "present" : "none");
         setSession(data.session);
         setReady(true);
       })
@@ -472,8 +473,15 @@ function App() {
         reportBoot("getSession", err);
         if (mounted) setReady(true);
       });
-    const { data: sub } = sb.auth.onAuthStateChange((_event, next) => {
-      setSession(next);
+    const { data: sub } = sb.auth.onAuthStateChange((event, next) => {
+      console.log("[auth] state change", event, next ? "session" : "null");
+      if (event === "SIGNED_OUT") {
+        setSession(null);
+        return;
+      }
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED" || event === "INITIAL_SESSION") {
+        setSession(next);
+      }
     });
     return () => {
       mounted = false;
@@ -505,7 +513,12 @@ function App() {
       email={session.user.email ?? "unknown"}
       userId={session.user.id}
       onSignOut={() => {
-        sb.auth.signOut().then(() => setSession(null));
+        // Account already called sb.auth.signOut(); force the login screen
+        // immediately in case the auth event hasn't fired yet on iOS WebView.
+        console.log("[auth] onSignOut callback - clearing session");
+        setSession(null);
+        // Best-effort secondary signOut so any stale tokens get cleared.
+        sb.auth.signOut().catch((err) => console.error("[auth] secondary signOut failed", err));
       }}
     />
   );

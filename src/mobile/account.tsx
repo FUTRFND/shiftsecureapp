@@ -297,6 +297,7 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
   const [signOutErr, setSignOutErr] = useState<string | null>(null);
 
   const onSignOutPressed = useCallback(async () => {
+    console.log("[account] sign out clicked");
     const ok = await confirm({
       title: "Sign out?",
       body: "You'll need to sign in again to view alerts, tasks, and dictate handoffs.",
@@ -309,10 +310,12 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
     setSignOutErr(null);
     try {
       const { error } = await sb.auth.signOut();
-      if (error) throw error;
-      // Parent's onAuthStateChange will clear the session; also notify parent
-      // directly so the login screen renders immediately.
-      onSignOut();
+      if (error) {
+        console.error("[account] sign out failed", error);
+        setSignOutErr(error.message);
+      } else {
+        console.log("[account] sign out success");
+      }
     } catch (error) {
       console.error("[account] sign out failed", error);
       setSignOutErr(
@@ -320,6 +323,14 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
       );
     } finally {
       setSigningOut(false);
+      // Always clear local account/billing/profile state and notify parent,
+      // so the login screen renders even if signOut errored on the network.
+      try {
+        setProfile(null);
+        setRole(null);
+        setHandoffCount(null);
+      } catch {}
+      onSignOut();
     }
   }, [confirm, onSignOut, sb]);
 
