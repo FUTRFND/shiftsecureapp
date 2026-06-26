@@ -68,14 +68,6 @@ const sb = createClient(SUPABASE_URL ?? "", SUPABASE_PUBLISHABLE_KEY ?? "", {
 
 const screens = ["Home", "Alerts", "Templates", "Tasks", "Voice", "Account"] as const;
 type Screen = (typeof screens)[number];
-type AuthDebug = {
-  signedIn: boolean;
-  session: boolean;
-  userId: string | null;
-  rootState: "signed in" | "signed out";
-  currentAuthEvent: string;
-  lastLogoutStep: string;
-};
 
 // Inline SVG icons matched to SF Symbols feel.
 function TabIcon({ name, active }: { name: Screen; active: boolean }) {
