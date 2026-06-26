@@ -21,7 +21,6 @@ import {
   radii,
   shadow,
   space,
-  useConfirm,
   useKeyboardScrollIntoView,
 } from "./ui";
 import {
@@ -82,7 +81,6 @@ function statusOf(state: SubscriptionState): {
 
 export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props) {
   useKeyboardScrollIntoView();
-  const { confirm, dialog: confirmDialog } = useConfirm();
 
   // ---------- Profile ----------
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -305,19 +303,7 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
   const [signOutErr, setSignOutErr] = useState<string | null>(null);
 
   const onSignOutPressed = useCallback(async () => {
-    console.log("[logout] Account Sign out button tapped");
-    const ok = await confirm({
-      title: "Sign out?",
-      body: "You'll need to sign in again to view alerts, tasks, and dictate handoffs.",
-      confirmLabel: "Sign out",
-      cancelLabel: "Cancel",
-      destructive: true,
-      onConfirm: () => {
-        console.log("[account] sign out confirmation accepted");
-      },
-    });
-    if (!ok) return;
-    console.log("[logout] Confirmation accepted");
+    console.log("[account] sign out clicked");
     setSigningOut(true);
     setSignOutErr(null);
     try {
@@ -336,13 +322,12 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
         setHandoffCount(null);
       } catch {}
     }
-  }, [confirm, onSignOut]);
+  }, [onSignOut]);
 
   // ---------- Render ----------
   return (
     <main style={pageStyle}>
       <ScreenHeader title="Account" subtitle="Profile, plan, and billing" />
-      {confirmDialog}
       <div
         aria-label="Auth debug"
         style={{
