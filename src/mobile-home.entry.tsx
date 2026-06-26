@@ -68,6 +68,14 @@ const sb = createClient(SUPABASE_URL ?? "", SUPABASE_PUBLISHABLE_KEY ?? "", {
 
 const screens = ["Home", "Alerts", "Templates", "Tasks", "Voice", "Account"] as const;
 type Screen = (typeof screens)[number];
+type AuthDebug = {
+  signedIn: boolean;
+  session: boolean;
+  userId: string | null;
+  rootState: "signed in" | "signed out";
+  currentAuthEvent: string;
+  lastLogoutStep: string;
+};
 
 // Inline SVG icons matched to SF Symbols feel.
 function TabIcon({ name, active }: { name: Screen; active: boolean }) {
@@ -140,7 +148,7 @@ function MobileHome({
 }: {
   email: string;
   userId: string;
-  authDebug: { session: boolean; userId: string | null; rootState: "signed in" | "signed out" };
+  authDebug: AuthDebug;
   onSignOut: () => Promise<void>;
 }) {
   const [activeTab, setActiveTab] = useState<Screen>("Home");
@@ -278,6 +286,10 @@ function MobileHome({
 
 
 function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
+  useEffect(() => {
+    console.log("[logout] Login screen rendered");
+  }, []);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -469,6 +481,8 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [signedIn, setSignedIn] = useState(false);
   const [ready, setReady] = useState(false);
+  const [currentAuthEvent, setCurrentAuthEvent] = useState("none");
+  const [lastLogoutStep, setLastLogoutStep] = useState("none");
 
   const applySession = (next: Session | null) => {
     setSession(next);
@@ -483,6 +497,7 @@ function App() {
       .then(({ data }) => {
         if (!mounted) return;
         console.log("[auth] session restored", data.session ? "present" : "none");
+        setCurrentAuthEvent("initial getSession");
         applySession(data.session);
         setReady(true);
       })
@@ -491,7 +506,13 @@ function App() {
         if (mounted) setReady(true);
       });
     const { data: sub } = sb.auth.onAuthStateChange((event, next) => {
+      console.log("[logout] onAuthStateChange events received", {
+        event,
+        sessionPresent: Boolean(next),
+        userId: next?.user?.id ?? null,
+      });
       console.log("[auth] state change", event, next ? "session" : "null");
+      setCurrentAuthEvent(event);
       if (event === "SIGNED_OUT") {
         applySession(null);
         return;
@@ -530,9 +551,12 @@ function App() {
       email={user.email ?? "unknown"}
       userId={user.id}
       authDebug={{
+        signedIn,
         session: Boolean(session),
         userId: user?.id ?? null,
         rootState: signedIn ? "signed in" : "signed out",
+        currentAuthEvent,
+        lastLogoutStep,
       }}
       onSignOut={() =>
         hardSignOut({
@@ -540,6 +564,7 @@ function App() {
           setSession,
           setUser,
           setSignedIn,
+          onLogoutStep: setLastLogoutStep,
         })
       }
     />
