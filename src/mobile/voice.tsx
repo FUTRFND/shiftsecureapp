@@ -451,7 +451,9 @@ export function VoiceScreen({
     setDraftTitle("");
     setSaveErr(null);
     setGenerateErr(null);
-    finalRef.current = "";
+    baseTranscriptRef.current = "";
+    finalBufferRef.current = "";
+    interimRef.current = "";
   }, [confirm, hasSummary, transcript]);
 
   const updateField = useCallback(
