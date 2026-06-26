@@ -175,18 +175,11 @@ async function loadRc(): Promise<RcPurchasesModule | null> {
     return null;
   }
   try {
-    // Defeat Vite/Rollup static analysis: the RevenueCat Capacitor SDK is a
-    // native-only optional dependency and must NEVER be resolved by the web
-    // build. We construct the module specifier at runtime and route through
-    // a globally-injected dynamic importer that the native shell registers.
-    const g = globalThis as { __lovableNativeImport?: (s: string) => Promise<unknown> };
-    const importer = g.__lovableNativeImport;
-    if (!importer) {
-      nativeUnavailable = true;
-      return null;
-    }
-    const spec = ["@revenuecat", "purchases-capacitor"].join("/");
-    const mod = (await importer(spec)) as RcPurchasesModule;
+    // Dynamic import keeps the native-only SDK out of the initial bundle but
+    // still allows Vite to resolve & ship it for the iOS/Android shell.
+    const mod = (await import(
+      /* @vite-ignore */ "@revenuecat/purchases-capacitor"
+    )) as RcPurchasesModule;
     return mod;
   } catch (err) {
     console.warn("[payments] RevenueCat plugin unavailable", err);
