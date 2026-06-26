@@ -388,6 +388,7 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
             <Row label="Role" value={role ? prettyRole(role) : "—"} />
             <Row label="Department" value={profile?.department || "—"} last />
             {profileErr && <Banner tone="error">{profileErr}</Banner>}
+            {signOutErr && <Banner tone="error">{signOutErr}</Banner>}
             <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
               <button
                 type="button"
@@ -401,14 +402,16 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
                 type="button"
                 className="mobile-tap"
                 onClick={onSignOutPressed}
+                disabled={signingOut}
                 style={{
                   ...ghostButton,
                   flex: 1,
                   color: palette.critical,
                   borderColor: palette.hairline,
+                  opacity: signingOut ? 0.6 : 1,
                 }}
               >
-                Sign out
+                {signingOut ? "Signing out…" : "Sign out"}
               </button>
             </div>
           </>
