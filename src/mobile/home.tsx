@@ -274,7 +274,7 @@ export function HomeScreen({
             firstName
           )}
         </h1>
-        <p
+        <div
           style={{
             margin: "8px 0 0",
             fontSize: type.callout,
@@ -287,7 +287,7 @@ export function HomeScreen({
           ) : (
             roleLine
           )}
-        </p>
+        </div>
       </section>
 
       {/* 2x2 tile grid */}
