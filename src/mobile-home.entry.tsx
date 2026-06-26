@@ -520,14 +520,6 @@ function App() {
     <MobileHome
       email={user.email ?? "unknown"}
       userId={user.id}
-      authDebug={{
-        signedIn,
-        session: Boolean(session),
-        userId: user?.id ?? null,
-        rootState: signedIn ? "signed in" : "signed out",
-        currentAuthEvent,
-        lastLogoutStep,
-      }}
       onSignOut={() =>
         hardSignOut({
           supabase: sb,
