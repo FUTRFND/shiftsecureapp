@@ -28,19 +28,12 @@ import {
 } from "@/services/subscription";
 import { isNative } from "@/platform/runtime";
 import { PaymentsError, type SubscriptionPackage } from "@/platform/payments";
+import { PRODUCT_IDS } from "@/config/subscription";
 
 type Props = {
   sb: SupabaseClient;
   userId: string;
   email: string;
-  authDebug: {
-    signedIn: boolean;
-    session: boolean;
-    userId: string | null;
-    rootState: "signed in" | "signed out";
-    currentAuthEvent: string;
-    lastLogoutStep: string;
-  };
   onSignOut: () => Promise<void>;
 };
 
