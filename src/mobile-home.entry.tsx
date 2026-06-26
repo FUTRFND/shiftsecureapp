@@ -327,38 +327,18 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
         justifyContent: "center",
       }}
     >
-      {/* Brand mark */}
-      <div
-        aria-hidden="true"
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: 22,
-          background: gradient.primary,
-          color: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: 800,
-          fontSize: 28,
-          marginBottom: space.lg,
-          boxShadow: shadow.primary,
-          letterSpacing: -1,
-        }}
-      >
-        SS
-      </div>
-
+      {/* Brand wordmark */}
       <h1
         style={{
-          margin: "0 0 6px",
+          margin: `0 0 6px`,
           fontSize: 32,
           fontWeight: 700,
           letterSpacing: -0.8,
           textAlign: "center",
+          color: palette.ink,
         }}
       >
-        Welcome back
+        Shift Secure
       </h1>
       <p
         style={{
@@ -368,8 +348,9 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
           textAlign: "center",
         }}
       >
-        Sign in to Shift Secure to continue
+        Clinical Handoff. Simplified.
       </p>
+
 
       {/* Centered card */}
       <div
