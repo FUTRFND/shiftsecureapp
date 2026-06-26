@@ -278,7 +278,11 @@ function MobileHome({
 type AuthMode = "signin" | "signup";
 
 function AuthScreen({ onSession }: { onSession: (s: Session) => void }) {
-  const [mode, setMode] = useState<AuthMode>("signup");
+  const [mode, setMode] = useState<AuthMode>(() => {
+    const initial: AuthMode = "signup";
+    console.log("[auth] initial mode", initial);
+    return initial;
+  });
 
   useEffect(() => {
     console.log("[auth] AuthScreen rendered, mode:", mode);
