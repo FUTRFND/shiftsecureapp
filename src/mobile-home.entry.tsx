@@ -135,12 +135,10 @@ function TabIcon({ name, active }: { name: Screen; active: boolean }) {
 function MobileHome({
   email,
   userId,
-  authDebug,
   onSignOut,
 }: {
   email: string;
   userId: string;
-  authDebug: AuthDebug;
   onSignOut: () => Promise<void>;
 }) {
   const [activeTab, setActiveTab] = useState<Screen>("Home");
@@ -177,7 +175,6 @@ function MobileHome({
         sb={sb}
         userId={userId}
         email={email}
-        authDebug={authDebug}
         onSignOut={onSignOut}
       />
     );
