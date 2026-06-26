@@ -312,6 +312,9 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
       confirmLabel: "Sign out",
       cancelLabel: "Cancel",
       destructive: true,
+      onConfirm: () => {
+        console.log("[account] sign out confirmation accepted");
+      },
     });
     if (!ok) return;
     console.log("[logout] Confirmation accepted");
