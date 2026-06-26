@@ -35,7 +35,14 @@ type Props = {
   sb: SupabaseClient;
   userId: string;
   email: string;
-  authDebug: { session: boolean; userId: string | null; rootState: "signed in" | "signed out" };
+  authDebug: {
+    signedIn: boolean;
+    session: boolean;
+    userId: string | null;
+    rootState: "signed in" | "signed out";
+    currentAuthEvent: string;
+    lastLogoutStep: string;
+  };
   onSignOut: () => Promise<void>;
 };
 
@@ -298,7 +305,7 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
   const [signOutErr, setSignOutErr] = useState<string | null>(null);
 
   const onSignOutPressed = useCallback(async () => {
-    console.log("[account] sign out clicked");
+    console.log("[logout] Account Sign out button tapped");
     const ok = await confirm({
       title: "Sign out?",
       body: "You'll need to sign in again to view alerts, tasks, and dictate handoffs.",
@@ -307,11 +314,12 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
       destructive: true,
     });
     if (!ok) return;
+    console.log("[logout] Confirmation accepted");
     setSigningOut(true);
     setSignOutErr(null);
     try {
       await onSignOut();
-      console.log("[account] sign out success");
+      console.log("[logout] Account sign out flow returned");
     } catch (error) {
       console.error("[account] sign out failed", error);
       setSignOutErr(
@@ -346,7 +354,12 @@ export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props
           fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
         }}
       >
-        session: {authDebug.session ? "yes" : "no"} · user id: {authDebug.userId?.slice(0, 8) ?? "none"} · auth root state: {authDebug.rootState}
+        <div>signedIn: {authDebug.signedIn ? "true" : "false"}</div>
+        <div>session present: {authDebug.session ? "yes" : "no"}</div>
+        <div>user id: {authDebug.userId ?? "none"}</div>
+        <div>current auth event: {authDebug.currentAuthEvent}</div>
+        <div>last logout step reached: {authDebug.lastLogoutStep}</div>
+        <div>auth root state: {authDebug.rootState}</div>
       </div>
 
       {/* Profile */}
