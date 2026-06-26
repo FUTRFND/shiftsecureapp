@@ -327,8 +327,8 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
       // so the login screen renders even if signOut errored on the network.
       try {
         setProfile(null);
-        setSub(null);
-        setUsage(null);
+        setRole(null);
+        setHandoffCount(null);
       } catch {}
       onSignOut();
     }
