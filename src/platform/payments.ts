@@ -163,7 +163,8 @@ type RcPurchasesModule = {
     restorePurchases: () => Promise<{ customerInfo: unknown }>;
     addCustomerInfoUpdateListener: (
       cb: (info: unknown) => void,
-    ) => Promise<{ remove: () => Promise<void> }>;
+    ) => Promise<string | { remove: () => Promise<void> }>;
+    removeCustomerInfoUpdateListener?: (opts: { listenerId: string }) => Promise<void>;
   };
   LOG_LEVEL?: Record<string, string>;
 };
