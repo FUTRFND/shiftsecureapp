@@ -164,8 +164,12 @@ export async function hardSignOut({
   }
 
   clearBrowserStorage();
+  mark("local/session storage cleared");
   await clearCapacitorAuthPreferences();
+  mark("Capacitor Preferences cleared");
+  mark("RevenueCat logout attempted");
   await logoutRevenueCatSafely();
+  mark("RevenueCat logout completed");
 
   setSession(null);
   setUser(null);
