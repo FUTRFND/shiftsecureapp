@@ -159,19 +159,42 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
     return () => unsub();
   }, [userId]);
 
+  const [offeringsLoading, setOfferingsLoading] = useState(false);
+
   const loadOfferings = useCallback(async () => {
     setOfferingsErr(null);
+    setOfferingsLoading(true);
     try {
+      console.log("[account/rc] requesting offerings…", {
+        native: isNative(),
+        userId,
+      });
       const pkgs = await subscriptionService.getOfferings();
+      console.log(
+        `[account/rc] received ${pkgs.length} package(s)`,
+        pkgs.map((p) => ({
+          packageId: p.identifier,
+          productId: p.productId,
+          period: p.period,
+          priceString: p.priceString,
+        })),
+      );
       setOfferings(pkgs);
+      if (pkgs.length === 0) {
+        setOfferingsErr(
+          "No subscription plans were returned by the store. Make sure your Sandbox Apple ID is signed in.",
+        );
+      }
     } catch (err) {
-      console.error("[account] offerings failed", err);
+      console.error("[account/rc] offerings failed", err);
       setOfferingsErr(
         err instanceof Error ? err.message : "Couldn't load plans.",
       );
       setOfferings([]);
+    } finally {
+      setOfferingsLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     if (isNative()) void loadOfferings();
@@ -204,13 +227,25 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
   const isPro = subState.customerInfo.activeEntitlements.length > 0;
   const status = statusOf(subState);
   const expiry = formatExpiry(subState.customerInfo.expirationDate);
-  const monthlyPkg = useMemo(
-    () =>
-      (offerings ?? []).find((p) => p.period === "monthly") ??
-      (offerings ?? [])[0] ??
-      null,
-    [offerings],
-  );
+  // Match by store product identifier first — package ids on RevenueCat
+  // ($rc_monthly etc.) can vary; product ids are stable across configs.
+  const monthlyPkg = useMemo(() => {
+    const list = offerings ?? [];
+    return (
+      list.find((p) => p.productId === PRODUCT_IDS.monthly) ??
+      list.find((p) => p.period === "monthly") ??
+      list[0] ??
+      null
+    );
+  }, [offerings]);
+  const annualPkg = useMemo(() => {
+    const list = offerings ?? [];
+    return (
+      list.find((p) => p.productId === PRODUCT_IDS.annual) ??
+      list.find((p) => p.period === "annual") ??
+      null
+    );
+  }, [offerings]);
 
   // ---------- Actions ----------
   const onPurchase = useCallback(async () => {
