@@ -35,7 +35,8 @@ type Props = {
   sb: SupabaseClient;
   userId: string;
   email: string;
-  onSignOut: () => void;
+  authDebug: { session: boolean; userId: string | null; rootState: "signed in" | "signed out" };
+  onSignOut: () => Promise<void>;
 };
 
 type Profile = {
@@ -72,7 +73,7 @@ function statusOf(state: SubscriptionState): {
   return { label: "Canceled (active until expiry)", tone: "warning" };
 }
 
-export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
+export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props) {
   useKeyboardScrollIntoView();
   const { confirm, dialog: confirmDialog } = useConfirm();
 
@@ -309,13 +310,8 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
     setSigningOut(true);
     setSignOutErr(null);
     try {
-      const { error } = await sb.auth.signOut();
-      if (error) {
-        console.error("[account] sign out failed", error);
-        setSignOutErr(error.message);
-      } else {
-        console.log("[account] sign out success");
-      }
+      await onSignOut();
+      console.log("[account] sign out success");
     } catch (error) {
       console.error("[account] sign out failed", error);
       setSignOutErr(
@@ -323,22 +319,35 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
       );
     } finally {
       setSigningOut(false);
-      // Always clear local account/billing/profile state and notify parent,
-      // so the login screen renders even if signOut errored on the network.
       try {
         setProfile(null);
         setRole(null);
         setHandoffCount(null);
       } catch {}
-      onSignOut();
     }
-  }, [confirm, onSignOut, sb]);
+  }, [confirm, onSignOut]);
 
   // ---------- Render ----------
   return (
     <main style={pageStyle}>
       <ScreenHeader title="Account" subtitle="Profile, plan, and billing" />
       {confirmDialog}
+      <div
+        aria-label="Auth debug"
+        style={{
+          margin: `-${space.xs}px 0 ${space.md}px`,
+          padding: "8px 10px",
+          borderRadius: radii.md,
+          background: palette.bgAlt,
+          border: `1px solid ${palette.hairline}`,
+          color: palette.subtle,
+          fontSize: 11,
+          lineHeight: 1.4,
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+        }}
+      >
+        session: {authDebug.session ? "yes" : "no"} · user id: {authDebug.userId?.slice(0, 8) ?? "none"} · auth root state: {authDebug.rootState}
+      </div>
 
       {/* Profile */}
       <SectionHeader title="Profile" />

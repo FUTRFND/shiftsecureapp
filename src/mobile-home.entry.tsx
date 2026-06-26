@@ -2,13 +2,14 @@
 // No router, no AuthProvider, no Toaster, no native-shell, no Capacitor plugins.
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { createClient, type Session } from "@supabase/supabase-js";
+import { createClient, type Session, type User } from "@supabase/supabase-js";
 import { AlertsScreen } from "./mobile/alerts";
 import { TemplatesScreen } from "./mobile/templates";
 import { TasksScreen } from "./mobile/tasks";
 import { VoiceScreen } from "./mobile/voice";
 import { HomeScreen } from "./mobile/home";
 import { AccountScreen } from "./mobile/account";
+import { hardSignOut } from "./mobile/auth-session";
 import {
   Banner,
   ScreenFade,
@@ -134,11 +135,13 @@ function TabIcon({ name, active }: { name: Screen; active: boolean }) {
 function MobileHome({
   email,
   userId,
+  authDebug,
   onSignOut,
 }: {
   email: string;
   userId: string;
-  onSignOut: () => void;
+  authDebug: { session: boolean; userId: string | null; rootState: "signed in" | "signed out" };
+  onSignOut: () => Promise<void>;
 }) {
   const [activeTab, setActiveTab] = useState<Screen>("Home");
   const goAlerts = () => setActiveTab("Alerts");
@@ -170,7 +173,13 @@ function MobileHome({
     screen = <VoiceScreen sb={sb} userId={userId} onBack={goAlerts} />;
   } else if (activeTab === "Account") {
     screen = (
-      <AccountScreen sb={sb} userId={userId} email={email} onSignOut={onSignOut} />
+      <AccountScreen
+        sb={sb}
+        userId={userId}
+        email={email}
+        authDebug={authDebug}
+        onSignOut={onSignOut}
+      />
     );
   }
 
@@ -457,7 +466,15 @@ function LoginForm({ onSession }: { onSession: (s: Session) => void }) {
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [signedIn, setSignedIn] = useState(false);
   const [ready, setReady] = useState(false);
+
+  const applySession = (next: Session | null) => {
+    setSession(next);
+    setUser(next?.user ?? null);
+    setSignedIn(Boolean(next?.user));
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -466,7 +483,7 @@ function App() {
       .then(({ data }) => {
         if (!mounted) return;
         console.log("[auth] session restored", data.session ? "present" : "none");
-        setSession(data.session);
+        applySession(data.session);
         setReady(true);
       })
       .catch((err) => {
@@ -476,11 +493,11 @@ function App() {
     const { data: sub } = sb.auth.onAuthStateChange((event, next) => {
       console.log("[auth] state change", event, next ? "session" : "null");
       if (event === "SIGNED_OUT") {
-        setSession(null);
+        applySession(null);
         return;
       }
       if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED" || event === "INITIAL_SESSION") {
-        setSession(next);
+        applySession(next);
       }
     });
     return () => {
@@ -504,22 +521,27 @@ function App() {
     );
   }
 
-  if (!session) {
-    return <LoginForm onSession={setSession} />;
+  if (!session || !user || !signedIn) {
+    return <LoginForm onSession={applySession} />;
   }
 
   return (
     <MobileHome
-      email={session.user.email ?? "unknown"}
-      userId={session.user.id}
-      onSignOut={() => {
-        // Account already called sb.auth.signOut(); force the login screen
-        // immediately in case the auth event hasn't fired yet on iOS WebView.
-        console.log("[auth] onSignOut callback - clearing session");
-        setSession(null);
-        // Best-effort secondary signOut so any stale tokens get cleared.
-        sb.auth.signOut().catch((err) => console.error("[auth] secondary signOut failed", err));
+      email={user.email ?? "unknown"}
+      userId={user.id}
+      authDebug={{
+        session: Boolean(session),
+        userId: user?.id ?? null,
+        rootState: signedIn ? "signed in" : "signed out",
       }}
+      onSignOut={() =>
+        hardSignOut({
+          supabase: sb,
+          setSession,
+          setUser,
+          setSignedIn,
+        })
+      }
     />
   );
 }
