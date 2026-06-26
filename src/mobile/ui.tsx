@@ -983,10 +983,10 @@ export function Skeleton({
 }) {
   ensureGlobalStyles();
   return (
-    <div
+    <span
       className="mobile-skeleton"
       aria-hidden="true"
-      style={{ width, height, ...style }}
+      style={{ display: "block", width, height, ...style }}
     />
   );
 }

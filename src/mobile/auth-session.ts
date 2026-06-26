@@ -137,6 +137,7 @@ export async function hardSignOut({
     logLogoutStep(step, payload);
   };
 
+  console.log("[auth] hard sign out start");
   mark("hardSignOut() entered");
 
   let signOutError: unknown = null;
