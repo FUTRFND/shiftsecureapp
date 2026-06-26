@@ -293,16 +293,35 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
     }
   }, []);
 
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutErr, setSignOutErr] = useState<string | null>(null);
+
   const onSignOutPressed = useCallback(async () => {
     const ok = await confirm({
       title: "Sign out?",
       body: "You'll need to sign in again to view alerts, tasks, and dictate handoffs.",
       confirmLabel: "Sign out",
+      cancelLabel: "Cancel",
       destructive: true,
     });
     if (!ok) return;
-    onSignOut();
-  }, [confirm, onSignOut]);
+    setSigningOut(true);
+    setSignOutErr(null);
+    try {
+      const { error } = await sb.auth.signOut();
+      if (error) throw error;
+      // Parent's onAuthStateChange will clear the session; also notify parent
+      // directly so the login screen renders immediately.
+      onSignOut();
+    } catch (error) {
+      console.error("[account] sign out failed", error);
+      setSignOutErr(
+        error instanceof Error ? error.message : "Failed to sign out. Please try again.",
+      );
+    } finally {
+      setSigningOut(false);
+    }
+  }, [confirm, onSignOut, sb]);
 
   // ---------- Render ----------
   return (
@@ -369,6 +388,7 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
             <Row label="Role" value={role ? prettyRole(role) : "—"} />
             <Row label="Department" value={profile?.department || "—"} last />
             {profileErr && <Banner tone="error">{profileErr}</Banner>}
+            {signOutErr && <Banner tone="error">{signOutErr}</Banner>}
             <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
               <button
                 type="button"
@@ -382,14 +402,16 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
                 type="button"
                 className="mobile-tap"
                 onClick={onSignOutPressed}
+                disabled={signingOut}
                 style={{
                   ...ghostButton,
                   flex: 1,
                   color: palette.critical,
                   borderColor: palette.hairline,
+                  opacity: signingOut ? 0.6 : 1,
                 }}
               >
-                Sign out
+                {signingOut ? "Signing out…" : "Sign out"}
               </button>
             </div>
           </>
