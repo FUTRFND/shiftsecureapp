@@ -71,7 +71,7 @@ function statusOf(state: SubscriptionState): {
   return { label: "Canceled (active until expiry)", tone: "warning" };
 }
 
-export function AccountScreen({ sb, userId, email, authDebug, onSignOut }: Props) {
+export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
   useKeyboardScrollIntoView();
 
   // ---------- Profile ----------
