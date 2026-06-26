@@ -511,6 +511,7 @@ type ConfirmOptions = {
   confirmLabel?: string;
   cancelLabel?: string;
   destructive?: boolean;
+  onConfirm?: () => void;
 };
 
 type PendingConfirm = ConfirmOptions & {
@@ -543,26 +544,35 @@ export function useConfirm(): {
   );
 
   const dialog = pending ? (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      onClick={() => close(false)}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: palette.overlay,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "center",
-        padding: space.lg,
-        paddingBottom: `calc(${space.lg}px + env(safe-area-inset-bottom, 0px))`,
-        fontFamily: SYS_FONT,
-      }}
-    >
+    <>
       <div
-        onClick={(e) => e.stopPropagation()}
+        aria-hidden="true"
+        onClick={() => close(false)}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: palette.overlay,
+          zIndex: 1000,
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 1001,
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "center",
+          padding: space.lg,
+          paddingBottom: `calc(${space.lg}px + env(safe-area-inset-bottom, 0px))`,
+          fontFamily: SYS_FONT,
+          pointerEvents: "none",
+        }}
+      >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         style={{
           width: "100%",
           maxWidth: 380,
@@ -571,6 +581,9 @@ export function useConfirm(): {
           padding: space.lg,
           boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
           animation: "mobile-fade-in 180ms ease-out both",
+          position: "relative",
+          zIndex: 1002,
+          pointerEvents: "auto",
         }}
       >
         <h2
@@ -607,7 +620,7 @@ export function useConfirm(): {
           <button
             type="button"
             className="mobile-tap"
-            style={ghostButton}
+            style={{ ...ghostButton, position: "relative", zIndex: 1003 }}
             onClick={() => close(false)}
           >
             {pending.cancelLabel ?? "Cancel"}
@@ -615,8 +628,11 @@ export function useConfirm(): {
           <button
             type="button"
             className="mobile-tap"
-            style={pending.destructive ? dangerButton : primaryButton}
-            onClick={() => close(true)}
+            style={{ ...(pending.destructive ? dangerButton : primaryButton), position: "relative", zIndex: 1003 }}
+            onClick={() => {
+              pending.onConfirm?.();
+              close(true);
+            }}
             autoFocus
           >
             {pending.confirmLabel ?? "Confirm"}
@@ -624,6 +640,7 @@ export function useConfirm(): {
         </div>
       </div>
     </div>
+    </>
   ) : null;
 
   return { confirm, dialog };
