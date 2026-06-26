@@ -587,8 +587,6 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [signedIn, setSignedIn] = useState(false);
   const [ready, setReady] = useState(false);
-  const [currentAuthEvent, setCurrentAuthEvent] = useState("none");
-  const [lastLogoutStep, setLastLogoutStep] = useState("none");
 
   const applySession = (next: Session | null) => {
     setSession(next);
