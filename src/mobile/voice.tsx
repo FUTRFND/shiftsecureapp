@@ -1,6 +1,6 @@
 // Native Voice screen — local state, plain HTML, no router/UI libs.
-// Uses Web Speech API when available (iOS WKWebView lacks it — falls back
-// to manual transcript entry). Calls the ai-handoff edge function directly.
+// Uses platformSpeech (Capacitor SpeechRecognition on iOS/Android, Web Speech
+// API on web with manual fallback). Calls the ai-handoff edge function.
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -26,6 +26,7 @@ import {
   useConfirm,
   useKeyboardScrollIntoView,
 } from "./ui";
+import { platformSpeech, SpeechError } from "@/platform/speech";
 
 const monoTextareaStyle: React.CSSProperties = {
   ...baseTextareaStyle,
