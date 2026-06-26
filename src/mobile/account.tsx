@@ -320,27 +320,6 @@ export function AccountScreen({ sb, userId, email, onSignOut }: Props) {
   return (
     <main style={pageStyle}>
       <ScreenHeader title="Account" subtitle="Profile, plan, and billing" />
-      <div
-        aria-label="Auth debug"
-        style={{
-          margin: `-${space.xs}px 0 ${space.md}px`,
-          padding: "8px 10px",
-          borderRadius: radii.md,
-          background: palette.bgAlt,
-          border: `1px solid ${palette.hairline}`,
-          color: palette.subtle,
-          fontSize: 11,
-          lineHeight: 1.4,
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
-        }}
-      >
-        <div>signedIn: {authDebug.signedIn ? "true" : "false"}</div>
-        <div>session present: {authDebug.session ? "yes" : "no"}</div>
-        <div>user id: {authDebug.userId ?? "none"}</div>
-        <div>current auth event: {authDebug.currentAuthEvent}</div>
-        <div>last logout step reached: {authDebug.lastLogoutStep}</div>
-        <div>auth root state: {authDebug.rootState}</div>
-      </div>
 
       {/* Profile */}
       <SectionHeader title="Profile" />
