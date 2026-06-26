@@ -348,7 +348,11 @@ const nativePayments: PlatformPayments = {
       cb(normalizeInfo(info)),
     );
     return () => {
-      void handle.remove();
+      if (typeof handle === "string") {
+        void rc.Purchases.removeCustomerInfoUpdateListener?.({ listenerId: handle });
+      } else {
+        void handle.remove();
+      }
     };
   },
   isAvailable() {
