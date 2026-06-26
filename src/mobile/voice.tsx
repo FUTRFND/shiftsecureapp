@@ -586,7 +586,9 @@ export function VoiceScreen({
         setContext(typeof d.context === "string" ? d.context : "");
         const t = typeof d.transcript === "string" ? d.transcript : "";
         setTranscript(t);
-        finalRef.current = t + " ";
+        baseTranscriptRef.current = t;
+        finalBufferRef.current = "";
+        interimRef.current = "";
         setSbar({
           patient: typeof d.patient === "string" ? d.patient : "",
           situation: typeof d.situation === "string" ? d.situation : "",
@@ -835,7 +837,9 @@ export function VoiceScreen({
           value={liveTranscript}
           onChange={(e) => {
             setTranscript(e.target.value);
-            finalRef.current = e.target.value + " ";
+            baseTranscriptRef.current = e.target.value;
+            finalBufferRef.current = "";
+            interimRef.current = "";
             setInterim("");
           }}
           placeholder={
